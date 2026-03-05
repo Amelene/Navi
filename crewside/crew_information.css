@@ -1,0 +1,269 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #fff;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('../assets/image/log.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.5;
+    z-index: -1;
+}
+
+.container {
+    width: 100%;
+    max-width: 700px;
+    position: relative;
+}
+
+.logo {
+    margin-bottom: 10px;
+justify-content: left;
+    text-align: left;
+    margin-left: -400px;
+    margin-top: -100px;
+}
+
+.logo img {
+    height: 80px;
+}
+
+.form-card {
+    background: rgba(255, 255, 255, 0.512);
+    border-radius: 20px;
+    padding: 30px 50px 30px 50px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 3px solid #126E82;
+}
+
+.form-title {
+    color: #126E82;
+    font-size: 30px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+
+.error-message {
+    color: #c33;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #fcc;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-row {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 25px;
+}
+
+.form-row .form-group {
+    flex: 1;
+    margin-bottom: 0;
+    gap: 10px;
+}
+
+.form-row .form-group:last-child {
+    padding-left: 30px;
+}
+
+.form-group label {
+    color: #126E82;
+    font-weight: 600;
+    font-size: 1rem;
+    min-width: 100px;
+    margin-bottom: 0;
+    white-space: nowrap;
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #126E82;
+    box-shadow: 0 0 0 3px rgba(18, 110, 130, 0.1);
+}
+
+.form-input:read-only {
+    cursor: not-allowed;
+}
+
+.vessel-type-buttons {
+    display: flex;
+    gap: 15px;
+    flex: 1;
+}
+
+.vessel-btn {
+    flex: 1;
+    padding: 12px 20px;
+    border: 2px solid #ddd;
+    background: white;
+    color: #126E82;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.vessel-btn:hover {
+    background: #e8f4f8;
+    transform: translateY(-2px);
+}
+
+.vessel-btn.active {
+    background: #126E82;
+    color: white;
+    box-shadow: 0 4px 12px rgba(18, 110, 130, 0.3);
+}
+
+.button-group {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-check {
+    background: #126E82;
+    color: white;
+}
+
+.btn-check:hover {
+    background: #0e5a6b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(18, 110, 130, 0.3);
+}
+
+.btn-proceed {
+    background: #FF7E5F;
+    color: white;
+}
+
+.btn-proceed:hover:not(:disabled) {
+    background: #ff6a47;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 126, 95, 0.3);
+}
+
+.btn-proceed:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.back-link {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.back-link a {
+    color: #126E82;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.back-link a:hover {
+    color: #0e5a6b;
+    text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .form-card {
+        padding: 30px 20px;
+    }
+
+    .form-title {
+        font-size: 1.5rem;
+    }
+
+    .logo img {
+        height: 60px;
+    }
+
+    .form-group {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .form-group label {
+        min-width: auto;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .form-row .form-group {
+        margin-bottom: 25px;
+    }
+
+    .vessel-type-buttons {
+        width: 100%;
+    }
+
+    .button-group {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+    }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "php-project",
+  "version": "1.0.0",
+  "description": "A dual-portal PHP application for managing shipping crew and administrative operations.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bootstrap": "^5.3.8"
+  }
+}

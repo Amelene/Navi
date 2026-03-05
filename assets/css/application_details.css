@@ -1,0 +1,898 @@
+@font-face {
+    font-family: 'Poppins';
+    src: url('../fonts/Poppins-Bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Poppins';
+    src: url('../fonts/Poppins-SemiBold.ttf') format('truetype');
+    font-weight: 600;
+    font-style: normal;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* A4 Size Layout */
+body {
+    font-family: "Poppins", sans-serif;
+    background: #f5f5f5;
+    padding: 0;
+    margin: 0;
+    padding-bottom: 70px; /* Space for fixed footer */
+}
+
+.application-container {
+    max-width: 210mm; /* A4 width */
+    margin: 20px auto;
+    background: white;
+    padding: 20px;
+    position: relative;
+    z-index: 2;
+}
+
+/* Header Section */
+.application-header {
+    background: white;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    padding: 10px 20px 20px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.header-logo {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: flex-start;
+    padding-left: 10px;
+}
+
+.header-logo img {
+    width: 180px;
+    height: auto;
+    margin-top: -10px;
+}
+
+.header-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    padding-right: 0px;
+}
+
+.header-info {
+    text-align: left;
+    font-size: 10px;
+    line-height: 1.7;
+    color: #000;
+    font-family: 'Poppins', sans-serif;
+    max-width: 400px;
+    padding-left: 50px;
+}
+
+.header-info p {
+    margin: 3px 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+}
+
+.header-form-number {
+    text-align: right;
+    font-size: 10px;
+    font-weight: 700;
+    color: #000;
+    line-height: 1.5;
+    font-family: 'Poppins', sans-serif;
+    align-self: flex-end;
+}
+
+.header-form-number p {
+    margin: 2px 0;
+}
+
+/* Form Card */
+.form-card {
+    background: white;
+    border-radius: 12px;
+    min-height: auto;
+    padding: 20px;
+    margin-bottom: 15px;
+}
+
+/* Form Title Banner */
+.form-title-banner {
+    padding: 10px;
+    text-align: center;
+    margin: 0;
+}
+
+.form-title-banner h1 {
+    font-size: 20px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: bold;
+    color: #000000;
+    margin: 0;
+}
+
+/* Form content padding */
+.form-content {
+    padding: 15px;
+}
+
+/* Section Titles */
+.section-title {
+    padding: 8px 12px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 15px 0 0 0;
+    border: 1px solid #000;
+    color: #000000;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: center;
+}
+
+/* Position Section */
+.position-section {
+    border: 1px solid #000;
+    margin-bottom: 15px;
+}
+
+.info-layout-horizontal {
+    display: flex;
+    flex-direction: row;
+}
+
+.info-layout-horizontal .info-item {
+    flex: 1;
+}
+
+.info-layout-horizontal .info-item:last-child {
+    border-right: none;
+}
+
+/* Personal Information Section */
+.personal-info-section,
+.education-section,
+.emergency-section,
+.document-section,
+.training-section,
+.additional-certificates-section,
+.sea-service-section,
+.checklist-section,
+.additional-info-section {
+    border: 1px solid #000;
+    margin-bottom: 15px;
+}
+
+.personal-info-section .section-title,
+.education-section .section-title,
+.emergency-section .section-title,
+.document-section .section-title,
+.training-section .section-title,
+.additional-certificates-section .section-title,
+.sea-service-section .section-title,
+.checklist-section .section-title,
+.additional-info-section .section-title {
+    margin: 0;
+    border-bottom: 1px solid #000;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+}
+
+.info-layout {
+    display: flex;
+    gap: 0;
+}
+
+.info-columns {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+}
+
+.info-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-item {
+    display: flex;
+    border: 1px solid #000;
+    border-top: none;
+    border-left: none;
+    min-height: 40px;
+}
+
+.info-item:first-child {
+    border-top: 1px solid #000;
+}
+
+.info-column:first-child .info-item {
+    border-left: 1px solid #000;
+}
+
+.info-item label {
+    flex: 0 0 140px;
+    padding: 8px 10px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 10px;
+    color: #000000;
+    display: flex;
+    align-items: center;
+    border-right: 1px solid #000;
+}
+
+/* Additional styles for read-only view */
+.info-value {
+    flex: 1;
+    padding: 8px 10px;
+    font-size: 10px;
+    font-family: Arial, sans-serif;
+    color: #000;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+}
+
+.photo-box-wrapper {
+    flex: 0 0 220px;
+    border: 1px solid #000;
+    border-left: none;
+    border-top: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+}
+
+/* Photo Box */
+.photo-box {
+    width: 230px;
+    height: 230px;
+    border: 2px solid #000000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    font-size: 12px;
+    color: #000000;
+    position: relative;
+}
+
+.photo-box::before {
+    content: "";
+    width: 75px;
+    height: 75px;
+    border-radius: 50%;
+    margin-bottom: 20px;
+}
+
+.photo-box::after {
+    content: "";
+    width: 110px;
+    height: 55px;
+    border-radius: 55px 55px 0 0;
+    position: absolute;
+    bottom: 0;
+}
+
+/* Simple Layout */
+.info-layout-simple {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-layout-simple .info-item {
+    display: flex;
+    border: 1px solid #000;
+    border-top: none;
+    border-left: 1px solid #000;
+    min-height: 40px;
+}
+
+.info-layout-simple .info-item:first-child {
+    border-top: 1px solid #000;
+}
+
+/* Document Table */
+.document-table-wrapper {
+    overflow-x: auto;
+}
+
+.doc-table,
+.sea-service-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.doc-table th,
+.doc-table td,
+.sea-service-table th,
+.sea-service-table td {
+    border: 1px solid #000;
+    padding: 8px;
+    text-align: left;
+}
+
+.doc-table th,
+.sea-service-table th {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    color: #000000;
+    font-size: 12px;
+}
+
+.doc-table td,
+.sea-service-table td {
+    color: #000;
+    font-weight: 500;
+}
+
+.doc-table td:first-child {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    color: #000000;
+}
+
+/* Checklist Section */
+.checklist-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+}
+
+.checklist-column {
+    border: 1px solid #000;
+    border-top: none;
+}
+
+.checklist-column:first-child {
+    border-right: none;
+}
+
+.checklist-column h3.section-title {
+    margin: 0;
+    border: none;
+    border-bottom: 1px solid #000;
+    font-size: 12px;
+}
+
+.checklist-items {
+    padding: 10px;
+}
+
+.checklist-item {
+    margin-bottom: 8px;
+}
+
+.checklist-item label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.checklist-item input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.checklist-item input[type="checkbox"]:disabled {
+    cursor: not-allowed;
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 2px solid #000;
+    gap: 10px;
+}
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-back {
+    background-color: #000000;
+    color: white;
+}
+
+.btn-back:hover {
+    background-color: #4b5563;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+}
+
+.btn-print {
+    background-color: #16a34a;
+    color: white;
+}
+
+.btn-print:hover {
+    background-color: #15803d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+}
+
+.btn-next {
+    background-color: #126E82;
+    color: white;
+    text-decoration: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.btn-next:hover {
+    background-color: #0e5566;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(18, 110, 130, 0.3);
+}
+
+/* Footer */
+.site-footer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #126E82;
+    color: #fff;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 -4px 8px rgba(14, 107, 99, 0.12);
+    z-index: 999;
+    padding: 0;
+}
+
+.site-footer .footer__content {
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 auto;
+    padding: 0 40px;
+}
+
+.site-footer .footer__text {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #fff;
+}
+
+.site-footer .footer__socials {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.site-footer .social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.site-footer .social-link:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.site-footer .social-link svg {
+    width: 18px;
+    height: 18px;
+    color: #fff;
+}
+
+/* Print styles - Compact layout */
+@media print {
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+    
+    body {
+        background: white !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .form-actions,
+    .site-footer {
+        display: none !important;
+    }
+    
+    /* Compact container */
+    .application-container {
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 15px !important;
+        position: relative !important;
+        z-index: 2 !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+    }
+
+    /* Horizontal Header Layout */
+    .application-header {
+        border: none !important;
+        border-radius: 0 !important;
+        margin-bottom: 8px !important;
+        padding: 10px 0 !important;
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: flex-start !important;
+    }
+    
+    .header-logo {
+        padding-left: 0 !important;
+        flex: 0 0 auto !important;
+    }
+    
+    .header-logo img {
+        width: 150px !important;
+        height: auto !important;
+        margin-top: 0 !important;
+    }
+    
+    .header-right {
+        flex: 1 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-end !important;
+        padding-right: 0 !important;
+        gap: 8px !important;
+    }
+    
+    .header-info {
+        font-size: 8px !important;
+        line-height: 1.5 !important;
+        padding-left: 0 !important;
+        text-align: right !important;
+        max-width: none !important;
+    }
+    
+    .header-info p {
+        margin: 2px 0 !important;
+        gap: 4px !important;
+        justify-content: flex-end !important;
+    }
+    
+    .header-form-number {
+        font-size: 9px !important;
+        text-align: right !important;
+    }
+    
+    .header-form-number p {
+        margin: 1px 0 !important;
+    }
+    
+    /* Compact form card */
+    .form-card {
+        background: white !important;
+        border-radius: 0 !important;
+        padding: 10px !important;
+        margin-bottom: 0 !important;
+    }
+    
+    .form-title-banner {
+        padding: 8px !important;
+    }
+    
+    .form-title-banner h1 {
+        font-size: 16px !important;
+        margin: 0 !important;
+    }
+    
+    .form-content {
+        padding: 8px !important;
+    }
+    
+    /* Compact sections */
+    .section-title {
+        background: #f0f0f0 !important;
+        padding: 4px 8px !important;
+        font-size: 11px !important;
+        margin: 8px 0 0 0 !important;
+        border: 1px solid #000 !important;
+        font-weight: bold !important;
+    }
+    
+    .position-section,
+    .personal-info-section,
+    .education-section,
+    .emergency-section,
+    .document-section,
+    .training-section,
+    .additional-certificates-section,
+    .sea-service-section,
+    .checklist-section,
+    .additional-info-section {
+        border: 1px solid #000 !important;
+        margin-bottom: 8px !important;
+        page-break-inside: avoid;
+    }
+    
+    /* Compact info items */
+    .info-item {
+        min-height: 24px !important;
+        border: 1px solid #000 !important;
+        border-top: none !important;
+        border-left: none !important;
+    }
+    
+    .info-item:first-child {
+        border-top: 1px solid #000 !important;
+    }
+    
+    .info-column:first-child .info-item {
+        border-left: 1px solid #000 !important;
+    }
+    
+    .info-item label {
+        flex: 0 0 100px !important;
+        padding: 3px 6px !important;
+        background: white !important;
+        font-size: 9px !important;
+        border-right: 1px solid #000 !important;
+        font-weight: bold !important;
+    }
+    
+    .info-value {
+        padding: 3px 6px !important;
+        font-size: 9px !important;
+        background: white !important;
+        font-weight: normal !important;
+    }
+    
+    /* Compact photo box */
+    .photo-box-wrapper {
+        flex: 0 0 140px !important;
+        padding: 8px !important;
+        border-left: 1px solid #000 !important;
+    }
+    
+    .photo-box {
+        width: 140px !important;
+        height: 140px !important;
+        border: 2px solid #000 !important;
+    }
+    
+    .photo-box::before {
+        width: 50px !important;
+        height: 50px !important;
+        background-color: #126E82 !important;
+        margin-bottom: 10px !important;
+    }
+    
+    .photo-box::after {
+        width: 70px !important;
+        height: 35px !important;
+        background-color: #126E82 !important;
+        border-radius: 35px 35px 0 0 !important;
+    }
+    
+    /* Compact tables */
+    .doc-table,
+    .sea-service-table {
+        font-size: 8px !important;
+    }
+    
+    .doc-table th,
+    .doc-table td,
+    .sea-service-table th,
+    .sea-service-table td {
+        padding: 3px 4px !important;
+        border: 1px solid #000 !important;
+    }
+    
+    .doc-table th,
+    .sea-service-table th {
+        background-color: #ffffff !important;
+        font-weight: bold !important;
+        font-size: 8px !important;
+    }
+    
+    .doc-table td,
+    .sea-service-table td {
+        background-color: white !important;
+        font-size: 8px !important;
+    }
+    
+    .doc-table td:first-child {
+        background-color: white !important;
+        font-weight: bold !important;
+    }
+    
+    /* Compact checklist */
+    .checklist-column {
+        border: 1px solid #000 !important;
+    }
+    
+    .checklist-column h3.section-title {
+        font-size: 10px !important;
+        padding: 3px 6px !important;
+        border-bottom: 1px solid #000 !important;
+    }
+    
+    .checklist-items {
+        padding: 6px !important;
+    }
+    
+    .checklist-item {
+        margin-bottom: 4px !important;
+    }
+    
+    .checklist-item label {
+        font-size: 8px !important;
+        gap: 4px !important;
+    }
+    
+    .checklist-item input[type="checkbox"] {
+        width: 12px !important;
+        height: 12px !important;
+    }
+    
+    /* A4 print size with minimal margins */
+    @page {
+        size: A4;
+        margin: 8mm;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+        padding-bottom: 100px; /* More space for footer on mobile */
+    }
+
+    .application-container {
+        padding: 10px;
+        margin: 10px auto;
+    }
+
+    .application-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .header-logo {
+        margin-bottom: 15px;
+    }
+
+    .header-info {
+        padding: 15px 0;
+        text-align: center;
+    }
+
+    .header-form-number {
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    .form-title-banner h1 {
+        font-size: 18px;
+    }
+
+    .info-columns {
+        grid-template-columns: 1fr;
+    }
+
+    .photo-box-wrapper {
+        width: 100%;
+        border-left: 1px solid #000;
+        border-top: 1px solid #000;
+    }
+
+    .checklist-container {
+        grid-template-columns: 1fr;
+    }
+
+    .checklist-column:first-child {
+        border-right: 1px solid #000;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    .doc-table,
+    .sea-service-table {
+        font-size: 10px;
+    }
+
+    .doc-table th,
+    .doc-table td,
+    .sea-service-table th,
+    .sea-service-table td {
+        padding: 6px;
+    }
+
+    .info-item label {
+        flex: 0 0 120px;
+        font-size: 11px;
+    }
+
+    .info-value {
+        font-size: 11px;
+    }
+
+    .section-title {
+        font-size: 12px;
+    }
+
+    .site-footer {
+        position: relative;
+        height: auto;
+        padding: 15px 20px;
+    }
+
+    .site-footer .footer__content {
+        flex-direction: column;
+        gap: 10px;
+        padding: 0;
+    }
+
+    .site-footer .footer__text {
+        font-size: 0.8rem;
+        text-align: center;
+    }
+
+    .site-footer .footer__socials {
+        gap: 12px;
+    }
+}

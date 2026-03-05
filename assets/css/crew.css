@@ -1,0 +1,419 @@
+@font-face {
+    font-family: 'Poppins';
+    src: url('../assets/fonts/Poppins-Bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Poppins';
+    src: url('../assets/fonts/Poppins-SemiBold.ttf') format('truetype');
+    font-weight: 600;
+    font-style: normal;
+}
+:root {
+    --primary: #126E82;
+    --secondary: #1abc9c;
+    --warn: #FF8A4C;
+    --danger: #e74c3c;
+    --success: #27ae60;
+    --text-dark: #2c3e50;
+    --text-light: #7f8c8d;
+    --bg-light: #f8f9fa;
+    --border-color: #e0e0e0;
+}
+
+/* Main Layout & Background */
+/* Background is handled by body::before in main.css */
+
+/* Make main content scrollable */
+.main {
+    height: 100vh;
+    overflow: hidden;
+}
+
+.main__content {
+    height: 100%;
+    overflow-y: auto;
+    padding-right: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: #ccc #f1f1f1;
+}
+
+/* Custom Scrollbar for main content - Webkit browsers */
+.main__content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.main__content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.main__content::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+}
+
+.main__content::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
+
+/* Hide default scrollbar for body */
+body {
+    overflow: hidden;
+}
+
+/* Page Title */
+.page-title {
+    font-size: 1.5rem;
+    color: var(--primary);
+    margin-bottom: 24px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: relative;
+    z-index: 1;
+    font-family: 'Poppins', sans-serif;
+    font-weight: bold;
+
+}
+
+/* Metrics Cards */
+.metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 28px;
+    position: relative;
+    z-index: 1;
+}
+
+.metric.card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 20px 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border: 1px solid #e5e5e5;
+    transition: all 0.3s ease;
+}
+
+.metric.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.metric__label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #555;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+    line-height: 1.2;
+}
+
+.metric__number {
+    font-size: 1.85rem;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+}
+
+.metric__icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.metric__icon svg {
+    width: 28px;
+    height: 28px;
+    stroke-width: 2px;
+}
+
+.icon-user { 
+    color: var(--primary);
+}
+.icon-check { 
+    color: var(--success);
+}
+.icon-clock { 
+    color: var(--warn);
+}
+.icon-power { 
+    color: var(--danger);
+}
+
+/* Crew Records Card */
+.card--padded {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    border: 1px solid #e5e5e5;
+    padding: 32px;
+    position: relative;
+    z-index: 1;
+}
+
+.card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 26px;
+}
+
+.card__title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.card__actions {
+    display: flex;
+    gap: 12px;
+}
+
+.btn {
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s ease;
+    text-transform: capitalize;
+}
+
+.btn.primary.upload {
+    background-color: #17a2b8;
+    color: #fff;
+}
+
+.btn.warn.add {
+    background-color: var(--warn);
+    color: #fff;
+}
+
+.btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+/* Controls: Search & Filters */
+.card__controls {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 26px;
+}
+
+.search-wrap {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon {
+    position: absolute;
+    left: 16px;
+    color: #999;
+    display: flex;
+    align-items: center;
+    pointer-events: none;
+}
+
+.input-search {
+    width: 100%;
+    padding: 11px 16px 11px 46px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 0.9rem;
+    color: #2c3e50;
+    outline: none;
+    transition: all 0.3s ease;
+    background-color: #fff;
+}
+
+.input-search:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(18, 110, 130, 0.08);
+}
+
+.input-search::placeholder {
+    color: #aaa;
+}
+
+.crew-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.btn.ghost {
+    background: #fff;
+    border: 1px solid #ddd;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+.btn.ghost svg {
+    width: 16px;
+    height: 16px;
+    color: #555;
+}
+
+.btn.ghost:hover {
+    background: #f8f9fa;
+    border-color: #bbb;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+/* Table Styling */
+.table-container {
+    padding: 0;
+    background-color: #fff;
+}
+
+.table-wrap {
+    overflow-x: auto;
+    border-radius: 10px;
+    border: 1px solid #e5e5e5;
+}
+
+.crew-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+}
+
+.crew-table th {
+    background: #f8f9fa;
+    color: #666;
+    font-weight: 700;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    padding: 16px 18px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+    white-space: nowrap;
+    letter-spacing: 0.3px;
+}
+
+.crew-table td {
+    padding: 18px;
+    border-bottom: 1px solid #f0f0f0;
+    color: #2c3e50;
+    font-size: 0.85rem;
+    vertical-align: middle;
+}
+
+.crew-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.crew-table tbody tr:hover {
+    background-color: #f9fafb;
+}
+
+.crew-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.fw-bold {
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.crew-status.warn {
+    color: var(--warn);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.72rem;
+    letter-spacing: 0.3px;
+}
+
+.link-action {
+    color: #6c5ce7;
+    text-decoration: underline;
+    font-weight: 600;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    transition: color 0.2s ease;
+}
+
+.link-action:hover {
+    color: #5f4dd1;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .metrics {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .metrics {
+        grid-template-columns: 1fr;
+    }
+    
+    .card__controls {
+        flex-direction: column;
+    }
+    
+    .crew-controls {
+        width: 100%;
+    }
+    
+    .crew-controls .btn {
+        flex: 1;
+        justify-content: center;
+    }
+    
+    .card__header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+    
+    .card__actions {
+        width: 100%;
+    }
+    
+    .card__actions .btn {
+        flex: 1;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-title {
+        font-size: 1.4rem;
+    }
+    
+    .metric__number {
+        font-size: 1.6rem;
+    }
+    
+    .card--padded {
+        padding: 20px;
+    }
+}
+ 

@@ -1,0 +1,303 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.login-container {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+}
+
+/* ============================================
+   LEFT SECTION - Ship Image with Registration
+   ============================================ */
+.left-section {
+    flex: 1;
+    position: relative;
+    background-image: url('../assets/image/log.jpg');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    clip-path: polygon(0 0, 85% 0, 100% 100%, 0 100%);
+}
+
+.left-section .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(18, 110, 130, 0.7) 0%, rgba(18, 110, 130, 0.5) 100%);
+}
+
+.left-section .content {
+    position: relative;
+    z-index: 2;
+    color: white;
+    text-align: center;
+    padding: 2rem;
+    max-width: 500px;
+}
+
+.registration-prompt h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.registration-prompt > p {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.registration-prompt .subtitle {
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    opacity: 0.95;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.apply-btn {
+    background-color: #FF6B35;
+    color: white;
+    border: none;
+    padding: 1rem 3rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+    text-decoration: none;
+    display: inline-block;
+}
+
+.apply-btn:hover {
+    background-color: #E55A2B;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+}
+
+.apply-btn:active {
+    transform: translateY(0);
+}
+
+/* ============================================
+   RIGHT SECTION - Login Form
+   ============================================ */
+.right-section {
+    flex: 1;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    position: relative;
+}
+
+.logo-container {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+}
+
+.logo {
+    width: 120px;
+    height: auto;
+}
+
+.login-form-container {
+    width: 100%;
+    max-width: 450px;
+    padding: 2rem;
+}
+
+.login-title {
+    color: #126E82;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-align: left;
+}
+
+.login-subtitle {
+    color: #2c3e50;
+    font-size: 1.1rem;
+    margin-bottom: 3rem;
+    text-align: left;
+}
+
+.login-form {
+    width: 100%;
+}
+
+.form-group {
+    margin-bottom: 2rem;
+}
+
+.form-select {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    font-size: 1rem;
+    color: #6b7280;
+    background-color: #f3f4f6;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 20px;
+    padding-right: 3rem;
+}
+
+.form-select:focus {
+    outline: none;
+    border-color: #126E82;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(18, 110, 130, 0.1);
+}
+
+.form-select option {
+    padding: 0.75rem;
+    background-color: white;
+    color: #2c3e50;
+}
+
+.login-btn {
+    background-color: #126E82;
+    color: white;
+    border: none;
+    padding: 1rem 2.5rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px rgba(18, 110, 130, 0.3);
+}
+
+.login-btn:hover {
+    background-color: #0e5a6b;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(18, 110, 130, 0.4);
+}
+
+.login-btn:active {
+    transform: translateY(0);
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 1024px) {
+    .left-section {
+        clip-path: polygon(0 0, 80% 0, 100% 100%, 0 100%);
+    }
+    
+    .registration-prompt h2 {
+        font-size: 2rem;
+    }
+    
+    .registration-prompt > p {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .login-container {
+        flex-direction: column;
+    }
+    
+    .left-section {
+        clip-path: none;
+        min-height: 40vh;
+    }
+    
+    .registration-prompt h2 {
+        font-size: 1.8rem;
+    }
+    
+    .registration-prompt > p {
+        font-size: 1.3rem;
+    }
+    
+    .registration-prompt .subtitle {
+        font-size: 0.9rem;
+    }
+    
+    .right-section {
+        min-height: 60vh;
+    }
+    
+    .logo-container {
+        top: 1rem;
+        right: 1rem;
+    }
+    
+    .logo {
+        width: 80px;
+    }
+    
+    .login-title {
+        font-size: 2rem;
+    }
+    
+    .login-subtitle {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .left-section .content {
+        padding: 1.5rem;
+    }
+    
+    .registration-prompt h2 {
+        font-size: 1.5rem;
+    }
+    
+    .registration-prompt > p {
+        font-size: 1.2rem;
+    }
+    
+    .apply-btn {
+        padding: 0.875rem 2.5rem;
+        font-size: 1rem;
+    }
+    
+    .login-form-container {
+        padding: 1.5rem;
+    }
+    
+    .login-title {
+        font-size: 1.75rem;
+    }
+    
+    .login-btn {
+        width: 100%;
+        padding: 1rem;
+    }
+}
