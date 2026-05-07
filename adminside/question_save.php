@@ -148,6 +148,25 @@ try {
             [$exam_category_id, $question_id !== '' ? $question_id : null, $question_text, $imageFilename, $question_order]
         );
         $questionDbId = (int)$db->lastInsertId();
+
+        // Defensive fallback: if lastInsertId is invalid, resolve by most recent matching row
+        if ($questionDbId <= 0) {
+            $resolved = $db->fetchOne(
+                "SELECT id
+                 FROM questions
+                 WHERE exam_category_id = ?
+                   AND question_text = ?
+                   AND status = 'active'
+                 ORDER BY id DESC
+                 LIMIT 1",
+                [$exam_category_id, $question_text]
+            );
+            $questionDbId = (int)($resolved['id'] ?? 0);
+        }
+    }
+
+    if ($questionDbId <= 0) {
+        throw new Exception('Invalid question ID detected while saving. Save aborted to prevent orphan choices.');
     }
 
     foreach (['A', 'B', 'C', 'D', 'E'] as $letter) {
