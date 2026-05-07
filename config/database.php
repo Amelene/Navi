@@ -1,15 +1,118 @@
 <?php
 
+/**
+ * Simple .env loader (no external dependency)
+ */
+function loadEnvFile($filePath) {
+    if (!file_exists($filePath)) {
+        return;
+    }
+
+    $lines = file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        $trimmed = trim($line);
+        if ($trimmed === '' || strpos($trimmed, '#') === 0) {
+            continue;
+        }
+
+        $parts = explode('=', $trimmed, 2);
+        if (count($parts) !== 2) {
+            continue;
+        }
+
+        $key = trim($parts[0]);
+        $value = trim($parts[1]);
+
+        if ((str_starts_with($value, '"') && str_ends_with($value, '"')) || (str_starts_with($value, "'") && str_ends_with($value, "'"))) {
+            $value = substr($value, 1, -1);
+        }
+
+        if (getenv($key) === false) {
+            putenv("$key=$value");
+            $_ENV[$key] = $value;
+            $_SERVER[$key] = $value;
+        }
+    }
+}
+
+$envPath = dirname(__DIR__) . DIRECTORY_SEPARATOR . '.env';
+loadEnvFile($envPath);
+
+/**
+ * Get env value with fallback
+ */
+function envValue($key, $default = null) {
+    $value = getenv($key);
+    return ($value === false || $value === '') ? $default : $value;
+}
+
+/**
+ * Convert env string to bool
+ */
+function envBool($key, $default = false) {
+    $value = envValue($key, null);
+    if ($value === null) return $default;
+
+    $normalized = strtolower(trim((string)$value));
+    return in_array($normalized, ['1', 'true', 'yes', 'on'], true);
+}
+
+/**
+ * Auto-detect local environment if APP_ENV is not set
+ */
+function isLocalEnvironment() {
+    $appEnv = strtolower((string) envValue('APP_ENV', ''));
+    if ($appEnv !== '') {
+        return in_array($appEnv, ['local', 'development', 'dev'], true);
+    }
+
+    $host = $_SERVER['HTTP_HOST'] ?? '';
+    $serverName = $_SERVER['SERVER_NAME'] ?? '';
+    $cliServerName = $_SERVER['HOSTNAME'] ?? '';
+    $isCli = (PHP_SAPI === 'cli');
+
+    $localHosts = ['localhost', '127.0.0.1', '::1'];
+    return in_array($host, $localHosts, true)
+        || in_array($serverName, $localHosts, true)
+        || in_array($cliServerName, $localHosts, true)
+        || str_starts_with($host, 'localhost:')
+        || $isCli;
+}
+
+// Defaults (kept for backward compatibility)
+$defaultLocal = [
+    'DB_HOST' => 'localhost',
+    'DB_PORT' => '3306',
+    'DB_NAME' => 'navi_shipping',
+    'DB_USER' => 'root',
+    'DB_PASS' => '',
+    'DB_CHARSET' => 'utf8mb4',
+    'DB_DEBUG' => true,
+];
+
+$defaultLive = [
+    'DB_HOST' => 'localhost',
+    'DB_PORT' => '3306',
+    'DB_NAME' => 'navizaft_navi',
+    'DB_USER' => 'navizaft_navi',
+    'DB_PASS' => 'Admin@navi',
+    'DB_CHARSET' => 'utf8mb4',
+    'DB_DEBUG' => false,
+];
+
+$useLocalDefaults = isLocalEnvironment();
+$selectedDefaults = $useLocalDefaults ? $defaultLocal : $defaultLive;
+
 // Database Configuration
-define('DB_HOST', 'localhost');        // MySQL server
-define('DB_PORT', '3306');             // MySQL port (default: 3306)
-define('DB_NAME', 'navizaft_navi');    // Database name
-define('DB_USER', 'navizaft_navi');    // MySQL username
-define('DB_PASS', 'Admin@navi');       // MySQL password
-define('DB_CHARSET', 'utf8mb4');       // Character set
+define('DB_HOST', envValue('DB_HOST', $selectedDefaults['DB_HOST']));        // MySQL server
+define('DB_PORT', envValue('DB_PORT', $selectedDefaults['DB_PORT']));        // MySQL port (default: 3306)
+define('DB_NAME', envValue('DB_NAME', $selectedDefaults['DB_NAME']));        // Database name
+define('DB_USER', envValue('DB_USER', $selectedDefaults['DB_USER']));        // MySQL username
+define('DB_PASS', envValue('DB_PASS', $selectedDefaults['DB_PASS']));        // MySQL password
+define('DB_CHARSET', envValue('DB_CHARSET', $selectedDefaults['DB_CHARSET'])); // Character set
 
 // Error Reporting (set to false in production)
-define('DB_DEBUG', false);
+define('DB_DEBUG', envBool('DB_DEBUG', $selectedDefaults['DB_DEBUG']));
 
 /**
  * Database Connection Class

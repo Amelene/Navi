@@ -15,7 +15,7 @@ $dashboardStats = [
 	'active_vessels' => 0
 ];
 
-$overviewChartLabels = ['Q1', 'Q2', 'Q3', 'Q4'];
+$overviewChartLabels = [];
 $overviewChartDatasets = [];
 
 $expiryDistribution = [
@@ -96,42 +96,62 @@ try {
 	$dashboardStats['active_vessels'] = (int)($db->fetchOne("SELECT COUNT(DISTINCT vessel_name) AS count FROM vw_crew_details WHERE vessel_name IS NOT NULL AND TRIM(vessel_name) <> ''")['count'] ?? 0);
 
 	$positionOverviewRows = $db->fetchAll("
-		SELECT 
+		SELECT
 			COALESCE(NULLIF(TRIM(v.position_name), ''), 'UNASSIGNED') AS position_name,
 			CASE
-				WHEN MONTH(COALESCE(cm.updated_at, cm.created_at)) BETWEEN 1 AND 3 THEN 'Q1'
-				WHEN MONTH(COALESCE(cm.updated_at, cm.created_at)) BETWEEN 4 AND 6 THEN 'Q2'
-				WHEN MONTH(COALESCE(cm.updated_at, cm.created_at)) BETWEEN 7 AND 9 THEN 'Q3'
-				ELSE 'Q4'
-			END AS quarter_label,
+				WHEN cm.crew_no REGEXP '^CRW-[0-9]{4}-' THEN SUBSTRING(cm.crew_no, 5, 4)
+				ELSE CAST(YEAR(COALESCE(cm.updated_at, cm.created_at)) AS CHAR)
+			END AS record_year,
 			COUNT(*) AS total_count
 		FROM crew_master cm
 		LEFT JOIN positions v ON v.id = cm.position_id
 		WHERE cm.crew_status = 'on_board'
-		GROUP BY COALESCE(NULLIF(TRIM(v.position_name), ''), 'UNASSIGNED'), quarter_label
-		ORDER BY COALESCE(NULLIF(TRIM(v.position_name), ''), 'UNASSIGNED'), quarter_label
+		GROUP BY
+			COALESCE(NULLIF(TRIM(v.position_name), ''), 'UNASSIGNED'),
+			record_year
+		ORDER BY
+			record_year ASC,
+			COALESCE(NULLIF(TRIM(v.position_name), ''), 'UNASSIGNED') ASC
 	");
 
-	$quarterIndexMap = ['Q1' => 0, 'Q2' => 1, 'Q3' => 2, 'Q4' => 3];
 	$chartColorPalette = ['#8979FF', '#FF928A', '#3CC3DF', '#FFAE4C', '#537FF1', '#5EC269', '#F06292', '#26A69A', '#8D6E63', '#42A5F5'];
-	$positionSeriesMap = [];
+	$yearSet = [];
+	$positionYearMap = [];
 
 	foreach ($positionOverviewRows as $row) {
-		$positionName = $row['position_name'] ?? 'UNASSIGNED';
-		$quarterLabel = $row['quarter_label'] ?? 'Q1';
+		$positionName = (string)($row['position_name'] ?? 'UNASSIGNED');
+		$recordYear = (string)($row['record_year'] ?? '');
 		$totalCount = (int)($row['total_count'] ?? 0);
 
-		if (!isset($positionSeriesMap[$positionName])) {
-			$positionSeriesMap[$positionName] = [0, 0, 0, 0];
+		if ($recordYear === '') {
+			continue;
 		}
 
-		if (isset($quarterIndexMap[$quarterLabel])) {
-			$positionSeriesMap[$positionName][$quarterIndexMap[$quarterLabel]] = $totalCount;
+		$yearSet[$recordYear] = true;
+
+		if (!isset($positionYearMap[$positionName])) {
+			$positionYearMap[$positionName] = [];
+		}
+		$positionYearMap[$positionName][$recordYear] = $totalCount;
+	}
+
+	$overviewChartLabels = array_keys($yearSet);
+	sort($overviewChartLabels);
+
+	if (!empty($overviewChartLabels)) {
+		$maxYear = (int)max($overviewChartLabels);
+		for ($y = $maxYear + 1; $y <= 2029; $y++) {
+			$overviewChartLabels[] = (string)$y;
 		}
 	}
 
 	$colorIndex = 0;
-	foreach ($positionSeriesMap as $positionName => $seriesData) {
+	foreach ($positionYearMap as $positionName => $yearCountMap) {
+		$seriesData = [];
+		foreach ($overviewChartLabels as $yearLabel) {
+			$seriesData[] = (int)($yearCountMap[$yearLabel] ?? 0);
+		}
+
 		$overviewChartDatasets[] = [
 			'label' => $positionName,
 			'data' => $seriesData,
@@ -529,7 +549,7 @@ try {
 
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 	<script>
-		// Overview bar chart — quarterly onboard positions from crew management
+		// Overview bar chart — onboard crew count per position
 		const ovCtx = document.getElementById('overviewChart').getContext('2d');
 		const overviewChartLabels = <?php echo json_encode($overviewChartLabels); ?>;
 		const overviewChartDatasets = <?php echo json_encode($overviewChartDatasets); ?>;
@@ -547,6 +567,17 @@ try {
 					legend: {
 						position: 'bottom',
 						labels: { padding: 20, font: { size: 11 } }
+					}
+				},
+				scales: {
+					y: {
+						beginAtZero: true,
+						min: 0,
+						max: 100,
+						ticks: {
+							precision: 0,
+							stepSize: 10
+						}
 					}
 				},
 				layout: { padding: { top: 25, bottom: 5 } }

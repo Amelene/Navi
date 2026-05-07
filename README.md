@@ -44,17 +44,29 @@ This system has **TWO separate portals**:
    - Choose file: `database/schema.sql`
    - Click "Go" to import
 
-### 3. Configure Database Connection
+### 3. Configure Database Connection (Local + Live Safe Setup)
 
-1. Open `config/database.php`
-2. Update these settings if needed:
-   ```php
-   define('DB_HOST', 'localhost');
-   define('DB_PORT', '3306');
-   define('DB_NAME', 'navi_shipping');
-   define('DB_USER', 'root');
-   define('DB_PASS', '');  // Leave blank for XAMPP default
+The project now supports environment-based DB config, so puwede kang may **local DB** at **live DB** nang hindi agad napu-push ang live/local secrets sa git.
+
+1. Copy `.env.example` to `.env`
+2. Edit `.env` with your **local** credentials:
+   ```env
+   APP_ENV=local
+   DB_HOST=localhost
+   DB_PORT=3306
+   DB_NAME=navi_shipping
+   DB_USER=root
+   DB_PASS=
+   DB_CHARSET=utf8mb4
+   DB_DEBUG=true
    ```
+3. `.env` is ignored by git (via `.gitignore`), so hindi masasama sa commits.
+4. On live server, you can set server environment variables or keep production defaults in `config/database.php`.
+
+Fallback behavior:
+- If `APP_ENV=local` or localhost/CLI detected → local defaults
+- Otherwise → live defaults
+- Any `DB_*` in `.env` overrides defaults
 
 ---
 

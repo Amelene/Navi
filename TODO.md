@@ -1,6 +1,8 @@
-# Assessment Question Display Fix TODO
+# Dashboard Position Overview Fix TODO
 
-- [x] Update `crewside/examination.php` to always show question text when available (even if image exists).
-- [x] Add safe fallback UI when a question has no loaded choices/options.
-- [x] Run PHP syntax check for edited file. *(Blocked in this environment: `php` CLI is not installed / not in PATH.)*
-- [x] Mark completed tasks.
+- [x] Understand current chart implementation in `adminside/index.php`
+- [x] Confirm intended behavior with user (count on-board crew per position)
+- [ ] Update backend query and data mapping to aggregate by position only
+- [ ] Update chart labels/dataset to show on-board count per position
+- [ ] Adjust chart options for integer y-axis ticks
+- [ ] Mark completion summary
