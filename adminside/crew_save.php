@@ -24,6 +24,8 @@ $birth_date    = trim($_POST['birth_date'] ?? '');
 $phone         = trim($_POST['phone'] ?? '');
 $nationality   = trim($_POST['nationality'] ?? '');
 $address       = trim($_POST['address'] ?? '');
+$middle_name   = trim($_POST['middle_name'] ?? '');
+$ext_name      = trim($_POST['ext_name'] ?? '');
 
 $errors = [];
 
@@ -32,11 +34,6 @@ if ($first_name === '') $errors[] = 'First Name is required.';
 if ($last_name === '') $errors[] = 'Last Name is required.';
 if ($position_id <= 0) $errors[] = 'On Board Position is required.';
 if ($vessel_id <= 0) $errors[] = 'Vessel Assigned is required.';
-
-$validStatuses = ['on_board', 'on_vacation', 'inactive', 'terminated'];
-if (!in_array($crew_status, $validStatuses, true)) {
-    $errors[] = 'Invalid crew status selected.';
-}
 
 if ($birth_date !== '') {
     $d = DateTime::createFromFormat('Y-m-d', $birth_date);
@@ -80,11 +77,19 @@ try {
         'vessel_id'  => $vessel_id,
     ];
 
+    if (isset($availableColumns['middle_name'])) {
+        $insertData['middle_name'] = $middle_name !== '' ? $middle_name : null;
+    }
+    if (isset($availableColumns['ext_name'])) {
+        $insertData['ext_name'] = $ext_name !== '' ? $ext_name : null;
+    }
     if (isset($availableColumns['department_id'])) {
         $insertData['department_id'] = $department_id > 0 ? $department_id : null;
     }
     if (isset($availableColumns['crew_status'])) {
-        $insertData['crew_status'] = $crew_status;
+        $insertData['crew_status'] = in_array($crew_status, ['on_board', 'on_vacation', 'inactive', 'terminated'], true)
+            ? $crew_status
+            : 'on_board';
     }
     if (isset($availableColumns['birth_date'])) {
         $insertData['birth_date'] = $birth_date !== '' ? $birth_date : null;
