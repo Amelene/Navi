@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 session_start();
 
 // Check if crew is logged in
@@ -13,8 +13,7 @@ $department = $_GET['dept'] ?? 'DECK';
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="icon type=image/png href=../assets/image/logo.png>
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($department); ?> Categories - Navi Shipping</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -23,8 +22,7 @@ $department = $_GET['dept'] ?? 'DECK';
 <body class="<?php echo (strtoupper($department) === 'STEWARD') ? 'steward-page' : ''; ?>">
     <!-- Header -->
     <header class="header">
-        <link rel="icon type=image/png href=../assets/image/logo.png>
-<div class="header-content">
+        <div class="header-content">
             <div class="logo-section">
                 <img src="../assets/image/logo.png" alt="NS Logo" class="logo">
             </div>
@@ -142,7 +140,7 @@ $department = $_GET['dept'] ?? 'DECK';
             </div>
 
             <div class="back-link">
-                <a href="index.php">â† Back to Departments</a>
+                <a href="index.php">← Back to Departments</a>
             </div>
         </div>
     </main>
@@ -150,4 +148,3 @@ $department = $_GET['dept'] ?? 'DECK';
     <?php include '../includes/footer.php'; ?>
 </body>
 </html>
-

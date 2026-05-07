@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 session_start();
 require_once '../config/database.php';
 
@@ -70,8 +70,7 @@ try {
 <!doctype html>
 <html lang="en">
 <head>
-    <link rel="icon type=image/png href=../assets/image/logo.png>
-<meta charset="utf-8">
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>NSC Exam Results</title>
     <link rel="stylesheet" href="../assets/css/main.css?v=<?php echo time(); ?>">
@@ -174,7 +173,7 @@ try {
                                     <?php if (isset($showSetupMessage) && $showSetupMessage): ?>
                                         <tr>
                                             <td colspan="8" style="text-align: center; padding: 40px;">
-                                                <h3 style="color: #dc3545; margin-bottom: 15px;">âš ï¸ Database Not Set Up</h3>
+                                                <h3 style="color: #dc3545; margin-bottom: 15px;">⚠️ Database Not Set Up</h3>
                                                 <p style="margin-bottom: 20px;">The exam tables have not been created yet. Please run the setup script first.</p>
                                                 <a href="../testfile/setup_exam_tables.php" style="display: inline-block; padding: 12px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
                                                     Run Setup Script
@@ -217,4 +216,3 @@ try {
     <?php include '../includes/footer.php'; ?>
 </body>
 </html>
-

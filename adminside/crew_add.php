@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 session_start();
 
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
@@ -41,8 +41,7 @@ function oldv($key, $default = '')
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="icon type=image/png href=../assets/image/logo.png>
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Add New Crew</title>
     <link rel="stylesheet" href="../assets/css/main.css?v=<?php echo time(); ?>">
@@ -169,4 +168,3 @@ function oldv($key, $default = '')
 <?php include '../includes/footer.php'; ?>
 </body>
 </html>
-

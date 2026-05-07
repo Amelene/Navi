@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 session_start();
 
 // Check if application was submitted
@@ -18,8 +18,7 @@ unset($_SESSION['application_id']);
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="icon type=image/png href=../assets/image/logo.png>
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Application Submitted - Navi Shipping</title>
     <style>
@@ -116,7 +115,7 @@ unset($_SESSION['application_id']);
         }
 
         .info-box li:before {
-            content: "âœ“ ";
+            content: "✓ ";
             color: #16a34a;
             font-weight: bold;
             margin-right: 8px;
@@ -245,4 +244,3 @@ unset($_SESSION['application_id']);
     </div>
 </body>
 </html>
-

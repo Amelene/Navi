@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 session_start();
 
 // Check if user is logged in
@@ -30,8 +30,7 @@ try {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="icon type=image/png href=../assets/image/logo.png>
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload Files - Crew Management</title>
     <link rel="stylesheet" href="../assets/css/main.css?v=<?php echo time(); ?>">
@@ -442,4 +441,3 @@ try {
     </script>
 </body>
 </html>
-

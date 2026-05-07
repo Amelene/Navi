@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 session_start();
 
 // Check if user is logged in
@@ -65,8 +65,7 @@ unset($_SESSION['staff_add_success'], $_SESSION['staff_add_error']);
 <!doctype html>
 <html lang="en">
 <head>
-    <link rel="icon type=image/png href=../assets/image/logo.png>
-<meta charset="utf-8">
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Add New Staff</title>
     <link rel="stylesheet" href="../assets/css/main.css?v=<?php echo time(); ?>">
@@ -228,7 +227,7 @@ unset($_SESSION['staff_add_success'], $_SESSION['staff_add_error']);
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Salary (â‚±)</label>
+                            <label class="form-label">Salary (₱)</label>
                             <input type="number" name="salary" class="form-control" min="0" step="0.01" placeholder="15000">
                         </div>
 
@@ -251,4 +250,3 @@ unset($_SESSION['staff_add_success'], $_SESSION['staff_add_error']);
 <?php include '../includes/footer.php'; ?>
 </body>
 </html>
-

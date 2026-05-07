@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 session_start();
 
 // Check if user is logged in
@@ -199,8 +199,7 @@ try {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<link rel="icon type=image/png href=../assets/image/logo.png>
-<meta charset="UTF-8">
+	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Dashboard</title>
     <link rel="stylesheet" href="../assets/css/main.css?v=<?php echo time(); ?>">
@@ -302,7 +301,7 @@ try {
 											<form method="POST" class="task-delete-form">
 												<input type="hidden" name="dashboard_task_action" value="delete">
 												<input type="hidden" name="task_id" value="<?php echo htmlspecialchars((string)($task['id'] ?? '')); ?>">
-												<button type="submit" class="task-delete-btn" title="Delete task">Ã—</button>
+												<button type="submit" class="task-delete-btn" title="Delete task">×</button>
 											</form>
 										</div>
 									</li>
@@ -351,7 +350,7 @@ try {
 										</div>
 										<div class="activity__content">
 											<strong><?php echo htmlspecialchars($activityTitle); ?></strong>
-											<div class="activity__meta"><?php echo htmlspecialchars($activityCrewName . ' Â· ' . $activityTimeText); ?></div>
+											<div class="activity__meta"><?php echo htmlspecialchars($activityCrewName . ' · ' . $activityTimeText); ?></div>
 										</div>
 									</li>
 								<?php endforeach; ?>
@@ -391,35 +390,35 @@ try {
 							<li>
 								<div>
 									<div class="event-title">New Crew Member Added</div>
-									<div class="event-meta">12-12-25 &nbsp; â€¢ &nbsp; 10:00 AM</div>
+									<div class="event-meta">12-12-25 &nbsp; • &nbsp; 10:00 AM</div>
 								</div>
 								<span class="event-badge contact">Contact</span>
 							</li>
 							<li>
 								<div>
 									<div class="event-title">Safety Traning Session</div>
-									<div class="event-meta">12-15-25 &nbsp; â€¢ &nbsp; 8:00 AM</div>
+									<div class="event-meta">12-15-25 &nbsp; • &nbsp; 8:00 AM</div>
 								</div>
 								<span class="event-badge training">Training</span>
 							</li>
 							<li>
 								<div>
 									<div class="event-title">Certificate Verification</div>
-									<div class="event-meta">12-15-25 &nbsp; â€¢ &nbsp; 8:00 AM</div>
+									<div class="event-meta">12-15-25 &nbsp; • &nbsp; 8:00 AM</div>
 								</div>
 								<span class="event-badge cert">Certification</span>
 							</li>
 							<li>
 								<div>
 									<div class="event-title">Client Meeting</div>
-									<div class="event-meta">12-18-25 &nbsp; â€¢ &nbsp; 3:00 PM</div>
+									<div class="event-meta">12-18-25 &nbsp; • &nbsp; 3:00 PM</div>
 								</div>
 								<span class="event-badge meeting">Meeting</span>
 							</li>
 							<li>
 								<div>
 									<div class="event-title">Meeting with staff</div>
-									<div class="event-meta">12-20-25 &nbsp; â€¢ &nbsp; 3:00 PM</div>
+									<div class="event-meta">12-20-25 &nbsp; • &nbsp; 3:00 PM</div>
 								</div>
 								<span class="event-badge meeting">Meeting</span>
 							</li>
@@ -500,7 +499,7 @@ try {
 		<div class="task-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="taskModalTitle">
 			<div class="task-modal__header">
 				<h3 id="taskModalTitle">Add Upcoming Task</h3>
-				<button type="button" class="task-modal__close" id="closeTaskModal">Ã—</button>
+				<button type="button" class="task-modal__close" id="closeTaskModal">×</button>
 			</div>
 			<form method="POST" class="task-modal__form">
 				<input type="hidden" name="dashboard_task_action" value="add">
@@ -530,7 +529,7 @@ try {
 
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 	<script>
-		// Overview bar chart â€” quarterly onboard positions from crew management
+		// Overview bar chart — quarterly onboard positions from crew management
 		const ovCtx = document.getElementById('overviewChart').getContext('2d');
 		const overviewChartLabels = <?php echo json_encode($overviewChartLabels); ?>;
 		const overviewChartDatasets = <?php echo json_encode($overviewChartDatasets); ?>;
@@ -705,4 +704,3 @@ try {
 	</script>
 </body>
 </html>
-

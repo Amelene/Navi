@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 session_start();
 require_once '../config/database.php';
 
@@ -69,8 +69,7 @@ if ($returnTo === '') {
 <!doctype html>
 <html lang="en">
 <head>
-    <link rel="icon type=image/png href=../assets/image/logo.png>
-<meta charset="utf-8">
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?php echo $isEdit ? 'Edit Question' : 'Add Question'; ?></title>
     <link rel="stylesheet" href="../assets/css/main.css?v=<?php echo time(); ?>">
@@ -186,4 +185,3 @@ if ($returnTo === '') {
 <?php include '../includes/footer.php'; ?>
 </body>
 </html>
-
