@@ -1,7 +1,5 @@
+---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/navizaft/public_html/
-    - /bin/cp -R *.php $DEPLOYPATH
-    - /bin/cp -R css $DEPLOYPATH
-    - /bin/cp -R js $DEPLOYPATH
-    - /bin/cp -R images $DEPLOYPATH
+    - export DEPLOYPATH=/home/navizaft/public_html
+    - /bin/cp -R * $DEPLOYPATH
