@@ -200,6 +200,7 @@ class Database {
             $stmt = $this->connection->prepare($sql);
             return $stmt->execute($params);
         } catch (PDOException $e) {
+            error_log("DB execute error: " . $e->getMessage() . " | SQL: " . $sql . " | Params: " . json_encode($params));
             if (DB_DEBUG) {
                 throw new Exception("Query Error: " . $e->getMessage() . " | SQL: " . $sql);
             } else {
