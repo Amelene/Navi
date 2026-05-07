@@ -79,83 +79,81 @@ try {
         exit();
     }
 
-    // Build INSERT dynamically based on actual crew_master columns (for schema compatibility)
-    $columnRows = $db->fetchAll("SHOW COLUMNS FROM crew_master");
-    $availableColumns = [];
-    foreach ($columnRows as $col) {
-        if (!empty($col['Field'])) {
-            $availableColumns[$col['Field']] = true;
-        }
-    }
+    // Try multiple insert shapes for compatibility with different live schemas.
+    $validCrewStatus = in_array($crew_status, ['on_board', 'on_vacation', 'inactive', 'terminated'], true)
+        ? $crew_status
+        : 'on_board';
 
-    $insertData = [
-        'crew_no'    => $crew_no,
-        'first_name' => $first_name,
-        'last_name'  => $last_name,
-        'position_id'=> $position_id,
-        'vessel_id'  => $vessel_id,
+    $insertAttempts = [
+        // Full modern schema
+        [
+            'sql' => "INSERT INTO crew_master (
+                        crew_no, first_name, last_name, position_id, vessel_id, department_id,
+                        crew_status, birth_date, phone, nationality, address
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            'params' => [
+                $crew_no,
+                $first_name,
+                $last_name,
+                $position_id,
+                $vessel_id,
+                $department_id > 0 ? $department_id : null,
+                $validCrewStatus,
+                $birth_date !== '' ? $birth_date : null,
+                $phone !== '' ? $phone : null,
+                $nationality !== '' ? $nationality : null,
+                $address !== '' ? $address : null
+            ],
+        ],
+        // Without department/status
+        [
+            'sql' => "INSERT INTO crew_master (
+                        crew_no, first_name, last_name, position_id, vessel_id,
+                        birth_date, phone, nationality, address
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            'params' => [
+                $crew_no,
+                $first_name,
+                $last_name,
+                $position_id,
+                $vessel_id,
+                $birth_date !== '' ? $birth_date : null,
+                $phone !== '' ? $phone : null,
+                $nationality !== '' ? $nationality : null,
+                $address !== '' ? $address : null
+            ],
+        ],
+        // Minimal legacy schema
+        [
+            'sql' => "INSERT INTO crew_master (crew_no, first_name, last_name, position_id, vessel_id)
+                      VALUES (?, ?, ?, ?, ?)",
+            'params' => [
+                $crew_no,
+                $first_name,
+                $last_name,
+                $position_id,
+                $vessel_id
+            ],
+        ],
     ];
 
-    if (isset($availableColumns['middle_name'])) {
-        $insertData['middle_name'] = $middle_name !== '' ? $middle_name : null;
-    }
-    if (isset($availableColumns['ext_name'])) {
-        $insertData['ext_name'] = $ext_name !== '' ? $ext_name : null;
-    }
-    if (isset($availableColumns['department_id'])) {
-        $insertData['department_id'] = $department_id > 0 ? $department_id : null;
-    }
-    if (isset($availableColumns['crew_status'])) {
-        $insertData['crew_status'] = in_array($crew_status, ['on_board', 'on_vacation', 'inactive', 'terminated'], true)
-            ? $crew_status
-            : 'on_board';
-    }
-    if (isset($availableColumns['birth_date'])) {
-        $insertData['birth_date'] = $birth_date !== '' ? $birth_date : null;
-    }
-    if (isset($availableColumns['phone'])) {
-        $insertData['phone'] = $phone !== '' ? $phone : null;
-    }
-    if (isset($availableColumns['nationality'])) {
-        $insertData['nationality'] = $nationality !== '' ? $nationality : null;
-    }
-    if (isset($availableColumns['address'])) {
-        $insertData['address'] = $address !== '' ? $address : null;
-    }
+    $saved = false;
+    $lastError = null;
 
-    // Remove any values for columns that are NOT NULL and received empty input
-    // so DB defaults can apply when available.
-    $requiredWithoutDefault = [];
-    foreach ($columnRows as $col) {
-        $field = $col['Field'] ?? '';
-        $isNullable = strtoupper((string)($col['Null'] ?? 'YES')) === 'YES';
-        $defaultValue = $col['Default'] ?? null;
-        $extra = strtolower((string)($col['Extra'] ?? ''));
-        $isAutoIncrement = strpos($extra, 'auto_increment') !== false;
-
-        if ($field === '' || $isAutoIncrement) {
-            continue;
-        }
-
-        if (!$isNullable && $defaultValue === null) {
-            $requiredWithoutDefault[$field] = true;
+    foreach ($insertAttempts as $attempt) {
+        try {
+            $db->execute($attempt['sql'], $attempt['params']);
+            $saved = true;
+            break;
+        } catch (Exception $inner) {
+            $lastError = $inner;
+            error_log('crew_save.php insert attempt failed: ' . $inner->getMessage() . ' | SQL: ' . $attempt['sql']);
         }
     }
 
-    foreach ($insertData as $k => $v) {
-        if ($v === '' || $v === null) {
-            if (!isset($requiredWithoutDefault[$k])) {
-                unset($insertData[$k]);
-            }
-        }
+    if (!$saved) {
+        throw new Exception($lastError ? $lastError->getMessage() : 'Insert failed for all schema variants.');
     }
-
-    $columns = array_keys($insertData);
-    $placeholders = implode(', ', array_fill(0, count($columns), '?'));
-    $sql = "INSERT INTO crew_master (" . implode(', ', $columns) . ") VALUES (" . $placeholders . ")";
-    $params = array_values($insertData);
-
-    $db->execute($sql, $params);
 
     $_SESSION['success_message'] = 'New crew member added successfully.';
     header('Location: crew.php');
