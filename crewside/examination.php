@@ -242,26 +242,41 @@ $show_intro = ($current_step === 0);
                                 <?php endif; ?>
 
                                 <div class="question-main">
-                                    <?php if (!$isImageQuestionText): ?>
+                                    <?php
+                                    $trimmedQuestionText = trim((string)$questionText);
+                                    $hasReadableQuestionText = $trimmedQuestionText !== '' && !$isImageQuestionText;
+                                    $questionOptions = (isset($currentQuestion['options']) && is_array($currentQuestion['options']))
+                                        ? $currentQuestion['options']
+                                        : [];
+                                    ?>
+                                    <?php if ($hasReadableQuestionText): ?>
                                         <p class="question-text">
                                             <?php echo htmlspecialchars($questionText); ?>
                                         </p>
                                     <?php endif; ?>
                                     
                                     <div class="options-container">
-                                        <?php foreach ($currentQuestion['options'] as $option): ?>
-                                            <div class="option-card" 
-                                                 data-question-id="<?php echo $currentQuestion['id']; ?>"
-                                                 data-option-id="<?php echo $option['id']; ?>"
-                                                 data-option-letter="<?php echo $option['letter']; ?>"
-                                                 onclick="selectAnswer(<?php echo $currentQuestion['id']; ?>, <?php echo $option['id']; ?>, '<?php echo $option['letter']; ?>')">
-                                                <div class="option-radio"></div>
+                                        <?php if (!empty($questionOptions)): ?>
+                                            <?php foreach ($questionOptions as $option): ?>
+                                                <div class="option-card" 
+                                                     data-question-id="<?php echo $currentQuestion['id']; ?>"
+                                                     data-option-id="<?php echo $option['id']; ?>"
+                                                     data-option-letter="<?php echo $option['letter']; ?>"
+                                                     onclick="selectAnswer(<?php echo $currentQuestion['id']; ?>, <?php echo $option['id']; ?>, '<?php echo $option['letter']; ?>')">
+                                                    <div class="option-radio"></div>
+                                                    <div class="option-content">
+                                                        <span class="option-letter"><?php echo $option['letter']; ?>.</span>
+                                                        <span class="option-text"><?php echo htmlspecialchars($option['text']); ?></span>
+                                                    </div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <div class="option-card" style="cursor: default; opacity: 0.85;">
                                                 <div class="option-content">
-                                                    <span class="option-letter"><?php echo $option['letter']; ?>.</span>
-                                                    <span class="option-text"><?php echo htmlspecialchars($option['text']); ?></span>
+                                                    <span class="option-text">No choices available for this question yet.</span>
                                                 </div>
                                             </div>
-                                        <?php endforeach; ?>
+                                        <?php endif; ?>
                                     </div>
                                     
                                     <div class="navigation-buttons">

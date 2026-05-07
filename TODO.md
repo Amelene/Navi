@@ -1,4 +1,6 @@
-- [x] Remove "DOC EXPIRY" header column in adminside/crew.php
-- [x] Remove DOC EXPIRY cell/badge rendering in each crew row
-- [x] Update empty-state colspan from 8 to 7
-- [x] Verify final table column alignment in code
+# Assessment Question Display Fix TODO
+
+- [x] Update `crewside/examination.php` to always show question text when available (even if image exists).
+- [x] Add safe fallback UI when a question has no loaded choices/options.
+- [ ] Run PHP syntax check for edited file.
+- [ ] Mark completed tasks.
