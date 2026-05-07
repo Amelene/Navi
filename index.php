@@ -11,11 +11,11 @@
 session_start();
 
 if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
-    header('Location: adminside/index.php');
+    header('Location: crewside/index.php');
     exit();
 }
 
 // Default: redirect to admin login
-header('Location: adminside/login.php');
+header('Location: crewside/login.php');
 exit();
 ?>
