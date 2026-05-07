@@ -2,4 +2,4 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/navizaft/public_html/
-    - "/bin/cp -R * $DEPLOYPATH"
+    - /bin/cp -R adminside assets config crewside helpers includes uploads index.php README.md $DEPLOYPATH
