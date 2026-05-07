@@ -53,9 +53,15 @@ if ($force_reload_questions || !isset($_SESSION['exam_questions']) || empty($_SE
             $passing_score = $category['passing_score'];
             
             // First, get 40 random questions
-            $randomQuestionsQuery = "SELECT id, question_text, image_filename, question_order
-                                    FROM questions
-                                    WHERE exam_category_id = ? AND status = 'active'
+            $randomQuestionsQuery = "SELECT q.id, q.question_text, q.image_filename, q.question_order
+                                    FROM questions q
+                                    WHERE q.exam_category_id = ? 
+                                      AND q.status = 'active'
+                                      AND EXISTS (
+                                          SELECT 1
+                                          FROM question_options qo
+                                          WHERE qo.question_id = q.id
+                                      )
                                     ORDER BY RAND()
                                     LIMIT 40";
             
