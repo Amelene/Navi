@@ -63,30 +63,55 @@ try {
         exit();
     }
 
-    $sql = "INSERT INTO crew_master (
-                crew_no, first_name, last_name, position_id, vessel_id, department_id,
-                crew_status, birth_date, phone, nationality, address
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    // Build INSERT dynamically based on actual crew_master columns (for schema compatibility)
+    $columnRows = $db->fetchAll("SHOW COLUMNS FROM crew_master");
+    $availableColumns = [];
+    foreach ($columnRows as $col) {
+        if (!empty($col['Field'])) {
+            $availableColumns[$col['Field']] = true;
+        }
+    }
 
-    $db->execute($sql, [
-        $crew_no,
-        $first_name,
-        $last_name,
-        $position_id,
-        $vessel_id,
-        $department_id > 0 ? $department_id : null,
-        $crew_status,
-        $birth_date !== '' ? $birth_date : null,
-        $phone !== '' ? $phone : null,
-        $nationality !== '' ? $nationality : null,
-        $address !== '' ? $address : null
-    ]);
+    $insertData = [
+        'crew_no'    => $crew_no,
+        'first_name' => $first_name,
+        'last_name'  => $last_name,
+        'position_id'=> $position_id,
+        'vessel_id'  => $vessel_id,
+    ];
+
+    if (isset($availableColumns['department_id'])) {
+        $insertData['department_id'] = $department_id > 0 ? $department_id : null;
+    }
+    if (isset($availableColumns['crew_status'])) {
+        $insertData['crew_status'] = $crew_status;
+    }
+    if (isset($availableColumns['birth_date'])) {
+        $insertData['birth_date'] = $birth_date !== '' ? $birth_date : null;
+    }
+    if (isset($availableColumns['phone'])) {
+        $insertData['phone'] = $phone !== '' ? $phone : null;
+    }
+    if (isset($availableColumns['nationality'])) {
+        $insertData['nationality'] = $nationality !== '' ? $nationality : null;
+    }
+    if (isset($availableColumns['address'])) {
+        $insertData['address'] = $address !== '' ? $address : null;
+    }
+
+    $columns = array_keys($insertData);
+    $placeholders = implode(', ', array_fill(0, count($columns), '?'));
+    $sql = "INSERT INTO crew_master (" . implode(', ', $columns) . ") VALUES (" . $placeholders . ")";
+    $params = array_values($insertData);
+
+    $db->execute($sql, $params);
 
     $_SESSION['success_message'] = 'New crew member added successfully.';
     header('Location: crew.php');
     exit();
 } catch (Exception $e) {
-    $_SESSION['crew_add_errors'] = ['Failed to save crew: ' . $e->getMessage()];
+    error_log('crew_save.php error: ' . $e->getMessage());
+    $_SESSION['crew_add_errors'] = ['Failed to save crew: An error occurred. Please try again.'];
     $_SESSION['crew_add_old'] = $_POST;
     header('Location: crew_add.php');
     exit();

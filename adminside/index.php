@@ -554,6 +554,9 @@ try {
 		const overviewChartLabels = <?php echo json_encode($overviewChartLabels); ?>;
 		const overviewChartDatasets = <?php echo json_encode($overviewChartDatasets); ?>;
 
+		const overviewAllValues = overviewChartDatasets.flatMap(ds => Array.isArray(ds.data) ? ds.data : []);
+		const overviewMaxValue = overviewAllValues.length ? Math.max(...overviewAllValues, 0) : 0;
+
 		new Chart(ovCtx, {
 			type: 'bar',
 			data: {
@@ -572,11 +575,10 @@ try {
 				scales: {
 					y: {
 						beginAtZero: true,
-						min: 0,
-						max: 100,
+						suggestedMax: overviewMaxValue <= 5 ? 5 : undefined,
 						ticks: {
 							precision: 0,
-							stepSize: 10
+							stepSize: overviewMaxValue <= 5 ? 1 : undefined
 						}
 					}
 				},
