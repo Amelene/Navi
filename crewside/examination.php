@@ -79,7 +79,9 @@ if ($force_reload_questions || !isset($_SESSION['exam_questions']) || empty($_SE
             $questionsQuery = "SELECT q.id, q.question_text, q.image_filename, q.question_order,
                                       qo.id as option_id, qo.option_letter, qo.option_text
                                FROM questions q
-                               LEFT JOIN question_options qo ON q.id = qo.question_id
+                               LEFT JOIN question_options qo 
+                                 ON q.id = qo.question_id
+                                AND qo.question_id > 0
                                WHERE q.id IN ($placeholders)
                                ORDER BY FIELD(q.id, $placeholders), qo.option_letter";
             
@@ -99,19 +101,13 @@ if ($force_reload_questions || !isset($_SESSION['exam_questions']) || empty($_SE
                         'status' => 'unanswered'
                     ];
                 }
-                if (!empty($row['option_letter']) && $row['option_text'] !== null && trim((string)$row['option_text']) !== '') {
-                    // option_id can be 0/NULL in some legacy/imported rows, but option is still valid for display.
-                    // create a stable fallback id so frontend can still select and store an answer.
-                    $safeOptionId = isset($row['option_id']) && (int)$row['option_id'] > 0
-                        ? (int)$row['option_id']
-                        : ((int)$qId * 100 + (ord(strtoupper($row['option_letter'])) - 64));
-
-                    $questionsData[$qId]['options'][] = [
-                        'id' => $safeOptionId,
-                        'letter' => $row['option_letter'],
-                        'text' => $row['option_text']
-                    ];
-                }
+                    if (!empty($row['option_letter']) && $row['option_text'] !== null && trim((string)$row['option_text']) !== '') {
+                        $questionsData[$qId]['options'][] = [
+                            'id' => (int)$row['option_id'],
+                            'letter' => $row['option_letter'],
+                            'text' => $row['option_text']
+                        ];
+                    }
             }
             
             $questions = array_values($questionsData);
