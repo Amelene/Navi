@@ -299,6 +299,11 @@ body {
     color: var(--color-success);
 }
 
+.question-item.for-review .question-text {
+    color: var(--color-danger);
+    font-weight: 600;
+}
+
 .question-item i {
     font-size: 1.1rem;
     min-width: 20px;
@@ -358,7 +363,7 @@ body {
     background: var(--color-bg-white);
     border-radius: var(--radius-lg);
     padding: 25px;
-    max-width: 800px;
+    max-width: 1000px;
     width: 100%;
     box-shadow: var(--shadow-card);
 }
@@ -466,6 +471,45 @@ body {
 }
 
 .question-content { margin-top: 20px; }
+
+.question-layout {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    flex-direction: row-reverse;
+}
+
+.question-layout.has-image .question-media {
+    flex: 0 0 50%;
+    max-width: 50%;
+}
+
+.question-layout.has-image .question-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.question-layout.no-image .question-main {
+    width: 100%;
+}
+
+.question-image-wrapper {
+    padding: 10px;
+    background: var(--color-bg-content);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    display: flex;
+    justify-content: center;
+}
+
+.question-image {
+    width: 100%;
+    max-width: 100%;
+    max-height: 300px;
+    object-fit: contain;
+    border-radius: 8px;
+    display: block;
+}
 
 /* Question text in the main content area (not sidebar) */
 .question-text {
@@ -670,6 +714,86 @@ body {
     margin-bottom: 30px;
 }
 
+/* 5.8 Custom Modal (Minimalist)
+   ------------------------------------------------------------ */
+.custom-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+}
+
+.custom-modal-backdrop.hidden {
+    display: none;
+}
+
+.custom-modal {
+    width: 100%;
+    max-width: 520px;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.18);
+    padding: 28px 26px 22px;
+    border: 1px solid #ececec;
+}
+
+.custom-modal-title {
+    font-size: 2rem;
+    line-height: 1.2;
+    font-weight: 700;
+    color: #111111;
+    margin-bottom: 14px;
+}
+
+.custom-modal-message {
+    font-size: 1.05rem;
+    color: #4b5563;
+    line-height: 1.6;
+    margin-bottom: 28px;
+}
+
+.custom-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.modal-btn {
+    border: 2px solid transparent;
+    border-radius: 999px;
+    padding: 10px 22px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    background: #fff;
+    min-width: 110px;
+}
+
+.modal-btn-secondary {
+    border-color: #e5e7eb;
+    color: #1f2937;
+}
+
+.modal-btn-secondary:hover {
+    background: #f9fafb;
+}
+
+.modal-btn-primary {
+    border-color: #126E82;
+    color: #ffffff;
+    background: #126E82;
+}
+
+.modal-btn-primary:hover {
+    background: #0e5a6b;
+    border-color: #0e5a6b;
+}
+
 
 /* ============================================================
    6. RESPONSIVE DESIGN
@@ -710,6 +834,23 @@ body {
         align-self: flex-end;
     }
 
+    .question-layout {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .question-layout.has-image .question-media,
+    .question-layout.has-image .question-main {
+        flex: 1 1 auto;
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .question-image {
+        max-width: 100%;
+        max-height: 240px; /* resize control: mobile */
+    }
+
     .navigation-buttons {
         flex-wrap: wrap;
     }
@@ -722,5 +863,27 @@ body {
     .btn-next,
     .btn-submit {
         margin-left: 0;
+    }
+
+    .custom-modal {
+        max-width: 94%;
+        padding: 22px 18px 18px;
+    }
+
+    .custom-modal-title {
+        font-size: 1.45rem;
+    }
+
+    .custom-modal-message {
+        font-size: 0.98rem;
+    }
+
+    .custom-modal-actions {
+        justify-content: stretch;
+    }
+
+    .modal-btn {
+        flex: 1;
+        min-width: 0;
     }
 }

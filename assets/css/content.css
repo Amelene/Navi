@@ -476,6 +476,232 @@
     }
 }
 
+/* Extra dashboard section (calendar + events + document expiry) */
+.dashboard-extra-row {
+    grid-template-columns: 2fr 1fr;
+    align-items: stretch;
+}
+
+.calendar-card,
+.events-card,
+.document-expiry-card {
+    border-radius: 14px;
+    border: 1px solid #e5e5e5;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    background: #fff;
+}
+
+.calendar-card {
+    padding: 16px 18px;
+}
+
+.mini-calendar__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 14px;
+}
+
+.mini-calendar__nav {
+    border: 1px solid #d9dee5;
+    background: #fff;
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    cursor: pointer;
+    color: #576574;
+    line-height: 1;
+}
+
+.mini-calendar__weekdays,
+.mini-calendar__days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    text-align: center;
+    font-size: 12px;
+}
+
+.mini-calendar__weekdays {
+    color: #8a94a6;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.mini-calendar__days span {
+    color: #2d3436;
+    padding: 7px 0;
+    border-radius: 6px;
+}
+
+.mini-calendar__days span.muted {
+    color: #b7bec8;
+}
+
+.events-card {
+    padding: 14px;
+}
+
+.events-card .card__title {
+    color: #046b8b;
+    font-weight: 800;
+    letter-spacing: .4px;
+    margin-bottom: 12px;
+}
+
+.event-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.event-list li {
+    border: 1px solid #dfe6ee;
+    border-radius: 10px;
+    padding: 10px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.event-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #2d3436;
+}
+
+.event-meta {
+    font-size: 11px;
+    color: #7f8c8d;
+}
+
+.event-badge {
+    font-size: 10px;
+    font-weight: 700;
+    color: #fff;
+    border-radius: 20px;
+    padding: 4px 9px;
+    white-space: nowrap;
+}
+
+.event-badge.contact { background: #0b7fab; }
+.event-badge.training { background: #2da44e; }
+.event-badge.cert { background: #f97316; }
+.event-badge.meeting { background: #7c83ff; }
+
+.document-expiry-card {
+    margin-top: 14px;
+    padding: 14px;
+}
+
+.doc-expiry__title {
+    font-size: 21px;
+    font-weight: 700;
+    color: #ff6f00;
+}
+
+.doc-expiry__subtitle {
+    font-size: 12px;
+    color: #6f7b8b;
+    margin-bottom: 10px;
+}
+
+.doc-expiry__stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.doc-stat {
+    border-radius: 10px;
+    border: 1px solid;
+    padding: 9px 12px;
+    background: #fff;
+}
+
+.doc-stat__title {
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.doc-stat__value {
+    font-size: 12px;
+    color: #2d3436;
+}
+
+.doc-stat--critical { border-color: #ff6b6b; }
+.doc-stat--warning { border-color: #f5b041; }
+.doc-stat--normal { border-color: #2ecc71; }
+
+.doc-expiry__list {
+    max-height: 220px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.doc-row {
+    border-radius: 10px;
+    border: 1px solid #dde3eb;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    background: #fff;
+}
+
+.doc-row.critical { border-color: #ff6b6b; }
+.doc-row.warning { border-color: #f5b041; }
+.doc-row.normal { border-color: #2ecc71; }
+
+.doc-row__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.doc-row__meta {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    font-size: 11px;
+    color: #56606f;
+}
+
+.doc-pill {
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 12px;
+    padding: 3px 8px;
+    text-transform: capitalize;
+    color: #fff;
+}
+
+.doc-pill.critical { background: #ff4d4f; }
+.doc-pill.warning { background: #f59e0b; }
+.doc-pill.normal { background: #22c55e; }
+
+@media (max-width: 1024px) {
+    .dashboard-extra-row {
+        grid-template-columns: 1fr;
+    }
+
+    .doc-expiry__stats {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .doc-row__meta {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
 @media (max-width: 480px) {
     .page-title {
         font-size: 1.4rem;
@@ -487,6 +713,10 @@
     
     .card--padded {
         padding: 20px;
+    }
+
+    .doc-row__meta {
+        grid-template-columns: 1fr;
     }
 }
  

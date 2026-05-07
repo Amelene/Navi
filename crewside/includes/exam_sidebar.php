@@ -61,23 +61,25 @@ $remaining_questions = $total_questions - $answered_count;
         <div class="questions-list">
             <!-- Introduction -->
             <div class="question-item <?php echo ($current_step > 0) ? 'completed' : ''; ?>" 
-                 onclick="window.location.href='examination.php'">
+                 onclick="navigateToExamIntro()">
                 <i class="fas fa-check-circle accomplished-icon"></i>
                 <span class="question-text">Introduction</span>
             </div>
-            
-            <!-- Questions -->
-            <?php for ($i = 1; $i <= $total_questions; $i++): 
-                $is_current = ($current_step == $i);
-                $item_class = $is_current ? 'active' : '';
-            ?>
-            <div class="question-item <?php echo $item_class; ?>" 
-                 data-question-index="<?php echo $i; ?>"
-                 onclick="window.location.href='examination.php?step=<?php echo $i; ?>'">
-                <i class="far fa-circle unanswered-icon"></i>
-                <span class="question-text">Question <?php echo $i; ?></span>
-            </div>
-            <?php endfor; ?>
+
+            <?php if ($total_questions > 0): ?>
+                <!-- Questions -->
+                <?php for ($i = 1; $i <= $total_questions; $i++): 
+                    $is_current = ($current_step == $i);
+                    $item_class = $is_current ? 'active' : '';
+                ?>
+                <div class="question-item <?php echo $item_class; ?>" 
+                     data-question-index="<?php echo $i; ?>"
+                     onclick="navigateToExamStep(<?php echo $i; ?>)">
+                    <i class="far fa-circle unanswered-icon"></i>
+                    <span class="question-text">Question <?php echo $i; ?></span>
+                </div>
+                <?php endfor; ?>
+            <?php endif; ?>
         </div>
     </div>
 

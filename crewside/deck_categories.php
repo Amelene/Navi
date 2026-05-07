@@ -19,7 +19,7 @@ $department = $_GET['dept'] ?? 'DECK';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="deck_categories.css?v=<?php echo time(); ?>">
 </head>
-<body>
+<body class="<?php echo (strtoupper($department) === 'STEWARD') ? 'steward-page' : ''; ?>">
     <!-- Header -->
     <header class="header">
         <div class="header-content">
@@ -29,7 +29,7 @@ $department = $_GET['dept'] ?? 'DECK';
             
             <nav class="nav-tabs">
                 <a href="#" class="nav-tab active">NSC Examination</a>
-                <a href="#" class="nav-tab">Abstract</a>
+                <a href="abstract_entry.php" class="nav-tab">Abstract</a>
             </nav>
             
             <div class="user-section">
@@ -48,7 +48,7 @@ $department = $_GET['dept'] ?? 'DECK';
             <div class="category-grid">
                 <?php if (strtoupper($department) === 'STEWARD'): ?>
                     <!-- COOK Card -->
-                    <div class="category-card" onclick="window.location.href='crew_information.php?dept=<?php echo urlencode($department); ?>&category=COOK'">
+                    <div class="category-card steward-card" onclick="window.location.href='crew_information.php?dept=<?php echo urlencode($department); ?>&category=COOK'">
                         <img src="../assets/image/deck.jpg" alt="Cook" class="card-image">
                         <div class="card-content">
                             <h2 class="card-title">COOK</h2>
@@ -66,7 +66,7 @@ $department = $_GET['dept'] ?? 'DECK';
                     </div>
 
                     <!-- MESSMAN Card -->
-                    <div class="category-card" onclick="window.location.href='crew_information.php?dept=<?php echo urlencode($department); ?>&category=MESSMAN'">
+                    <div class="category-card steward-card" onclick="window.location.href='crew_information.php?dept=<?php echo urlencode($department); ?>&category=MESSMAN'">
                         <img src="../assets/image/deck.jpg" alt="Messman" class="card-image">
                         <div class="card-content">
                             <h2 class="card-title">MESSMAN</h2>

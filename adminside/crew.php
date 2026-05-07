@@ -48,6 +48,88 @@ try {
     
     // Fetch crew records
     $crewRecords = $db->fetchAll($sql, $params);
+
+    // Build expiry summary per crew (active docs with expiration_date only)
+    $crewNos = [];
+    foreach ($crewRecords as $row) {
+        if (!empty($row['crew_no'])) {
+            $crewNos[] = (string)$row['crew_no'];
+        }
+    }
+
+    $expiryByCrew = [];
+    $expirySummary = [
+        'critical_crews' => 0, // at least one doc expiring within 0-7 days
+        'warning_crews'  => 0, // at least one doc expiring within 8-30 days (and no critical)
+        'normal_crews'   => 0, // no docs in <=30 days, but has future docs >30 days
+        'expired_crews'  => 0  // at least one expired doc
+    ];
+
+    if (!empty($crewNos)) {
+        $placeholders = implode(',', array_fill(0, count($crewNos), '?'));
+        $expirySql = "
+            SELECT crew_no, expiration_date
+            FROM crew_documents
+            WHERE crew_no IN ($placeholders)
+              AND status = 'active'
+              AND expiration_date IS NOT NULL
+              AND expiration_date <> '0000-00-00'
+        ";
+        $expiryRows = $db->fetchAll($expirySql, $crewNos);
+
+        foreach ($crewNos as $cno) {
+            $expiryByCrew[$cno] = [
+                'critical' => 0,
+                'warning'  => 0,
+                'normal'   => 0,
+                'expired'  => 0
+            ];
+        }
+
+        if (!empty($expiryRows)) {
+            $today = new DateTime('today');
+            foreach ($expiryRows as $er) {
+                $cno = (string)($er['crew_no'] ?? '');
+                $exp = (string)($er['expiration_date'] ?? '');
+                if ($cno === '' || $exp === '') continue;
+
+                try {
+                    $expDate = new DateTime($exp);
+                    $expDate->setTime(0, 0, 0);
+                    $days = (int)$today->diff($expDate)->format('%r%a');
+
+                    if (!isset($expiryByCrew[$cno])) {
+                        $expiryByCrew[$cno] = ['critical' => 0, 'warning' => 0, 'normal' => 0, 'expired' => 0];
+                    }
+
+                    if ($days < 0) {
+                        $expiryByCrew[$cno]['expired']++;
+                    } elseif ($days <= 7) {
+                        $expiryByCrew[$cno]['critical']++;
+                    } elseif ($days <= 30) {
+                        $expiryByCrew[$cno]['warning']++;
+                    } else {
+                        $expiryByCrew[$cno]['normal']++;
+                    }
+                } catch (Exception $ignore) {
+                    // ignore invalid dates
+                }
+            }
+        }
+
+        foreach ($expiryByCrew as $bucket) {
+            if (($bucket['expired'] ?? 0) > 0) {
+                $expirySummary['expired_crews']++;
+            }
+            if (($bucket['critical'] ?? 0) > 0) {
+                $expirySummary['critical_crews']++;
+            } elseif (($bucket['warning'] ?? 0) > 0) {
+                $expirySummary['warning_crews']++;
+            } elseif (($bucket['normal'] ?? 0) > 0) {
+                $expirySummary['normal_crews']++;
+            }
+        }
+    }
     
     // Get statistics
     $stats = [
@@ -132,7 +214,7 @@ try {
                         <div class="card__title">Crew Records</div>
                         <div class="card__actions">
                             <button class="btn primary upload" onclick="window.location.href='crew_upload.php'">Upload Files</button>
-                            <button class="btn warn add">Add New</button>
+                            <button class="btn warn add" onclick="window.location.href='crew_add.php'">Add New</button>
                         </div>
                     </div>
 

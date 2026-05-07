@@ -6,6 +6,195 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
     header('Location: login.php');
     exit();
 }
+
+require_once '../config/database.php';
+
+$dashboardStats = [
+	'total_crew' => 0,
+	'on_board' => 0,
+	'active_vessels' => 0
+];
+
+$overviewChartLabels = ['Q1', 'Q2', 'Q3', 'Q4'];
+$overviewChartDatasets = [];
+
+$expiryDistribution = [
+	'three_months_before' => 0,
+	'two_months_before' => 0,
+	'one_month_before' => 0,
+	'expiring_overdue' => 0
+];
+
+$documentExpirySummary = [
+	'total_expiring' => 0,
+	'critical' => 0,
+	'warning' => 0
+];
+
+$recentActivities = [];
+
+if (!isset($_SESSION['dashboard_tasks']) || !is_array($_SESSION['dashboard_tasks'])) {
+	$_SESSION['dashboard_tasks'] = [
+		[
+			'id' => 'task_' . uniqid(),
+			'title' => 'Contract Renewal - Ocean 1',
+			'date' => date('Y-m-d', strtotime('+7 days')),
+			'priority' => 'high'
+		],
+		[
+			'id' => 'task_' . uniqid(),
+			'title' => 'Safety Training for New Crew',
+			'date' => date('Y-m-d', strtotime('+10 days')),
+			'priority' => 'medium'
+		]
+	];
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['dashboard_task_action'])) {
+	$action = strtolower(trim((string)$_POST['dashboard_task_action']));
+
+	if ($action === 'add') {
+		$title = trim((string)($_POST['task_title'] ?? ''));
+		$date = trim((string)($_POST['task_date'] ?? ''));
+		$priority = strtolower(trim((string)($_POST['task_priority'] ?? 'medium')));
+		$allowedPriorities = ['high', 'medium', 'low'];
+
+		if ($title !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+			if (!in_array($priority, $allowedPriorities, true)) {
+				$priority = 'medium';
+			}
+			$_SESSION['dashboard_tasks'][] = [
+				'id' => 'task_' . uniqid(),
+				'title' => $title,
+				'date' => $date,
+				'priority' => $priority
+			];
+		}
+	} elseif ($action === 'delete') {
+		$taskId = trim((string)($_POST['task_id'] ?? ''));
+		if ($taskId !== '') {
+			$_SESSION['dashboard_tasks'] = array_values(array_filter($_SESSION['dashboard_tasks'], function ($task) use ($taskId) {
+				return (string)($task['id'] ?? '') !== $taskId;
+			}));
+		}
+	}
+
+	header('Location: index.php');
+	exit();
+}
+
+$upcomingTasks = $_SESSION['dashboard_tasks'];
+usort($upcomingTasks, function ($a, $b) {
+	return strcmp((string)($a['date'] ?? ''), (string)($b['date'] ?? ''));
+});
+
+try {
+	$db = Database::getInstance();
+
+	$dashboardStats['total_crew'] = (int)($db->fetchOne("SELECT COUNT(*) AS count FROM crew_master")['count'] ?? 0);
+	$dashboardStats['on_board'] = (int)($db->fetchOne("SELECT COUNT(*) AS count FROM crew_master WHERE crew_status = 'on_board'")['count'] ?? 0);
+	$dashboardStats['active_vessels'] = (int)($db->fetchOne("SELECT COUNT(DISTINCT vessel_name) AS count FROM vw_crew_details WHERE vessel_name IS NOT NULL AND TRIM(vessel_name) <> ''")['count'] ?? 0);
+
+	$positionOverviewRows = $db->fetchAll("
+		SELECT 
+			COALESCE(NULLIF(TRIM(v.position_name), ''), 'UNASSIGNED') AS position_name,
+			CASE
+				WHEN MONTH(COALESCE(cm.updated_at, cm.created_at)) BETWEEN 1 AND 3 THEN 'Q1'
+				WHEN MONTH(COALESCE(cm.updated_at, cm.created_at)) BETWEEN 4 AND 6 THEN 'Q2'
+				WHEN MONTH(COALESCE(cm.updated_at, cm.created_at)) BETWEEN 7 AND 9 THEN 'Q3'
+				ELSE 'Q4'
+			END AS quarter_label,
+			COUNT(*) AS total_count
+		FROM crew_master cm
+		LEFT JOIN positions v ON v.id = cm.position_id
+		WHERE cm.crew_status = 'on_board'
+		GROUP BY COALESCE(NULLIF(TRIM(v.position_name), ''), 'UNASSIGNED'), quarter_label
+		ORDER BY COALESCE(NULLIF(TRIM(v.position_name), ''), 'UNASSIGNED'), quarter_label
+	");
+
+	$quarterIndexMap = ['Q1' => 0, 'Q2' => 1, 'Q3' => 2, 'Q4' => 3];
+	$chartColorPalette = ['#8979FF', '#FF928A', '#3CC3DF', '#FFAE4C', '#537FF1', '#5EC269', '#F06292', '#26A69A', '#8D6E63', '#42A5F5'];
+	$positionSeriesMap = [];
+
+	foreach ($positionOverviewRows as $row) {
+		$positionName = $row['position_name'] ?? 'UNASSIGNED';
+		$quarterLabel = $row['quarter_label'] ?? 'Q1';
+		$totalCount = (int)($row['total_count'] ?? 0);
+
+		if (!isset($positionSeriesMap[$positionName])) {
+			$positionSeriesMap[$positionName] = [0, 0, 0, 0];
+		}
+
+		if (isset($quarterIndexMap[$quarterLabel])) {
+			$positionSeriesMap[$positionName][$quarterIndexMap[$quarterLabel]] = $totalCount;
+		}
+	}
+
+	$colorIndex = 0;
+	foreach ($positionSeriesMap as $positionName => $seriesData) {
+		$overviewChartDatasets[] = [
+			'label' => $positionName,
+			'data' => $seriesData,
+			'backgroundColor' => $chartColorPalette[$colorIndex % count($chartColorPalette)]
+		];
+		$colorIndex++;
+	}
+
+	$expiryRow = $db->fetchOne("
+		SELECT
+			COALESCE(SUM(CASE WHEN DATEDIFF(expiration_date, CURDATE()) BETWEEN 61 AND 90 THEN 1 ELSE 0 END), 0) AS three_months_before,
+			COALESCE(SUM(CASE WHEN DATEDIFF(expiration_date, CURDATE()) BETWEEN 31 AND 60 THEN 1 ELSE 0 END), 0) AS two_months_before,
+			COALESCE(SUM(CASE WHEN DATEDIFF(expiration_date, CURDATE()) BETWEEN 1 AND 30 THEN 1 ELSE 0 END), 0) AS one_month_before,
+			COALESCE(SUM(CASE WHEN DATEDIFF(expiration_date, CURDATE()) <= 0 THEN 1 ELSE 0 END), 0) AS expiring_overdue,
+			COALESCE(SUM(CASE WHEN DATEDIFF(expiration_date, CURDATE()) <= 7 THEN 1 ELSE 0 END), 0) AS critical_count,
+			COALESCE(SUM(CASE WHEN DATEDIFF(expiration_date, CURDATE()) BETWEEN 8 AND 30 THEN 1 ELSE 0 END), 0) AS warning_count
+		FROM crew_documents
+		WHERE status = 'active'
+		  AND expiration_date IS NOT NULL
+		  AND expiration_date <> '0000-00-00'
+	") ?: [];
+
+	$expiryDistribution = [
+		'three_months_before' => (int)($expiryRow['three_months_before'] ?? 0),
+		'two_months_before' => (int)($expiryRow['two_months_before'] ?? 0),
+		'one_month_before' => (int)($expiryRow['one_month_before'] ?? 0),
+		'expiring_overdue' => (int)($expiryRow['expiring_overdue'] ?? 0)
+	];
+
+	$documentExpirySummary['critical'] = (int)($expiryRow['critical_count'] ?? 0);
+	$documentExpirySummary['warning'] = (int)($expiryRow['warning_count'] ?? 0);
+	$documentExpirySummary['total_expiring'] =
+		$expiryDistribution['one_month_before'] + $expiryDistribution['expiring_overdue'];
+
+	$recentActivities = $db->fetchAll("
+		SELECT activity_title, crew_name, activity_time, activity_color
+		FROM (
+			SELECT
+				'Exam Completed' AS activity_title,
+				COALESCE(NULLIF(TRIM(CONCAT(cm.first_name, ' ', cm.last_name)), ''), 'Crew Member') AS crew_name,
+				ea.end_time AS activity_time,
+				'yellow' AS activity_color
+			FROM exam_attempts ea
+			INNER JOIN crew_master cm ON cm.id = ea.crew_id
+			WHERE ea.status = 'completed' AND ea.end_time IS NOT NULL
+
+			UNION ALL
+
+			SELECT
+				'Document Uploaded' AS activity_title,
+				COALESCE(NULLIF(TRIM(CONCAT(cm.first_name, ' ', cm.last_name)), ''), 'Crew Member') AS crew_name,
+				cd.upload_date AS activity_time,
+				'blue' AS activity_color
+			FROM crew_documents cd
+			INNER JOIN crew_master cm ON cm.crew_no = cd.crew_no
+			WHERE cd.upload_date IS NOT NULL
+		) AS activity_feed
+		ORDER BY activity_time DESC
+		LIMIT 5
+	") ?: [];
+} catch (Exception $e) {
+	// Keep defaults to avoid dashboard crash
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -32,7 +221,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 					<div class="metric card">
 						<div class="metric__content">
 							<div class="metric__label">Total Crew Members</div>
-							<div class="metric__number">300</div>
+							<div class="metric__number"><?php echo $dashboardStats['total_crew']; ?></div>
 							<div class="metric__note">+12 this month</div>
 						</div>
 						<div class="metric__icon icon-users">
@@ -42,7 +231,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 					<div class="metric card">
 						<div class="metric__content">
 							<div class="metric__label">Crew on board</div>
-							<div class="metric__number">50</div>
+							<div class="metric__number"><?php echo $dashboardStats['on_board']; ?></div>
 							<div class="metric__note">+8 this week</div>
 						</div>
 						<div class="metric__icon icon-ship">
@@ -52,7 +241,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 					<div class="metric card">
 						<div class="metric__content">
 							<div class="metric__label">Active Vessels</div>
-							<div class="metric__number">6</div>
+							<div class="metric__number"><?php echo $dashboardStats['active_vessels']; ?></div>
 							<div class="metric__note">All operational</div>
 						</div>
 						<div class="metric__icon icon-vessel">
@@ -62,8 +251,8 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 					<div class="metric card">
 						<div class="metric__content">
 							<div class="metric__label">Documents Expiring</div>
-							<div class="metric__number">2</div>
-							<div class="metric__note">1 critical, 1 warning</div>
+							<div class="metric__number"><?php echo $documentExpirySummary['total_expiring']; ?></div>
+							<div class="metric__note"><?php echo $documentExpirySummary['critical']; ?> critical, <?php echo $documentExpirySummary['warning']; ?> warning</div>
 						</div>
 						<div class="metric__icon icon-alert">
 							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
@@ -86,43 +275,217 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 					<div class="card">
 						<div class="card__header">
 							<div class="card__title">Upcoming Task</div>
-							<div class="card__icon">
-								<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-							</div>
+							<button class="card__icon task-add-btn" id="openTaskModal" type="button" title="Add Task">
+								<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><line x1="12" y1="14" x2="12" y2="18"></line><line x1="10" y1="16" x2="14" y2="16"></line></svg>
+							</button>
 						</div>
 						<ul class="tasks">
-							<li class="task">
-								<div>Contract Renewal - Ocean 1</div>
-								<span class="badge badge--high">High</span>
-							</li>
-							<li class="task">
-								<div>Safety Training for New Crew</div>
-								<span class="badge badge--medium">Medium</span>
-							</li>
+							<?php if (!empty($upcomingTasks)): ?>
+								<?php foreach ($upcomingTasks as $task): ?>
+									<?php
+										$taskTitle = trim((string)($task['title'] ?? 'Untitled Task'));
+										$taskDate = trim((string)($task['date'] ?? ''));
+										$taskPriority = strtolower(trim((string)($task['priority'] ?? 'medium')));
+										$badgeClass = 'badge--medium';
+										if ($taskPriority === 'high') $badgeClass = 'badge--high';
+										if ($taskPriority === 'low') $badgeClass = 'badge--low';
+										$taskDateText = $taskDate !== '' ? date('M d, Y', strtotime($taskDate)) : 'No date';
+									?>
+									<li class="task">
+										<div class="task__content">
+											<div><?php echo htmlspecialchars($taskTitle); ?></div>
+											<div class="task__date"><?php echo htmlspecialchars($taskDateText); ?></div>
+										</div>
+										<div class="task__actions">
+											<span class="badge <?php echo htmlspecialchars($badgeClass); ?>"><?php echo htmlspecialchars(ucfirst($taskPriority)); ?></span>
+											<form method="POST" class="task-delete-form">
+												<input type="hidden" name="dashboard_task_action" value="delete">
+												<input type="hidden" name="task_id" value="<?php echo htmlspecialchars((string)($task['id'] ?? '')); ?>">
+												<button type="submit" class="task-delete-btn" title="Delete task">×</button>
+											</form>
+										</div>
+									</li>
+								<?php endforeach; ?>
+							<?php else: ?>
+								<li class="task">
+									<div class="task__content">
+										<div>No upcoming task yet.</div>
+										<div class="task__date">Click calendar icon to add one.</div>
+									</div>
+								</li>
+							<?php endif; ?>
 						</ul>
 					</div>
 					<div class="card">
 						<div class="card__title">Recent Activity</div>
 						<ul class="activity">
-							<li class="activity__item">
-								<div class="activity__avatar activity__avatar--blue">
-									<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+							<?php if (!empty($recentActivities)): ?>
+								<?php foreach ($recentActivities as $activity): ?>
+									<?php
+										$activityTitle = (string)($activity['activity_title'] ?? 'Activity');
+										$activityCrewName = (string)($activity['crew_name'] ?? 'Crew Member');
+										$activityTimeRaw = $activity['activity_time'] ?? null;
+										$activityColor = strtolower((string)($activity['activity_color'] ?? 'blue'));
+										$activityColorClass = $activityColor === 'yellow' ? 'activity__avatar--yellow' : 'activity__avatar--blue';
+										$activityTimeText = 'Just now';
+										if (!empty($activityTimeRaw)) {
+											$timestamp = strtotime((string)$activityTimeRaw);
+											if ($timestamp !== false) {
+												$secondsAgo = time() - $timestamp;
+												if ($secondsAgo < 60) {
+													$activityTimeText = 'Just now';
+												} elseif ($secondsAgo < 3600) {
+													$activityTimeText = floor($secondsAgo / 60) . ' minutes ago';
+												} elseif ($secondsAgo < 86400) {
+													$activityTimeText = floor($secondsAgo / 3600) . ' hours ago';
+												} else {
+													$activityTimeText = date('m-d-Y', $timestamp);
+												}
+											}
+										}
+									?>
+									<li class="activity__item">
+										<div class="activity__avatar <?php echo htmlspecialchars($activityColorClass); ?>">
+											<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+										</div>
+										<div class="activity__content">
+											<strong><?php echo htmlspecialchars($activityTitle); ?></strong>
+											<div class="activity__meta"><?php echo htmlspecialchars($activityCrewName . ' · ' . $activityTimeText); ?></div>
+										</div>
+									</li>
+								<?php endforeach; ?>
+							<?php else: ?>
+								<li class="activity__item">
+									<div class="activity__avatar activity__avatar--blue">
+										<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+									</div>
+									<div class="activity__content">
+										<strong>No recent activity yet</strong>
+										<div class="activity__meta">Activity will appear here automatically.</div>
+									</div>
+								</li>
+							<?php endif; ?>
+						</ul>
+					</div>
+				</div>
+
+				<div class="grid dashboard-extra-row">
+					<div class="card calendar-card">
+						<div class="mini-calendar">
+							<div class="mini-calendar__header">
+								<button class="mini-calendar__nav" id="miniCalPrev" type="button">&#10094;</button>
+								<span id="miniCalMonthLabel">Month Year</span>
+								<button class="mini-calendar__nav" id="miniCalNext" type="button">&#10095;</button>
+							</div>
+							<div class="mini-calendar__weekdays">
+								<span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span>
+							</div>
+							<div class="mini-calendar__days" id="miniCalDays"></div>
+						</div>
+					</div>
+
+					<div class="card events-card">
+						<div class="card__title">UPCOMING EVENTS</div>
+						<ul class="event-list">
+							<li>
+								<div>
+									<div class="event-title">New Crew Member Added</div>
+									<div class="event-meta">12-12-25 &nbsp; • &nbsp; 10:00 AM</div>
 								</div>
-								<div class="activity__content">
-									<strong>New Crew Member Added</strong>
-									<div class="activity__meta">Lee Tan · 15 minutes ago · 12-12-2025</div>
-								</div>
+								<span class="event-badge contact">Contact</span>
 							</li>
-							<li class="activity__item">
-								<div class="activity__avatar activity__avatar--yellow">
-									<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+							<li>
+								<div>
+									<div class="event-title">Safety Traning Session</div>
+									<div class="event-meta">12-15-25 &nbsp; • &nbsp; 8:00 AM</div>
 								</div>
-								<div class="activity__content">
-									<strong>Exam Completed with 95% Score</strong>
-									<div class="activity__meta">Amelene Cabatuanod · 1 hour ago</div>
+								<span class="event-badge training">Training</span>
+							</li>
+							<li>
+								<div>
+									<div class="event-title">Certificate Verification</div>
+									<div class="event-meta">12-15-25 &nbsp; • &nbsp; 8:00 AM</div>
 								</div>
+								<span class="event-badge cert">Certification</span>
+							</li>
+							<li>
+								<div>
+									<div class="event-title">Client Meeting</div>
+									<div class="event-meta">12-18-25 &nbsp; • &nbsp; 3:00 PM</div>
+								</div>
+								<span class="event-badge meeting">Meeting</span>
+							</li>
+							<li>
+								<div>
+									<div class="event-title">Meeting with staff</div>
+									<div class="event-meta">12-20-25 &nbsp; • &nbsp; 3:00 PM</div>
+								</div>
+								<span class="event-badge meeting">Meeting</span>
 							</li>
 						</ul>
+					</div>
+				</div>
+
+				<div class="card document-expiry-card">
+					<div class="doc-expiry__header">
+						<div>
+							<div class="doc-expiry__title">Document Expiry Tracking</div>
+							<div class="doc-expiry__subtitle">Monitor Crew Document Expirations</div>
+						</div>
+					</div>
+
+					<div class="doc-expiry__stats">
+						<div class="doc-stat doc-stat--critical">
+							<div class="doc-stat__title">Critical ( < 7 days )</div>
+							<div class="doc-stat__value">3 People</div>
+						</div>
+						<div class="doc-stat doc-stat--warning">
+							<div class="doc-stat__title">Warning (8-30 days)</div>
+							<div class="doc-stat__value">3 People</div>
+						</div>
+						<div class="doc-stat doc-stat--normal">
+							<div class="doc-stat__title">Normal ( > 30 days)</div>
+							<div class="doc-stat__value">7 People</div>
+						</div>
+					</div>
+
+					<div class="doc-expiry__list">
+						<div class="doc-row critical">
+							<div class="doc-row__top">
+								<strong>John Lim</strong>
+								<span class="doc-pill critical">critical</span>
+							</div>
+							<div class="doc-row__meta">
+								<span>Master</span>
+								<span>Master Marine COC</span>
+								<span>12-28-25</span>
+								<span>8 days</span>
+							</div>
+						</div>
+						<div class="doc-row warning">
+							<div class="doc-row__top">
+								<strong>Emily Bangis</strong>
+								<span class="doc-pill warning">warning</span>
+							</div>
+							<div class="doc-row__meta">
+								<span>Cook</span>
+								<span>Ship Cook Certificate</span>
+								<span>12-25-25</span>
+								<span>13 days</span>
+							</div>
+						</div>
+						<div class="doc-row normal">
+							<div class="doc-row__top">
+								<strong>Jake Co</strong>
+								<span class="doc-pill normal">normal</span>
+							</div>
+							<div class="doc-row__meta">
+								<span>Cadet</span>
+								<span>Master Marine COC</span>
+								<span>12-25-25</span>
+								<span>30 days</span>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -131,21 +494,51 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 
     <?php include '../includes/footer.php'; ?>
 
+	<div class="task-modal" id="taskModal" aria-hidden="true">
+		<div class="task-modal__backdrop" id="taskModalBackdrop"></div>
+		<div class="task-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="taskModalTitle">
+			<div class="task-modal__header">
+				<h3 id="taskModalTitle">Add Upcoming Task</h3>
+				<button type="button" class="task-modal__close" id="closeTaskModal">×</button>
+			</div>
+			<form method="POST" class="task-modal__form">
+				<input type="hidden" name="dashboard_task_action" value="add">
+				<label>
+					Task Title
+					<input type="text" name="task_title" required maxlength="120" placeholder="e.g. Contract Renewal - Ocean 1">
+				</label>
+				<label>
+					Date
+					<input type="date" name="task_date" required>
+				</label>
+				<label>
+					Priority
+					<select name="task_priority">
+						<option value="high">High</option>
+						<option value="medium" selected>Medium</option>
+						<option value="low">Low</option>
+					</select>
+				</label>
+				<div class="task-modal__actions">
+					<button type="button" class="btn ghost" id="cancelTaskModal">Cancel</button>
+					<button type="submit" class="btn primary">Save Task</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 	<script>
-		// Overview bar chart — only 2025 populated; total 300 across datasets
+		// Overview bar chart — quarterly onboard positions from crew management
 		const ovCtx = document.getElementById('overviewChart').getContext('2d');
+		const overviewChartLabels = <?php echo json_encode($overviewChartLabels); ?>;
+		const overviewChartDatasets = <?php echo json_encode($overviewChartDatasets); ?>;
+
 		new Chart(ovCtx, {
 			type: 'bar',
 			data: {
-				labels: ['2025','2026','2027','2028','2029'],
-				datasets: [
-					{ label: 'Position 1', data: [100,0,0,0,0], backgroundColor: '#8979FF' },
-					{ label: 'Position 2', data: [80,0,0,0,0], backgroundColor: '#FF928A' },
-					{ label: 'Position 3', data: [60,0,0,0,0], backgroundColor: '#3CC3DF' },
-					{ label: 'Position 4', data: [40,0,0,0,0], backgroundColor: '#FFAE4C' },
-					{ label: 'Position 5', data: [20,0,0,0,0], backgroundColor: '#537FF1' }
-				]
+				labels: overviewChartLabels,
+				datasets: overviewChartDatasets
 			},
 			options: { 
 				responsive: true, 
@@ -162,12 +555,19 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 
 		// Expiry pie chart
 		const exCtx = document.getElementById('expiryChart').getContext('2d');
+		const expiryChartData = <?php echo json_encode([
+			$expiryDistribution['three_months_before'],
+			$expiryDistribution['two_months_before'],
+			$expiryDistribution['one_month_before'],
+			$expiryDistribution['expiring_overdue']
+		]); ?>;
+
 		new Chart(exCtx, {
 			type: 'pie',
 			data: {
 				labels: ['3 Months Before','2 Months Before','1 Month Before','Expiring/Overdue'],
 				datasets: [{ 
-					data: [45, 25, 20, 10], 
+					data: expiryChartData, 
 					backgroundColor: ['#4CAF50','#2196F3','#FFC107','#F44336']
 				}]
 			},
@@ -181,6 +581,125 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 					}
 				}
 			}
+		});
+
+		// Real-time mini calendar
+		const miniCalMonthLabel = document.getElementById('miniCalMonthLabel');
+		const miniCalDays = document.getElementById('miniCalDays');
+		const miniCalPrev = document.getElementById('miniCalPrev');
+		const miniCalNext = document.getElementById('miniCalNext');
+
+		const monthNames = [
+			'January', 'February', 'March', 'April', 'May', 'June',
+			'July', 'August', 'September', 'October', 'November', 'December'
+		];
+
+		const dashboardTasks = <?php echo json_encode(array_map(function ($task) {
+			return [
+				'title' => (string)($task['title'] ?? ''),
+				'date' => (string)($task['date'] ?? ''),
+				'priority' => (string)($task['priority'] ?? 'medium')
+			];
+		}, $upcomingTasks)); ?>;
+
+		const taskDatesSet = new Set(
+			dashboardTasks
+				.map(task => (task.date || '').trim())
+				.filter(date => /^\d{4}-\d{2}-\d{2}$/.test(date))
+		);
+
+		const today = new Date();
+		let currentMonthDate = new Date(today.getFullYear(), today.getMonth(), 1);
+
+		function renderMiniCalendar(dateObj) {
+			const year = dateObj.getFullYear();
+			const month = dateObj.getMonth();
+
+			miniCalMonthLabel.textContent = `${monthNames[month]} ${year}`;
+			miniCalDays.innerHTML = '';
+
+			const firstDay = new Date(year, month, 1);
+			const lastDay = new Date(year, month + 1, 0);
+
+			// Convert JS Sunday-first to Monday-first index
+			const startOffset = (firstDay.getDay() + 6) % 7;
+			const daysInMonth = lastDay.getDate();
+
+			for (let i = 0; i < startOffset; i++) {
+				const emptyCell = document.createElement('span');
+				emptyCell.textContent = '';
+				miniCalDays.appendChild(emptyCell);
+			}
+
+			for (let d = 1; d <= daysInMonth; d++) {
+				const dayCell = document.createElement('span');
+				dayCell.textContent = d;
+
+				const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+				if (taskDatesSet.has(dateKey)) {
+					dayCell.classList.add('has-task-date');
+					dayCell.title = 'Has upcoming task';
+				}
+
+				const isToday =
+					d === today.getDate() &&
+					month === today.getMonth() &&
+					year === today.getFullYear();
+
+				if (isToday) {
+					dayCell.style.background = '#0f4c81';
+					dayCell.style.color = '#fff';
+					dayCell.style.borderRadius = '999px';
+					dayCell.style.fontWeight = '700';
+					dayCell.style.display = 'inline-flex';
+					dayCell.style.alignItems = 'center';
+					dayCell.style.justifyContent = 'center';
+					dayCell.style.width = '32px';
+					dayCell.style.height = '32px';
+					dayCell.style.margin = '0 auto';
+				}
+
+				miniCalDays.appendChild(dayCell);
+			}
+		}
+
+		miniCalPrev.addEventListener('click', function () {
+			currentMonthDate = new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth() - 1, 1);
+			renderMiniCalendar(currentMonthDate);
+		});
+
+		miniCalNext.addEventListener('click', function () {
+			currentMonthDate = new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth() + 1, 1);
+			renderMiniCalendar(currentMonthDate);
+		});
+
+		renderMiniCalendar(currentMonthDate);
+
+		const taskModal = document.getElementById('taskModal');
+		const openTaskModalBtn = document.getElementById('openTaskModal');
+		const closeTaskModalBtn = document.getElementById('closeTaskModal');
+		const cancelTaskModalBtn = document.getElementById('cancelTaskModal');
+		const taskModalBackdrop = document.getElementById('taskModalBackdrop');
+
+		function openTaskModal() {
+			if (!taskModal) return;
+			taskModal.classList.add('is-open');
+			taskModal.setAttribute('aria-hidden', 'false');
+		}
+
+		function closeTaskModal() {
+			if (!taskModal) return;
+			taskModal.classList.remove('is-open');
+			taskModal.setAttribute('aria-hidden', 'true');
+		}
+
+		if (openTaskModalBtn) openTaskModalBtn.addEventListener('click', openTaskModal);
+		if (closeTaskModalBtn) closeTaskModalBtn.addEventListener('click', closeTaskModal);
+		if (cancelTaskModalBtn) cancelTaskModalBtn.addEventListener('click', closeTaskModal);
+		if (taskModalBackdrop) taskModalBackdrop.addEventListener('click', closeTaskModal);
+
+		document.addEventListener('keydown', function (event) {
+			if (event.key === 'Escape') closeTaskModal();
 		});
 	</script>
 </body>

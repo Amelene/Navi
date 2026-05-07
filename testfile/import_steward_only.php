@@ -15,8 +15,14 @@ $csvFiles = [
         'category' => 'COOK',
         'vessel_type' => 'GENERAL',
         'description' => 'Cook/Catering examination for Steward department'
+    ],
+    [
+        'file' => '../crewside/csv/COOK/messman.csv',
+        'department' => 'STEWARD',
+        'category' => 'MESSMAN',
+        'vessel_type' => 'GENERAL',
+        'description' => 'Messman examination for Steward department'
     ]
-    // Add MESSMAN CSV here when available
 ];
 ?>
 <!DOCTYPE html>
@@ -161,7 +167,7 @@ try {
     
     echo '<div class="note">';
     echo '<h4>📝 Note:</h4>';
-    echo '<p>Currently importing COOK category only. Add MESSMAN CSV file to import both categories.</p>';
+    echo '<p>Importing both COOK and MESSMAN categories for STEWARD department.</p>';
     echo '</div>';
     
     echo '<h2 style="color: #333; margin-bottom: 20px;">📊 Import Progress</h2>';

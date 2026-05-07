@@ -54,7 +54,7 @@ try {
     ];
     
     $departments = $db->fetchAll("SELECT DISTINCT department_name FROM departments ORDER BY department_name");
-    $positions   = $db->fetchAll("SELECT DISTINCT position_name FROM positions WHERE position_name IN ('HR MANAGER', 'HR OFFICER', 'OPERATIONS MANAGER', 'FINANCE MANAGER', 'ACCOUNTANT', 'ADMIN OFFICER') ORDER BY position_name");
+    $positions   = $db->fetchAll("SELECT DISTINCT position_name FROM positions WHERE position_name IN ('HR MANAGER', 'ACCOUNTING OFFICER', 'CREWING OFFICER', 'FINANCE MANAGER') ORDER BY position_name");
     
 } catch (Exception $e) {
     die("Error: " . $e->getMessage());
@@ -125,7 +125,7 @@ try {
                         <div class="card__title">Staff Records</div>
                         <div class="card__actions">
                             <button class="btn primary upload">Upload Files</button>
-                            <button class="btn warn add">Add New</button>
+                            <a href="staff_add.php" class="btn warn add" style="text-decoration: none;">Add New</a>
                         </div>
                     </div>
 

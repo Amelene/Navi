@@ -19,9 +19,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $db = Database::getInstance();
         
-        // Fetch user from database
+        // Fetch user from database (admin/staff only)
         $user = $db->fetchOne(
-            "SELECT * FROM users WHERE email = ? AND user_status = 'active'",
+            "SELECT * FROM users WHERE email = ? AND user_status = 'active' AND role IN ('admin','staff')",
             [$email]
         );
         

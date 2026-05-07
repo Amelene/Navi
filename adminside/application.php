@@ -123,13 +123,14 @@ try {
                                         <th>DATE SUBMITTED</th>
                                         <th>TIME</th>
                                         <th>STATUS</th>
+                                        <th>ACTION</th>
                                         <th>APPLICATION DETAILS</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php if (empty($applications)): ?>
                                         <tr>
-                                            <td colspan="6" style="text-align: center; padding: 30px; color: #6b7280;">
+                                            <td colspan="7" style="text-align: center; padding: 30px; color: #6b7280;">
                                                 No applications found. Applications will appear here once submitted.
                                             </td>
                                         </tr>
@@ -152,6 +153,21 @@ try {
                                                 <td class="fw-bold"><?php echo htmlspecialchars($app['date_submitted']); ?></td>
                                                 <td class="fw-bold"><?php echo htmlspecialchars($app['time_submitted']); ?></td>
                                                 <td class="crew-status <?php echo $status_class; ?>"><?php echo $status_text; ?></td>
+                                                <td>
+                                                    <?php if ($app['status'] === 'pending' || $app['status'] === 'on_hold'): ?>
+                                                        <form action="application_action.php" method="POST" style="display:inline-flex; gap:6px;">
+                                                            <input type="hidden" name="application_id" value="<?php echo htmlspecialchars($app['application_id']); ?>">
+                                                            <?php if ($app['status'] !== 'confirmed'): ?>
+                                                                <button type="submit" name="action" value="accept" class="btn primary upload" style="padding:6px 10px; min-width:auto;">Accept</button>
+                                                            <?php endif; ?>
+                                                            <?php if ($app['status'] !== 'on_hold'): ?>
+                                                                <button type="submit" name="action" value="decline" class="btn warn add" style="padding:6px 10px; min-width:auto; background:#dc2626; border-color:#dc2626;">Decline</button>
+                                                            <?php endif; ?>
+                                                        </form>
+                                                    <?php else: ?>
+                                                        <span style="color:#16a34a; font-weight:700;">Processed</span>
+                                                    <?php endif; ?>
+                                                </td>
                                                 <td><a href="application_details.php?id=<?php echo urlencode($app['application_id']); ?>" class="link-action">VIEW DETAILS</a></td>
                                             </tr>
                                         <?php endforeach; ?>

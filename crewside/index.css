@@ -21,6 +21,7 @@ body {
   background-color: #ffffff;
   color: #34495e;
   overflow-x: hidden;
+  overflow-y: scroll;
 }
 
 body::before {
@@ -138,6 +139,7 @@ body::before {
 /* Main Content */
 .main-content {
     padding: 60px 20px 100px;
+
 }
 
 .page-title {

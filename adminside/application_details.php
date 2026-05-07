@@ -1,4 +1,4 @@
-<?php
+v<?php
 session_start();
 
 // Check if user is logged in
@@ -194,24 +194,76 @@ try {
                             </thead>
                             <tbody>
                                 <?php
-                                $trainCerts = [
-                                    'basic_training' => 'Basic Training',
-                                    'bt_cop'         => 'BT Cop',
-                                    'pscrb'          => 'PSCRB',
-                                    'pscrb_cop'      => 'PSCRB Cop',
-                                    'sdsd'           => 'SDSD',
-                                    'sdsd_cop'       => 'SDSD Cop',
-                                    'aff'            => 'AFF',
-                                    'aff_cop'        => 'AFF Cop',
-                                    'meca_mefa'      => 'MECA/MEFA',
+                                $deckOfficerPositions = [
+                                    '3rd Mate / 3rd Officer',
+                                    '2nd Mate / 2nd Officer',
+                                    'Chief Mate / Chief Officer',
+                                    'Captain / Master'
                                 ];
-                                foreach ($trainCerts as $key => $label): ?>
+
+                                $isDeckOfficer = in_array(trim($application['position_applied'] ?? ''), $deckOfficerPositions, true);
+
+                                if ($isDeckOfficer) {
+                                    $trainCerts = [
+                                        'basic_training' => ['label' => 'BT (Basic Training)', 'source' => 'training'],
+                                        'watch_keeping' => ['label' => 'ISM-O (International Safety Management for Officers)', 'source' => 'additional'],
+                                        'ship_simulator' => ['label' => 'RSC (Radar Simulator Course)', 'source' => 'additional'],
+                                        'brm' => ['label' => 'BRM (Bridge Resource Management)', 'source' => 'additional'],
+                                        'gmdss' => ['label' => 'Radio Communication/GMDSS', 'source' => 'additional'],
+                                        'ssbt' => ['label' => 'SSBT (Ship Simulator and Bridge Teamwork)', 'source' => 'additional'],
+                                        'cargo_handling' => ['label' => 'ATOT (Advanced Training for Oil Tanker Operations)', 'source' => 'additional'],
+                                        'meca_mefa' => ['label' => 'MEFA (Medical First Aid)', 'source' => 'training'],
+                                        'aff' => ['label' => 'AFF (Advanced Fire Fighting)', 'source' => 'training'],
+                                        'pscrb' => ['label' => 'PSCRB (Proficiency in Survival Craft and Rescue Boats)', 'source' => 'training'],
+                                        'mec_mefa_cop' => ['label' => 'MECA (Medical Care)', 'source' => 'additional'],
+                                        'sso' => ['label' => 'SSO (Ship Security Officer)', 'source' => 'additional'],
+                                        'marpol' => ['label' => 'Consolidated Marpol 1 to 6', 'source' => 'additional'],
+                                        'maritime_law' => ['label' => 'MLC (Management Level Certificate)', 'source' => 'additional'],
+                                        'btoc' => ['label' => 'BTOC (For Tankers Only)', 'source' => 'additional'],
+                                    ];
+                                } else {
+                                    $trainCerts = [
+                                        'basic_training'      => ['label' => 'Basic Training',           'source' => 'training'],
+                                        'bt_cop'              => ['label' => 'BT Cop',                   'source' => 'training'],
+                                        'pscrb'               => ['label' => 'PSCRB',                    'source' => 'training'],
+                                        'pscrb_cop'           => ['label' => 'PSCRB Cop',                'source' => 'training'],
+                                        'sdsd'                => ['label' => 'SDSD',                     'source' => 'training'],
+                                        'sdsd_cop'            => ['label' => 'SDSD Cop',                 'source' => 'training'],
+                                        'aff'                 => ['label' => 'AFF',                      'source' => 'training'],
+                                        'aff_cop'             => ['label' => 'AFF Cop',                  'source' => 'training'],
+                                        'meca_mefa'           => ['label' => 'MECA/MEFA',                'source' => 'training'],
+                                        'mec_mefa_cop'        => ['label' => 'MEC/MEFA Cop',             'source' => 'additional'],
+                                        'marpol'              => ['label' => 'Marpol',                   'source' => 'additional'],
+                                        'sso'                 => ['label' => 'SSO',                      'source' => 'additional'],
+                                        'watch_keeping'       => ['label' => 'Watch Keeping',            'source' => 'additional'],
+                                        'gmdss'               => ['label' => 'GMDSS',                    'source' => 'additional'],
+                                        'safe_nav'            => ['label' => 'Safe Navigation',          'source' => 'additional'],
+                                        'maritime_law'        => ['label' => 'Maritime Law',             'source' => 'additional'],
+                                        'nc'                  => ['label' => 'NC',                       'source' => 'additional'],
+                                        'dp'                  => ['label' => 'DP',                       'source' => 'additional'],
+                                        'padams'              => ['label' => 'PADAMS',                   'source' => 'additional'],
+                                        'hazmat'              => ['label' => 'HAZMAT',                   'source' => 'additional'],
+                                        'ecdis'               => ['label' => 'ECDIS',                    'source' => 'additional'],
+                                        'btoc'                => ['label' => 'BTOC',                     'source' => 'additional'],
+                                        'cargo_handling'      => ['label' => 'Cargo Handling',           'source' => 'additional'],
+                                        'fast_rescue'         => ['label' => 'Fast Rescue',              'source' => 'additional'],
+                                        'risk_assessment'     => ['label' => 'Risk Assessment',          'source' => 'additional'],
+                                        'ship_simulator'      => ['label' => 'Ship Simulator',           'source' => 'additional'],
+                                        'emergency_awareness' => ['label' => 'Emergency Awareness',      'source' => 'additional'],
+                                        'ccm'                 => ['label' => 'CCM',                      'source' => 'additional'],
+                                    ];
+                                }
+                                foreach ($trainCerts as $key => $meta):
+                                    $label = $meta['label'];
+                                    $source = $meta['source'];
+                                    $sourceData = $source === 'training' ? $training_certificates : $additional_certificates;
+                                ?>
                                 <tr>
                                     <td><?php echo $label; ?></td>
-                                    <td><?php echo htmlspecialchars($training_certificates[$key]['number']      ?? 'N/A'); ?></td>
-                                    <td><?php echo htmlspecialchars($training_certificates[$key]['issued_by']   ?? 'N/A'); ?></td>
-                                    <td><?php echo htmlspecialchars($training_certificates[$key]['issued_date'] ?? 'N/A'); ?></td>
-                                    <td><?php echo htmlspecialchars($training_certificates[$key]['expiry_date'] ?? 'N/A'); ?></td>
+                                    <td><?php echo htmlspecialchars($sourceData[$key]['number']      ?? 'N/A'); ?></td>
+                                    <td><?php echo htmlspecialchars($sourceData[$key]['issued_by']   ?? 'N/A'); ?></td>
+                                    <td><?php echo htmlspecialchars($sourceData[$key]['issued_date'] ?? 'N/A'); ?></td>
+                                    <td><?php echo htmlspecialchars($sourceData[$key]['expiry_date'] ?? 'N/A'); ?></td>
                                 </tr>
                                 <?php endforeach; ?>
                             </tbody>
@@ -219,50 +271,6 @@ try {
                     </div>
                 </div>
 
-                <!-- Additional Certificates Section -->
-                <div class="additional-certificates-section">
-                    <div class="section-title">ADDITIONAL CERTIFICATES</div>
-                    <div class="document-table-wrapper">
-                        <table class="doc-table">
-                            <thead>
-                                <tr><th>Certificate Type</th><th>Number</th><th>Issued By</th><th>Issued Date</th><th>Expiry Date</th></tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                $addCerts = [
-                                    'mec_mefa_cop'         => 'MEC/MEFA Cop',
-                                    'marpol'               => 'Marpol',
-                                    'sso'                  => 'SSO',
-                                    'watch_keeping'        => 'Watch Keeping',
-                                    'gmdss'                => 'GMDSS',
-                                    'safe_nav'             => 'Safe Navigation',
-                                    'maritime_law'         => 'Maritime Law',
-                                    'nc'                   => 'NC',
-                                    'dp'                   => 'DP',
-                                    'padams'               => 'PADAMS',
-                                    'hazmat'               => 'HAZMAT',
-                                    'ecdis'                => 'ECDIS',
-                                    'btoc'                 => 'BTOC',
-                                    'cargo_handling'       => 'Cargo Handling',
-                                    'fast_rescue'          => 'Fast Rescue',
-                                    'risk_assessment'      => 'Risk Assessment',
-                                    'ship_simulator'       => 'Ship Simulator',
-                                    'emergency_awareness'  => 'Emergency Awareness',
-                                    'ccm'                  => 'CCM',
-                                ];
-                                foreach ($addCerts as $key => $label): ?>
-                                <tr>
-                                    <td><?php echo $label; ?></td>
-                                    <td><?php echo htmlspecialchars($additional_certificates[$key]['number']      ?? 'N/A'); ?></td>
-                                    <td><?php echo htmlspecialchars($additional_certificates[$key]['issued_by']   ?? 'N/A'); ?></td>
-                                    <td><?php echo htmlspecialchars($additional_certificates[$key]['issued_date'] ?? 'N/A'); ?></td>
-                                    <td><?php echo htmlspecialchars($additional_certificates[$key]['expiry_date'] ?? 'N/A'); ?></td>
-                                </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
 
                 <!-- Sea Service Record Section -->
                 <div class="sea-service-section">
@@ -284,7 +292,22 @@ try {
                                     <td><?php echo htmlspecialchars($record['grt']      ?? 'N/A'); ?></td>
                                     <td><?php echo htmlspecialchars($record['from']     ?? 'N/A'); ?></td>
                                     <td><?php echo htmlspecialchars($record['to']       ?? 'N/A'); ?></td>
-                                    <td><?php echo htmlspecialchars($record['months']   ?? 'N/A'); ?></td>
+                                    <td><?php
+                                        $computedMonths = null;
+                                        if (!empty($record['from']) && !empty($record['to'])) {
+                                            try {
+                                                $fromDate = new DateTime($record['from']);
+                                                $toDate = new DateTime($record['to']);
+                                                if ($toDate >= $fromDate) {
+                                                    $interval = $fromDate->diff($toDate);
+                                                    $computedMonths = ($interval->y * 12) + $interval->m + (($interval->d >= 0) ? 1 : 0);
+                                                }
+                                            } catch (Exception $e) {
+                                                $computedMonths = null;
+                                            }
+                                        }
+                                        echo htmlspecialchars(($computedMonths !== null ? (string)$computedMonths : ($record['months'] ?? 'N/A')));
+                                    ?></td>
                                     <td><?php echo htmlspecialchars($record['reason']   ?? 'N/A'); ?></td>
                                 </tr>
                                 <?php endif; endforeach;
@@ -297,75 +320,123 @@ try {
                 </div>
 
                 <!-- Certificate Requirements Checklist Section -->
+                <?php
+                $deckOfficerPositionsChecklist = [
+                    '3rd Mate / 3rd Officer',
+                    '2nd Mate / 2nd Officer',
+                    'Chief Mate / Chief Officer',
+                    'Captain / Master'
+                ];
+                $engineOfficerPositionsChecklist = [
+                    '4th Engineer',
+                    '3rd Engineer',
+                    '2nd Engineer',
+                    'Chief Engineer'
+                ];
+                $positionAppliedChecklist = trim($application['position_applied'] ?? '');
+                $isDeckOfficerChecklist = in_array($positionAppliedChecklist, $deckOfficerPositionsChecklist, true);
+                $isEngineOfficerChecklist = in_array($positionAppliedChecklist, $engineOfficerPositionsChecklist, true);
+                ?>
                 <div class="checklist-section">
                     <div class="section-title">CERTIFICATE REQUIREMENTS CHECKLIST</div>
                     <div class="checklist-container">
-                        <!-- Ratings Column -->
-                        <div class="checklist-column">
-                            <h3 class="section-title">LIST OF CERTIFICATE REQUIREMENTS</h3>
-                            <div class="checklist-items">
-                                <?php
-                                $ratings_certs = [
-                                    'cert_bt'          => 'BT (Basic Training)',
-                                    'cert_ratings'     => 'Ratings Forming Part of a Navigational Watch',
-                                    'cert_nav_watch_24'=> 'Ratings Forming Part of a Navigational Watch (II/4)',
-                                    'cert_eng_watch_34'=> 'Ratings Forming Part of an Engineering Watch (III/4)',
-                                    'cert_nav_watch_25'=> 'Ratings Forming Part of a Navigational Watch (II/5)',
-                                    'cert_eng_watch_35'=> 'Ratings Forming Part of an Engineering Watch (III/5)',
-                                    'cert_sdsd'        => 'SDSD (Ship Security Duties)',
-                                    'cert_atot'        => 'ATOT (Advanced Training for Oil Tanker)',
-                                    'cert_atot_cargo'  => 'ATOT (Advanced Training for Oil Tanker Cargo Operations)',
-                                    'cert_mefa'        => 'MEFA (Medical First Aid)',
-                                    'cert_btoc'        => 'BTOC (Basic Training for Oil and Chemical Tanker Cargo Operations)',
-                                    'cert_aff'         => 'AFF (Advanced Fire Fighting)',
-                                    'cert_marpol'      => 'Consolidated Marpol 1 to 6',
-                                    'cert_pscrb'       => 'P.S.C.R.B (Proficiency in Survival Craft and Rescue Boat)',
-                                    'cert_ism'         => 'ISM Code',
-                                    'cert_rac'         => 'RAC (Radar Simulator Course)',
-                                ];
-                                foreach ($ratings_certs as $key => $label):
-                                    $checked = isset($certificate_checklist['ratings'][$key]) && $certificate_checklist['ratings'][$key] == 1;
-                                ?>
-                                <div class="checklist-item">
-                                    <label><input type="checkbox" <?php echo $checked ? 'checked' : ''; ?> disabled> <?php echo $label; ?></label>
+                        <?php if ($isDeckOfficerChecklist || $isEngineOfficerChecklist): ?>
+                            <div class="checklist-column" style="width:100%;">
+                                <h3 class="section-title"><?php echo $isEngineOfficerChecklist ? 'LIST OF CERTIFICARE REQUIRMENT FOR ENGINE OFFICER' : 'LIST OF CERTIFICATE REQUIRMENT FOR DECK OFFICER'; ?></h3>
+                                <div class="checklist-items">
+                                    <?php
+                                    $officers_certs = [
+                                        'officer_bt'            => 'BT (Basic Training)',
+                                        'officer_ismo'          => 'ISM-O (International Safety Management for Officers)',
+                                        'officer_rsc'           => 'RSC (Radar Simulator Course)',
+                                        'officer_brm'           => 'BRM (Bridge Resource Management)',
+                                        'officer_radio_gmdss'   => 'Radio Communication/GMDSS',
+                                        'officer_ssbt'          => 'SSBT',
+                                        'officer_atot'          => 'ATOT',
+                                        'officer_mefa'          => 'MEFA',
+                                        'officer_aff'           => 'AFF',
+                                        'officer_pscrb'         => 'P.S.C.R.B',
+                                        'officer_meca'          => 'MECA',
+                                        'officer_sso'           => 'SSO',
+                                        'officer_consolidated'  => 'CONSOLIDATED',
+                                        'officer_mlc'           => 'MANAGEMENT LEVEL CERTIFICATE',
+                                        'officer_btoc'          => 'BTOC',
+                                    ];
+                                    foreach ($officers_certs as $key => $label):
+                                        $checked = isset($certificate_checklist['officers'][$key]) && (int)$certificate_checklist['officers'][$key] === 1;
+                                    ?>
+                                    <div class="checklist-item">
+                                        <label><input type="checkbox" <?php echo $checked ? 'checked' : ''; ?> disabled> <?php echo $label; ?></label>
+                                    </div>
+                                    <?php endforeach; ?>
                                 </div>
-                                <?php endforeach; ?>
                             </div>
-                        </div>
+                        <?php else: ?>
+                            <!-- Ratings Column -->
+                            <div class="checklist-column">
+                                <h3 class="section-title">LIST OF CERTIFICATE REQUIREMENTS</h3>
+                                <div class="checklist-items">
+                                    <?php
+                                    $ratings_certs = [
+                                        'cert_bt'          => 'BT (Basic Training)',
+                                        'cert_ratings'     => 'Ratings Forming Part of a Navigational Watch',
+                                        'cert_nav_watch_24'=> 'Ratings Forming Part of a Navigational Watch (II/4)',
+                                        'cert_eng_watch_34'=> 'Ratings Forming Part of an Engineering Watch (III/4)',
+                                        'cert_nav_watch_25'=> 'Ratings Forming Part of a Navigational Watch (II/5)',
+                                        'cert_eng_watch_35'=> 'Ratings Forming Part of an Engineering Watch (III/5)',
+                                        'cert_sdsd'        => 'SDSD (Ship Security Duties)',
+                                        'cert_atot'        => 'ATOT (Advanced Training for Oil Tanker)',
+                                        'cert_atot_cargo'  => 'ATOT (Advanced Training for Oil Tanker Cargo Operations)',
+                                        'cert_mefa'        => 'MEFA (Medical First Aid)',
+                                        'cert_btoc'        => 'BTOC (Basic Training for Oil and Chemical Tanker Cargo Operations)',
+                                        'cert_aff'         => 'AFF (Advanced Fire Fighting)',
+                                        'cert_marpol'      => 'Consolidated Marpol 1 to 6',
+                                        'cert_pscrb'       => 'P.S.C.R.B (Proficiency in Survival Craft and Rescue Boat)',
+                                        'cert_ism'         => 'ISM Code',
+                                        'cert_rac'         => 'RAC (Radar Simulator Course)',
+                                    ];
+                                    foreach ($ratings_certs as $key => $label):
+                                        $checked = isset($certificate_checklist['ratings'][$key]) && $certificate_checklist['ratings'][$key] == 1;
+                                    ?>
+                                    <div class="checklist-item">
+                                        <label><input type="checkbox" <?php echo $checked ? 'checked' : ''; ?> disabled> <?php echo $label; ?></label>
+                                    </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
 
-                        <!-- Officers Column -->
-                        <div class="checklist-column">
-                            <h3 class="section-title">LIST OF TRAININGS/CERTIFICATES FOR OFFICERS</h3>
-                            <div class="checklist-items">
-                                <?php
-                                $officers_certs = [
-                                    'officer_bt'     => 'BT (Basic Training)',
-                                    'officer_bsc'    => 'BSC (Basic Safety Course)',
-                                    'officer_brm'    => 'BRM (Bridge Resource Management)',
-                                    'officer_erm'    => 'ERM (Engine Room Resource Management)',
-                                    'officer_radio'  => 'Radio Operator',
-                                    'officer_ssbt'   => 'SSBT (Ship Security and Bridge Team)',
-                                    'officer_atot'   => 'ATOT (Advanced Training for Oil Tanker)',
-                                    'officer_radar'  => 'Radar Navigation',
-                                    'officer_mefa'   => 'MEFA (Medical First Aid)',
-                                    'officer_aff'    => 'AFF (Advanced Fire Fighting)',
-                                    'officer_sncr'   => 'SNCR (Safe Navigation and Collision Regulations)',
-                                    'officer_pscrb'  => 'P.S.C.R.B (Proficiency in Survival Craft and Rescue Boat)',
-                                    'officer_meca'   => 'MECA (Medical Care)',
-                                    'officer_sso'    => 'SSO (Ship Security Officer)',
-                                    'officer_marpol' => 'Consolidated Marpol 1 to 6',
-                                    'officer_mlc'    => 'Management Level Certificate',
-                                    'officer_btoc'   => 'BTOC (For tankers only)',
-                                ];
-                                foreach ($officers_certs as $key => $label):
-                                    $checked = isset($certificate_checklist['officers'][$key]) && $certificate_checklist['officers'][$key] == 1;
-                                ?>
-                                <div class="checklist-item">
-                                    <label><input type="checkbox" <?php echo $checked ? 'checked' : ''; ?> disabled> <?php echo $label; ?></label>
+                            <!-- Officers Column -->
+                            <div class="checklist-column">
+                                <h3 class="section-title">LIST OF TRAININGS/CERTIFICATES FOR OFFICERS</h3>
+                                <div class="checklist-items">
+                                    <?php
+                                    $officers_certs = [
+                                        'officer_bt'            => 'BT (Basic Training)',
+                                        'officer_ismo'          => 'ISM-O (International Safety Management for Officers)',
+                                        'officer_rsc'           => 'RSC (Radar Simulator Course)',
+                                        'officer_brm'           => 'BRM (Bridge Resource Management)',
+                                        'officer_radio_gmdss'   => 'Radio Communication/GMDSS',
+                                        'officer_ssbt'          => 'SSBT (Ship Simulator and Bridge Teamwork)',
+                                        'officer_atot'          => 'ATOT (Advanced Training for Oil Tanker Operations)',
+                                        'officer_mefa'          => 'MEFA (Medical First Aid)',
+                                        'officer_aff'           => 'AFF (Advanced Fire Fighting)',
+                                        'officer_pscrb'         => 'PSCRB (Proficiency in Survival Craft and Rescue Boats)',
+                                        'officer_meca'          => 'MECA (Medical Care)',
+                                        'officer_sso'           => 'SSO (Ship Security Officer)',
+                                        'officer_consolidated'  => 'Consolidated Marpol 1 to 6',
+                                        'officer_mlc'           => 'MLC (Management Level Certificate)',
+                                        'officer_btoc'          => 'BTOC (For Tankers Only)',
+                                    ];
+                                    foreach ($officers_certs as $key => $label):
+                                        $checked = isset($certificate_checklist['officers'][$key]) && $certificate_checklist['officers'][$key] == 1;
+                                    ?>
+                                    <div class="checklist-item">
+                                        <label><input type="checkbox" <?php echo $checked ? 'checked' : ''; ?> disabled> <?php echo $label; ?></label>
+                                    </div>
+                                    <?php endforeach; ?>
                                 </div>
-                                <?php endforeach; ?>
                             </div>
-                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
 

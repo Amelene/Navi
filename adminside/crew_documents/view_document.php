@@ -23,7 +23,11 @@ try {
         [$docId]
     );
 
-    if (!$doc || ($doc['status'] ?? '') !== 'active') {
+    $status = strtolower(trim((string)($doc['status'] ?? '')));
+    if (
+        !$doc ||
+        !in_array($status, ['active', 'archived'], true)
+    ) {
         http_response_code(404);
         exit('Document not found');
     }

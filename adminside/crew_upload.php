@@ -85,7 +85,7 @@ try {
 
                     <!-- Upload Sections Container -->
                     <div class="upload-sections-container">
-                                                <div class="upload-section">
+                        <div class="upload-section">
                             <div class="upload-section-header">201 FILE</div>
                             <div class="upload-section-content">
                                 <button class="choose-file-btn" onclick="document.getElementById('file201Input').click()">Choose File</button>
@@ -115,6 +115,16 @@ try {
                         </div>
 
                         <div class="upload-section">
+                            <div class="upload-section-header">NBI</div>
+                            <div class="upload-section-content">
+                                <button class="choose-file-btn" onclick="document.getElementById('nbiInput').click()">Choose File</button>
+                                <span class="expiry-header">Expiration Date:</span>
+                                <input type="file" id="nbiInput" class="file-input-hidden" accept=".pdf,.doc,.docx" multiple onchange="handleFileSelect(event, 'nbi')">
+                                <div class="upload-file-list" id="nbiFileList"></div>
+                            </div>
+                        </div>
+
+                        <div class="upload-section">
                             <div class="upload-section-header">YELLOW FEVER</div>
                             <div class="upload-section-content">
                                 <button class="choose-file-btn" onclick="document.getElementById('yellowfeverInput').click()">Choose File</button>
@@ -135,9 +145,9 @@ try {
     </div>
 
     <?php include '../includes/footer.php'; ?>
-    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script>
-        let selectedFiles = { medical: [], contract: [], file201: [], yellowfever: [] };
+        let selectedFiles = { medical: [], contract: [], file201: [], nbi: [], yellowfever: [] };
         
         function selectCrew(crewNo) {
             if (crewNo) window.location.href = 'crew_upload.php?crew_no=' + crewNo;
@@ -155,12 +165,163 @@ try {
             }
         }
         
+        function parseDateToYmd(raw) {
+            if (!raw) return null;
+            const s = String(raw).trim().toLowerCase();
+
+            const monthMap = {
+                january: 1, jan: 1, february: 2, feb: 2, march: 3, mar: 3, april: 4, apr: 4,
+                may: 5, june: 6, jun: 6, july: 7, jul: 7, august: 8, aug: 8, september: 9, sep: 9, sept: 9,
+                october: 10, oct: 10, november: 11, nov: 11, december: 12, dec: 12
+            };
+
+            let m = s.match(/(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);
+            if (m) {
+                const y = Number(m[1]), mo = Number(m[2]), d = Number(m[3]);
+                if (mo >= 1 && mo <= 12 && d >= 1 && d <= 31) return `${y.toString().padStart(4,'0')}-${mo.toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
+            }
+
+            m = s.match(/(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
+            if (m) {
+                const mo = Number(m[1]), d = Number(m[2]), y = Number(m[3]);
+                if (mo >= 1 && mo <= 12 && d >= 1 && d <= 31) return `${y.toString().padStart(4,'0')}-${mo.toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
+            }
+
+            m = s.match(/([a-z]+)\s+(\d{1,2}),?\s+(\d{4})/);
+            if (m) {
+                const mo = monthMap[m[1]] || 0, d = Number(m[2]), y = Number(m[3]);
+                if (mo && d >= 1 && d <= 31) return `${y.toString().padStart(4,'0')}-${String(mo).padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
+            }
+
+            return null;
+        }
+
+        function detectExpiryFromText(text) {
+            if (!text) return null;
+            const lower = String(text).toLowerCase().replace(/\s+/g, ' ');
+            const kw = '(expiration|expiry|expire|valid until|validity)';
+
+            let m = lower.match(new RegExp(`${kw}\\s*(date)?\\s*[:\\-]?\\s*([a-z]+\\s+\\d{1,2},?\\s+\\d{4}|\\d{4}[-/]\\d{1,2}[-/]\\d{1,2}|\\d{1,2}[-/]\\d{1,2}[-/]\\d{4})`, 'i'));
+            if (m && m[3]) {
+                const ymd = parseDateToYmd(m[3]);
+                if (ymd) return ymd;
+            }
+
+            m = lower.match(new RegExp(`([a-z]+\\s+\\d{1,2},?\\s+\\d{4}|\\d{4}[-/]\\d{1,2}[-/]\\d{1,2}|\\d{1,2}[-/]\\d{1,2}[-/]\\d{4})\\s*(?:-|to|until)?\\s*${kw}`, 'i'));
+            if (m && m[1]) {
+                const ymd = parseDateToYmd(m[1]);
+                if (ymd) return ymd;
+            }
+
+            // strong fallback: if keyword exists anywhere, pick first valid date in whole text
+            if (new RegExp(kw, 'i').test(lower)) {
+                const anyDatePatterns = [
+                    /\d{4}[-/]\d{1,2}[-/]\d{1,2}/g,
+                    /\d{1,2}[-/]\d{1,2}[-/]\d{4}/g,
+                    /[a-z]+\s+\d{1,2},?\s+\d{4}/gi
+                ];
+
+                for (const p of anyDatePatterns) {
+                    const found = lower.match(p);
+                    if (!found) continue;
+                    for (const raw of found) {
+                        const ymd = parseDateToYmd(raw);
+                        if (ymd) return ymd;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        async function detectDocxExpiryClient(file) {
+            if (!window.JSZip) return null;
+            try {
+                const buffer = await file.arrayBuffer();
+                const zip = await JSZip.loadAsync(buffer);
+
+                let combined = '';
+
+                const docXmlFile = zip.file('word/document.xml');
+                if (docXmlFile) {
+                    const xml = await docXmlFile.async('string');
+                    combined += ' ' + xml
+                        .replace(/<\/w:t>/g, ' ')
+                        .replace(/<\/w:p>/g, ' ')
+                        .replace(/<[^>]+>/g, ' ')
+                        .replace(/\s+/g, ' ');
+                }
+
+                // also scan headers/footers/textboxes where expiry may exist
+                const extraParts = Object.keys(zip.files).filter(name =>
+                    /^word\/(header\d+|footer\d+|footnotes|endnotes|comments)\.xml$/i.test(name)
+                );
+
+                for (const name of extraParts) {
+                    const partXml = await zip.file(name).async('string');
+                    combined += ' ' + partXml
+                        .replace(/<\/w:t>/g, ' ')
+                        .replace(/<\/w:p>/g, ' ')
+                        .replace(/<[^>]+>/g, ' ')
+                        .replace(/\s+/g, ' ');
+                }
+
+                return detectExpiryFromText(combined);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        async function autoDetectExpiryForFile(file, expiryInput) {
+            if (!expiryInput) return;
+
+            // 1) Client-side DOCX parse first (works even if backend endpoint fails/session issue)
+            if (/\.docx$/i.test(file.name)) {
+                const clientDetected = await detectDocxExpiryClient(file);
+                if (clientDetected && !expiryInput.value) {
+                    expiryInput.value = clientDetected;
+                    expiryInput.title = 'Auto-detected (client-docx)';
+                    return;
+                }
+            }
+
+            // 2) Server-side fallback
+            try {
+                const fd = new FormData();
+                fd.append('file', file);
+
+                const res = await fetch('detect_expiry.php', {
+                    method: 'POST',
+                    body: fd,
+                    credentials: 'same-origin'
+                });
+
+                const data = await res.json();
+                if (data && data.success && data.expiration_date && !expiryInput.value) {
+                    expiryInput.value = data.expiration_date;
+                    expiryInput.title = 'Auto-detected: ' + (data.expiry_source || 'auto');
+                    return;
+                }
+            } catch (e) {
+                // keep manual flow working
+            }
+
+            // 3) filename fallback (last resort)
+            if (!expiryInput.value) {
+                const fromName = detectExpiryFromText(file.name);
+                if (fromName) {
+                    expiryInput.value = fromName;
+                    expiryInput.title = 'Auto-detected (filename)';
+                }
+            }
+        }
+
         function addFileToList(file, category, fileList) {
             const fileRow = document.createElement('div');
             fileRow.className = 'upload-file-row';
             fileRow.dataset.fileName = file.name;
             fileRow.dataset.category = category;
-            const needsExpiry = (category === 'medical' || category === 'contract' || category === 'yellowfever');
+            const needsExpiry = (category === 'medical' || category === 'contract' || category === 'nbi' || category === 'yellowfever');
             fileRow.innerHTML = `
                 <div class="upload-file-info">
                     <span class="upload-file-status">File uploaded:</span>
@@ -176,6 +337,11 @@ try {
                     </button>
                 </div>`;
             fileList.appendChild(fileRow);
+
+            if (needsExpiry) {
+                const expiryInput = fileRow.querySelector('.expiry-date-input');
+                autoDetectExpiryForFile(file, expiryInput);
+            }
         }
         
         function removeFile(button, category, fileName) {
@@ -187,16 +353,16 @@ try {
         
         function removeAllFiles() {
             if (confirm('Are you sure you want to remove all selected files?')) {
-                ['medical', 'contract', 'file201', 'yellowfever'].forEach(category => {
+                ['medical', 'contract', 'file201', 'nbi', 'yellowfever'].forEach(category => {
                     document.getElementById(category + 'FileList').querySelectorAll('.upload-file-row[data-file-name]').forEach(f => f.remove());
                 });
-                selectedFiles = { medical: [], contract: [], file201: [], yellowfever: [] };
+                selectedFiles = { medical: [], contract: [], file201: [], nbi: [], yellowfever: [] };
             }
         }
         
         function uploadAllFiles() {
             const crewNo  = document.getElementById('crewSelect').value;
-            const allFiles = [...selectedFiles.medical, ...selectedFiles.contract, ...selectedFiles.file201, ...selectedFiles.yellowfever];
+            const allFiles = [...selectedFiles.medical, ...selectedFiles.contract, ...selectedFiles.file201, ...selectedFiles.nbi, ...selectedFiles.yellowfever];
             
             if (allFiles.length === 0) { alert('No new files selected to upload.'); return; }
             
@@ -216,15 +382,11 @@ try {
                 selectedFiles[category].forEach((file, index) => {
                     const expiryInput = document.querySelector(`input[data-category="${category}"][data-filename="${file.name}"]`);
                     const expiryDate  = expiryInput ? expiryInput.value : '';
-                    const needsExpiry = (category === 'medical' || category === 'contract' || category === 'yellowfever');
+                    const needsExpiry = (category === 'medical' || category === 'contract' || category === 'nbi' || category === 'yellowfever');
                     const docType = '';
 
                     if (needsExpiry && !expiryDate) {
-                        if (category === 'file201' && docType && docType.toLowerCase() !== 'nbi') {
-                            // 201 files do not require expiry except NBI
-                        } else {
-                            missingDates.push(file.name);
-                        }
+                        missingDates.push(file.name);
                     }
 
                     formData.append(category + '[]', file);
@@ -236,7 +398,7 @@ try {
             });
             
             if (missingDates.length > 0) {
-                alert('Please set expiration dates for the following Medical, Contract, or Yellow Fever files:\n\n' + missingDates.join('\n'));
+                alert('Please set expiration dates for the following Medical, Contract, NBI, or Yellow Fever files:\n\n' + missingDates.join('\n'));
                 return;
             }
 
@@ -253,7 +415,17 @@ try {
                     let message = data.message;
                     if (data.uploaded_files?.length > 0) {
                         message += '\n\nUploaded files:';
-                        data.uploaded_files.forEach(f => { message += `\n- ${f.file_name} (${f.crew_no})`; });
+                        data.uploaded_files.forEach(f => {
+                            let expiryInfo = '';
+                            if (f.expiration_date) {
+                                if (f.expiry_source && f.expiry_source !== 'none') {
+                                    expiryInfo = ` | Expiry: ${f.expiration_date} (${f.expiry_source})`;
+                                } else {
+                                    expiryInfo = ` | Expiry: ${f.expiration_date}`;
+                                }
+                            }
+                            message += `\n- ${f.file_name} (${f.crew_no})${expiryInfo}`;
+                        });
                     }
                     if (data.errors?.length > 0) message += '\n\nWarnings:\n' + data.errors.join('\n');
                     alert(message);

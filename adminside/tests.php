@@ -131,8 +131,7 @@ try {
                     <div class="card__header">
                         <div class="card__title">Test Records</div>
                         <div class="card__actions">
-                            <button class="btn primary upload">Upload Files</button>
-                            <button class="btn warn add">Add New</button>
+                            <a href="question_bank.php" class="btn warn add">Question Bank</a>
                         </div>
                     </div>
 

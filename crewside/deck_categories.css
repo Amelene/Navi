@@ -21,6 +21,7 @@ body {
   background-color: #ffffff;
   color: #34495e;
   overflow-x: hidden;
+  overflow-y: scroll;
 }
 
 body::before {
@@ -143,11 +144,37 @@ body::before {
 /* Category Cards */
 .category-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 30px;
-    max-width: 1200px;
+    grid-template-columns: repeat(3, minmax(320px, 1fr));
+    gap: 50px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding-top: 100px;
+}
+
+body.steward-page .category-grid {
+    grid-template-columns: repeat(2, minmax(320px, 1fr));
+    justify-content: center;
+    max-width: 900px;
+}
+
+body.steward-page .steward-card {
+    max-width: none;
+}
+
+
+body.steward-page .card-image {
+    position: absolute;
+    top: -140px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+body.steward-page .card-content {
+    padding: 120px 25px 25px 25px;
 }
 
 .category-card {
@@ -157,9 +184,8 @@ body::before {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
     cursor: pointer;
-    margin-top: 120px;
-    overflow: visible;
-}
+    margin-top: 150px;
+    overflow: visible;}
 
 .category-card:hover {
     transform: translateY(-10px);
@@ -168,22 +194,20 @@ body::before {
 
 .card-image {
     position: absolute;
-    top: -100px;
+    top: -140px;
     left: 50%;
     transform: translateX(-50%);
     width: 100%;
-    height: 200px;
+    height: auto;
     object-fit: cover;
     border-radius: 15px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
 }
 
+
+
 .card-content {
     padding: 120px 25px 25px 25px;
-    border-top: 4px solid #FF7E5F;
-    display: flex;
-    flex-direction: column;
-    min-height: 180px;
 }
 
 .card-title {
@@ -192,16 +216,12 @@ body::before {
     font-weight: 700;
     margin-bottom: 15px;
     text-transform: uppercase;
-    text-align: center;
 }
 
 .card-description {
     color: #666;
     font-size: 14px;
     line-height: 1.6;
-    margin-bottom: 20px;
-    text-align: left;
-    flex-grow: 1;
 }
 
 .card-footer {
@@ -217,8 +237,8 @@ body::before {
     align-items: center;
     gap: 8px;
     color: #126E82;
-    font-weight: 600;
-    font-size: 14px;
+    font-weight: 700;
+    font-size: 12px;
 }
 
 .duration i {
@@ -227,7 +247,7 @@ body::before {
 
 .back-link {
     text-align: center;
-    margin-top: 40px;
+    margin-top: 15px;
 }
 
 .back-link a {
@@ -323,7 +343,8 @@ body::before {
         font-size: 14px;
     }
 
-    .category-grid {
+    .category-grid,
+    body.steward-page .category-grid {
         grid-template-columns: 1fr;
         gap: 20px;
     }

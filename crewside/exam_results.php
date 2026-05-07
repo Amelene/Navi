@@ -32,9 +32,9 @@ $date_issued = date('Y-m-d');
         .results-card {
             background: white;
             border-radius: 20px;
-            padding: 60px 40px;
+            padding: 50px 20px;
             text-align: center;
-            max-width: 700px;
+            max-width: 1000px;
             width: 100%;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             position: relative;
@@ -42,22 +42,22 @@ $date_issued = date('Y-m-d');
         
         .results-title {
             color: #FF7E5F;
-            font-size: 3rem;
+            font-size: 50px;
             font-weight: 800;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
             text-transform: uppercase;
             letter-spacing: 3px;
         }
         
         .results-subtitle {
             color: #126E82;
-            font-size: 1.5rem;
+            font-size: 20px;
             font-weight: 600;
-            margin-bottom: 50px;
+            margin-bottom: 0px;
         }
         
         .badge-container {
-            margin: 40px 0;
+            margin: 10px 0;
         }
         
         .badge-image {
@@ -69,7 +69,7 @@ $date_issued = date('Y-m-d');
         
         .release-message {
             color: #126E82;
-            font-size: 1.4rem;
+            font-size: 20px;
             font-weight: 600;
             margin: 50px 0 30px 0;
         }
@@ -84,13 +84,19 @@ $date_issued = date('Y-m-d');
         .date-label {
             font-weight: 700;
             color: #333;
-            font-size: 1.1rem;
+            font-size: 18px;
         }
         
         .date-value {
             color: #666;
-            font-size: 1.1rem;
+            font-size: 16px;
             margin-top: 5px;
+        }
+
+        .auto-home-note {
+            margin-top: 14px;
+            color: #6b7280;
+            font-size: 14px;
         }
     </style>
 </head>
@@ -164,17 +170,7 @@ $date_issued = date('Y-m-d');
                 </p>
 
                 <div class="badge-container">
-                    <svg class="badge-image" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
-                        <!-- Badge Circle -->
-                        <circle cx="100" cy="100" r="80" fill="#7DD3E8"/>
-                        
-                        <!-- Star -->
-                        <path d="M100 40 L110 70 L142 75 L121 96 L126 128 L100 113 L74 128 L79 96 L58 75 L90 70 Z" fill="#FFE66D"/>
-                        
-                        <!-- Ribbons -->
-                        <path d="M60 160 L40 240 L70 220 L80 180 Z" fill="#FF8A4C"/>
-                        <path d="M140 160 L160 240 L130 220 L120 180 Z" fill="#FF8A4C"/>
-                    </svg>
+                    <img src="../assets/image/cco.png" alt="Badge" class="badge-image">
                 </div>
 
                 <p class="release-message">
@@ -185,8 +181,25 @@ $date_issued = date('Y-m-d');
                     <div class="date-label">Date Issued</div>
                     <div class="date-value"><?php echo $date_issued; ?></div>
                 </div>
+
+                <p class="auto-home-note">Redirecting to home in <span id="autoHomeCountdown">10</span> seconds...</p>
             </div>
         </main>
     </div>
+
+    <script>
+        (function () {
+            let seconds = 10;
+            const el = document.getElementById('autoHomeCountdown');
+            const timer = setInterval(function () {
+                seconds--;
+                if (el) el.textContent = String(seconds);
+                if (seconds <= 0) {
+                    clearInterval(timer);
+                    window.location.href = 'index.php';
+                }
+            }, 1000);
+        })();
+    </script>
 </body>
 </html>

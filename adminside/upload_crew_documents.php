@@ -43,6 +43,156 @@ try {
         }
         return null;
     }
+
+    function normalizeDateToYmd($rawDate) {
+        if (!$rawDate) return null;
+        $rawDate = trim((string)$rawDate);
+        if ($rawDate === '') return null;
+
+        $rawDate = str_replace(['.', '_'], ['-', '-'], $rawDate);
+
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $rawDate)) {
+            return $rawDate;
+        }
+
+        if (preg_match('/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})$/', $rawDate, $m)) {
+            // assume month-day-year
+            $month = (int)$m[1];
+            $day   = (int)$m[2];
+            $year  = (int)$m[3];
+            if (checkdate($month, $day, $year)) {
+                return sprintf('%04d-%02d-%02d', $year, $month, $day);
+            }
+        }
+
+        if (preg_match('/^(\d{1,2})\s+([a-zA-Z]+)\s+(\d{4})$/', $rawDate, $m)) {
+            $day = (int)$m[1];
+            $month = strtotime($m[2] . ' 1 2000') ? (int)date('m', strtotime($m[2] . ' 1 2000')) : 0;
+            $year = (int)$m[3];
+            if ($month > 0 && checkdate($month, $day, $year)) {
+                return sprintf('%04d-%02d-%02d', $year, $month, $day);
+            }
+        }
+
+        if (preg_match('/^([a-zA-Z]+)\s+(\d{1,2}),?\s+(\d{4})$/', $rawDate, $m)) {
+            $month = strtotime($m[1] . ' 1 2000') ? (int)date('m', strtotime($m[1] . ' 1 2000')) : 0;
+            $day   = (int)$m[2];
+            $year  = (int)$m[3];
+            if ($month > 0 && checkdate($month, $day, $year)) {
+                return sprintf('%04d-%02d-%02d', $year, $month, $day);
+            }
+        }
+
+        return null;
+    }
+
+    function findDateNearExpiryKeywords($text) {
+        if (!$text) return null;
+        $text = strtolower((string)$text);
+
+        if (preg_match('/(?:expiration|expiry|expire)\s*(?:date)?\s*[:\-]?\s*(\d{4}[-\/]\d{1,2}[-\/]\d{1,2})/i', $text, $m)) {
+            return normalizeDateToYmd(str_replace('/', '-', $m[1]));
+        }
+
+        if (preg_match('/(?:expiration|expiry|expire)\s*(?:date)?\s*[:\-]?\s*(\d{1,2}[-\/]\d{1,2}[-\/]\d{4})/i', $text, $m)) {
+            return normalizeDateToYmd($m[1]);
+        }
+
+        if (preg_match('/(?:expiration|expiry|expire)\s*(?:date)?\s*[:\-]?\s*([a-zA-Z]+\s+\d{1,2},?\s+\d{4})/i', $text, $m)) {
+            return normalizeDateToYmd($m[1]);
+        }
+
+        if (preg_match('/(?:expiration|expiry|expire)\s*(?:date)?\s*[:\-]?\s*(\d{1,2}\s+[a-zA-Z]+\s+\d{4})/i', $text, $m)) {
+            return normalizeDateToYmd($m[1]);
+        }
+
+        return null;
+    }
+
+    function detectExpiryFromFilename($filename) {
+        $base = strtolower(pathinfo((string)$filename, PATHINFO_FILENAME));
+        return findDateNearExpiryKeywords($base);
+    }
+
+    function detectExpiryFromDocx($filePath) {
+        if (!class_exists('ZipArchive')) return null;
+        $zip = new ZipArchive();
+        if ($zip->open($filePath) !== true) return null;
+
+        $xml = $zip->getFromName('word/document.xml');
+        $zip->close();
+
+        if (!$xml) return null;
+
+        $plain = strip_tags($xml);
+        $plain = html_entity_decode($plain, ENT_QUOTES | ENT_XML1, 'UTF-8');
+
+        return findDateNearExpiryKeywords($plain);
+    }
+
+    function detectExpiryFromPdf($filePath) {
+        $content = @file_get_contents($filePath);
+        if (!$content) return null;
+
+        // basic text extraction from PDF streams (best-effort only)
+        $text = '';
+        if (preg_match_all('/\((.*?)\)\s*Tj/s', $content, $matches)) {
+            $text = implode(' ', $matches[1]);
+        } else {
+            $text = $content;
+        }
+
+        $text = preg_replace('/[^[:print:]\s]/u', ' ', $text);
+
+        return findDateNearExpiryKeywords($text);
+    }
+
+    function detectExpiryDate($originalFilename, $tmpFilePath, $mimeType) {
+        $date = detectExpiryFromFilename($originalFilename);
+        if ($date) {
+            return ['date' => $date, 'source' => 'filename'];
+        }
+
+        $mimeType = strtolower((string)$mimeType);
+
+        if (strpos($mimeType, 'wordprocessingml') !== false || preg_match('/\.docx$/i', $originalFilename)) {
+            $date = detectExpiryFromDocx($tmpFilePath);
+            if ($date) return ['date' => $date, 'source' => 'docx_content'];
+        }
+
+        if (strpos($mimeType, 'pdf') !== false || preg_match('/\.pdf$/i', $originalFilename)) {
+            $date = detectExpiryFromPdf($tmpFilePath);
+            if ($date) return ['date' => $date, 'source' => 'pdf_content'];
+        }
+
+        return ['date' => null, 'source' => null];
+    }
+
+    function detectExpiryViaPythonOcr($tmpFilePath, $originalFilename, $mimeType) {
+        $pythonExe = 'C:\\Users\\Admin\\AppData\\Local\\Programs\\Python\\Python314\\python.exe';
+        $scriptPath = __DIR__ . DIRECTORY_SEPARATOR . 'ocr_detect_expiry.py';
+
+        if (!file_exists($pythonExe) || !file_exists($scriptPath) || !function_exists('shell_exec')) {
+            return null;
+        }
+
+        $cmd = '"' . $pythonExe . '" "' . $scriptPath . '" "' . $tmpFilePath . '" "' . ($originalFilename ?? '') . '" "' . ($mimeType ?? '') . '"';
+        $output = shell_exec($cmd);
+        if (!$output) return null;
+
+        $decoded = json_decode($output, true);
+        if (!is_array($decoded) || ($decoded['success'] ?? false) !== true) {
+            return null;
+        }
+
+        $date = $decoded['expiration_date'] ?? null;
+        if (!$date) return null;
+
+        return [
+            'date' => $date,
+            'source' => 'ocr_' . ($decoded['expiry_source'] ?? 'python')
+        ];
+    }
     
     $crew_no     = $_POST['crew_no'] ?? '';
     $crew_id     = null;
@@ -57,7 +207,7 @@ try {
     $errors        = [];
     $allowedTypes  = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
     $maxFileSize   = 10 * 1024 * 1024; // 10MB
-    $categories    = ['medical', 'contract', 'file201', 'yellowfever'];
+    $categories    = ['medical', 'contract', 'file201', 'nbi', 'yellowfever'];
     
     foreach ($categories as $category) {
         if (isset($_FILES[$category]) && !empty($_FILES[$category]['name'][0])) {
@@ -106,6 +256,7 @@ try {
                     'medical'      => 'medical_certificates',
                     'contract'     => 'contract_files',
                     'file201'      => 'file_201',
+                    'nbi'          => 'nbi',
                     'yellowfever'  => 'yellow_fever',
                     default        => 'other'
                 };
@@ -114,8 +265,35 @@ try {
                 $docTypes = $_POST[$category . '_doc_type'] ?? [];
                 $docType = $docTypes[$i] ?? null;
 
+                $expirySource = null;
+                $detected = null;
+
+                if (!empty($expirationDate)) {
+                    $normalizedManualDate = normalizeDateToYmd($expirationDate);
+                    $expirationDate = $normalizedManualDate ?: $expirationDate;
+                    $expirySource = 'manual';
+                } else {
+                    $ocrDetected = detectExpiryViaPythonOcr($fileTmpName, $fileName, $fileType);
+                    if (!empty($ocrDetected['date'])) {
+                        $expirationDate = $ocrDetected['date'];
+                        $detected = ['date' => $expirationDate, 'source' => $ocrDetected['source']];
+                        $expirySource = $ocrDetected['source'];
+                    } else {
+                        $detected = detectExpiryDate($fileName, $fileTmpName, $fileType);
+                        if (!empty($detected['date'])) {
+                            $expirationDate = $detected['date'];
+                            $expirySource = 'auto_' . $detected['source'];
+                        }
+                    }
+                }
+
                 if ($category === 'yellowfever' && empty($expirationDate)) {
-                    $errors[] = "File $fileName: Yellow Fever requires expiration date.";
+                    $errors[] = "File $fileName: Yellow Fever requires expiration date (manual or detectable from filename/content).";
+                    continue;
+                }
+
+                if ($category === 'nbi' && empty($expirationDate)) {
+                    $errors[] = "File $fileName: NBI requires expiration date (manual or detectable from filename/content).";
                     continue;
                 }
 
@@ -152,16 +330,13 @@ try {
                         $docType = 'Certificates';
                     }
 
-                    if (strtolower((string)$docType) === 'nbi' && empty($expirationDate)) {
-                        $errors[] = "File $fileName: NBI requires expiration date.";
-                        continue;
-                    }
                 }
 
                 $dbCategory = match($category) {
                         'medical'      => 'medical_certificate',
                         'contract'     => 'contract_file',
                         'file201'      => 'file_201',
+                        'nbi'          => 'nbi',
                         'yellowfever'  => 'yellow_fever',
                         default        => 'medical_certificate'
                     };
@@ -310,12 +485,14 @@ try {
                     );
                     
                 $uploadedFiles[] = [
-                    'category'        => $category,
-                    'file_name'       => $storedFileName,
-                    'file_path'       => $storedPath,
-                    'crew_no'         => $currentCrewNo,
-                    'expiration_date' => $expirationDate,
-                    'doc_type'        => $docType
+                    'category'             => $category,
+                    'file_name'            => $storedFileName,
+                    'file_path'            => $storedPath,
+                    'crew_no'              => $currentCrewNo,
+                    'expiration_date'      => $expirationDate,
+                    'expiry_source'        => $expirySource ?: 'none',
+                    'expiry_detected_from' => $detected['source'] ?? null,
+                    'doc_type'             => $docType
                 ];
             }
         }

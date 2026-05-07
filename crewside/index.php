@@ -17,6 +17,7 @@ $crew_no = $_SESSION['crew_no'] ?? 'N/A';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crew Dashboard - Navi Shipping</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="index.css?v=<?php echo time(); ?>">
 </head>
 <body>
@@ -29,7 +30,7 @@ $crew_no = $_SESSION['crew_no'] ?? 'N/A';
             
             <nav class="nav-tabs">
                 <a href="index.php" class="nav-tab active">NSC Examination</a>
-                <a href="#" class="nav-tab">Abstract</a>
+                <a href="abstract_entry.php" class="nav-tab">Abstract</a>
             </nav>
             
             <div class="user-section">

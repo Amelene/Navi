@@ -1,0 +1,4 @@
+- [x] Remove "DOC EXPIRY" header column in adminside/crew.php
+- [x] Remove DOC EXPIRY cell/badge rendering in each crew row
+- [x] Update empty-state colspan from 8 to 7
+- [x] Verify final table column alignment in code
