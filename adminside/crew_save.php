@@ -159,6 +159,12 @@ try {
     header('Location: crew.php');
     exit();
 } catch (Exception $e) {
-    die('CREW SAVE ERROR: ' . $e->getMessage());
+    error_log('crew_save.php error: ' . $e->getMessage());
+    error_log('crew_save.php post: ' . json_encode($_POST));
+    $_SESSION['crew_add_errors'] = ['Failed to save crew: An error occurred. Please try again.'];
+    $_SESSION['crew_add_old'] = $_POST;
+    header('Location: crew_add.php');
+    exit();
 }
+
 
