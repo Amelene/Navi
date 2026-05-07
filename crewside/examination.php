@@ -99,9 +99,15 @@ if ($force_reload_questions || !isset($_SESSION['exam_questions']) || empty($_SE
                         'status' => 'unanswered'
                     ];
                 }
-                if ($row['option_id']) {
+                if (!empty($row['option_letter']) && $row['option_text'] !== null && trim((string)$row['option_text']) !== '') {
+                    // option_id can be 0/NULL in some legacy/imported rows, but option is still valid for display.
+                    // create a stable fallback id so frontend can still select and store an answer.
+                    $safeOptionId = isset($row['option_id']) && (int)$row['option_id'] > 0
+                        ? (int)$row['option_id']
+                        : ((int)$qId * 100 + (ord(strtoupper($row['option_letter'])) - 64));
+
                     $questionsData[$qId]['options'][] = [
-                        'id' => $row['option_id'],
+                        'id' => $safeOptionId,
                         'letter' => $row['option_letter'],
                         'text' => $row['option_text']
                     ];
