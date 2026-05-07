@@ -47,7 +47,7 @@ function oldv($key, $default = '')
     <link rel="stylesheet" href="../assets/css/main.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="../assets/css/content.css?v=<?php echo time(); ?>">
 </head>
-<body>
+<body class="crew-add-page">
 <div class="dashboard">
     <?php
     $GLOBALS['base_path'] = '../';
@@ -70,9 +70,9 @@ function oldv($key, $default = '')
                 </div>
             <?php endif; ?>
 
-            <div class="card card--padded">
-                <form action="crew_save.php" method="POST">
-                    <div class="grid" style="grid-template-columns: repeat(2, minmax(280px, 1fr)); gap:16px;">
+            <div class="card card--padded crew-add-card">
+                <form action="crew_save.php" method="POST" class="crew-add-form">
+                    <div class="grid crew-add-grid">
                         <div>
                             <label class="form-label">Crew No *</label>
                             <input type="text" name="crew_no" class="form-control" required value="<?php echo oldv('crew_no', $suggestedCrewNo); ?>">
@@ -155,9 +155,9 @@ function oldv($key, $default = '')
                         </div>
                     </div>
 
-                    <div style="margin-top:18px; display:flex; gap:10px;">
+                    <div class="crew-add-actions">
                         <button type="submit" class="btn warn add">Save Crew</button>
-                        <a href="crew.php" class="btn primary upload" style="text-decoration:none;">Cancel</a>
+                        <a href="crew.php" class="btn primary upload crew-add-cancel">Cancel</a>
                     </div>
                 </form>
             </div>

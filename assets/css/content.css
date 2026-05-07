@@ -719,4 +719,117 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* Crew Add Page */
+body.crew-add-page::before {
+    opacity: 0.14;
+}
+
+.crew-add-page .main__content {
+    max-width: 1180px;
+}
+
+.crew-add-page .page-title {
+    margin-bottom: 18px;
+    letter-spacing: 0.8px;
+}
+
+.crew-add-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    border: 1px solid rgba(18, 110, 130, 0.12);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.crew-add-form .form-label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e3a5f;
+}
+
+.crew-add-form .form-control {
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid #cfd8e3;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 1rem;
+    color: #243b53;
+    background: #fff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.crew-add-form .form-control:focus {
+    outline: none;
+    border-color: #126E82;
+    box-shadow: 0 0 0 3px rgba(18, 110, 130, 0.16);
+}
+
+.crew-add-grid {
+    grid-template-columns: repeat(2, minmax(320px, 1fr));
+    gap: 18px 22px;
+    margin-bottom: 4px;
+}
+
+.crew-add-grid > div:last-child {
+    grid-column: 1 / -1;
+}
+
+.crew-add-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.crew-add-actions .btn {
+    min-height: 44px;
+    min-width: 130px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+}
+
+.crew-add-cancel {
+    text-decoration: none;
+}
+
+@media (max-width: 900px) {
+    .crew-add-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .crew-add-grid > div:last-child {
+        grid-column: auto;
+    }
+
+    .crew-add-actions {
+        flex-wrap: wrap;
+    }
+
+    .crew-add-actions .btn,
+    .crew-add-cancel {
+        flex: 1;
+    }
+}
+
+@media (max-width: 520px) {
+    .crew-add-page .main {
+        padding: 1rem;
+        padding-bottom: calc(56px + 1rem);
+    }
+
+    .crew-add-card {
+        padding: 16px;
+    }
+
+    .crew-add-page .page-title {
+        font-size: 1.45rem;
+    }
+}
  
