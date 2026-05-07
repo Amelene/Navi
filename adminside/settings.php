@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 session_start();
 
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
@@ -75,7 +75,8 @@ try {
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
+    <link rel="icon type=image/png href=../assets/image/logo.png>
+<meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Security & Verification</title>
     <link rel="stylesheet" href="../assets/css/main.css?v=<?php echo time(); ?>">
@@ -387,7 +388,7 @@ try {
                     <div class="activity-item">
                         <p class="activity-title">User Login</p>
                         <div class="activity-meta"><?php echo htmlspecialchars(date('m/d/Y, g:i:s A', strtotime($loginAt))); ?></div>
-                        <div class="activity-meta">127.0.0.1 · <?php echo htmlspecialchars($role); ?></div>
+                        <div class="activity-meta">127.0.0.1 Â· <?php echo htmlspecialchars($role); ?></div>
                     </div>
                 </section>
             </div>
@@ -432,7 +433,7 @@ try {
                     <label class="pwd-label" for="new_password">New Password</label>
                     <div class="pwd-input-wrap">
                         <input type="password" id="new_password" name="new_password" class="pwd-input" minlength="8" required>
-                        <button type="button" class="toggle-eye" data-target="new_password">👁</button>
+                        <button type="button" class="toggle-eye" data-target="new_password">ðŸ‘</button>
                     </div>
                 </div>
 
@@ -440,7 +441,7 @@ try {
                     <label class="pwd-label" for="confirm_password">Confirm New Password</label>
                     <div class="pwd-input-wrap">
                         <input type="password" id="confirm_password" name="confirm_password" class="pwd-input" minlength="8" required>
-                        <button type="button" class="toggle-eye" data-target="confirm_password">👁</button>
+                        <button type="button" class="toggle-eye" data-target="confirm_password">ðŸ‘</button>
                     </div>
                 </div>
 
@@ -498,3 +499,4 @@ try {
 </script>
 </body>
 </html>
+

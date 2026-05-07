@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 session_start();
 
 // Check if crew is logged in
@@ -97,7 +97,8 @@ if (isset($_POST['proceed'])) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <link rel="icon type=image/png href=../assets/image/logo.png>
+<meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crew Information - <?php echo htmlspecialchars($department . ' - ' . $category); ?></title>
     <link rel="stylesheet" href="crew_information.css?v=<?php echo time(); ?>">
@@ -209,7 +210,7 @@ if (isset($_POST['proceed'])) {
             </form>
 
             <div class="back-link">
-                <a href="deck_categories.php?dept=<?php echo urlencode($department); ?>">← Back to Categories</a>
+                <a href="deck_categories.php?dept=<?php echo urlencode($department); ?>">â† Back to Categories</a>
             </div>
         </div>
     </div>
@@ -230,3 +231,4 @@ if (isset($_POST['proceed'])) {
     </script>
 </body>
 </html>
+

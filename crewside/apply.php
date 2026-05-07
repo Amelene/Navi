@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 // Suppress warnings for cleaner display
 error_reporting(E_ERROR | E_PARSE);
 session_start();
@@ -604,7 +604,8 @@ $formData = $_SESSION['application_data'];
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <link rel="icon type=image/png href=../assets/image/logo.png>
+<meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Application Form - Navi Shipping</title>
     <link rel="stylesheet" href="apply.css?v=<?php echo time(); ?>">
@@ -618,10 +619,10 @@ $formData = $_SESSION['application_data'];
             </div>
             <div class="header-right">
                 <div class="header-info">
-                    <p>📍 18 Leo St, Vermella Homes I, Almanza Uno, Las Pinas City, National Capital Region 1750, Philippines</p>
-                    <p>📞 +63 9172539709 / +63 2 88843101</p>
-                    <p>✉️ operations@navishipping.com.ph</p>
-                    <p>🌐 www.navishipping.com</p>
+                    <p>ðŸ“ 18 Leo St, Vermella Homes I, Almanza Uno, Las Pinas City, National Capital Region 1750, Philippines</p>
+                    <p>ðŸ“ž +63 9172539709 / +63 2 88843101</p>
+                    <p>âœ‰ï¸ operations@navishipping.com.ph</p>
+                    <p>ðŸŒ www.navishipping.com</p>
                 </div>
                 <div class="header-form-number">
                     <p>FORM: F - 021</p>
@@ -1055,8 +1056,8 @@ $formData = $_SESSION['application_data'];
                     </div>
 
                     <div class="form-actions">
-                        <a href="login.php" class="btn btn-back">← BACK TO LOGIN</a>
-                        <button type="submit" name="action" value="next" class="btn btn-next">NEXT →</button>
+                        <a href="login.php" class="btn btn-back">â† BACK TO LOGIN</a>
+                        <button type="submit" name="action" value="next" class="btn btn-next">NEXT â†’</button>
                     </div>
 
                 <?php elseif ($currentPage === 2): ?>
@@ -1119,8 +1120,8 @@ $formData = $_SESSION['application_data'];
                     </div>
 
                     <div class="form-actions">
-                        <button type="submit" name="action" value="back" class="btn btn-back">← BACK</button>
-                        <button type="submit" name="action" value="next" class="btn btn-next">NEXT →</button>
+                        <button type="submit" name="action" value="back" class="btn btn-back">â† BACK</button>
+                        <button type="submit" name="action" value="next" class="btn btn-next">NEXT â†’</button>
                     </div>
 
                 <?php elseif ($currentPage === 3): ?>
@@ -1271,7 +1272,7 @@ $formData = $_SESSION['application_data'];
                     </div>
 
                     <div class="form-actions">
-                        <button type="submit" name="action" value="back" class="btn btn-back">← BACK</button>
+                        <button type="submit" name="action" value="back" class="btn btn-back">â† BACK</button>
                         <button type="submit" name="action" value="submit" class="btn btn-submit">SUBMIT APPLICATION</button>
                     </div>
 
@@ -1798,3 +1799,4 @@ $formData = $_SESSION['application_data'];
     </script>
 </body>
 </html>
+

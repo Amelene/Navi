@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 session_start();
 
 // Check if crew is logged in
@@ -14,7 +14,8 @@ $crew_no = $_SESSION['crew_no'] ?? 'N/A';
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <link rel="icon type=image/png href=../assets/image/logo.png>
+<meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crew Dashboard - Navi Shipping</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -23,7 +24,8 @@ $crew_no = $_SESSION['crew_no'] ?? 'N/A';
 <body>
     <!-- Header -->
     <header class="header">
-        <div class="header-content">
+        <link rel="icon type=image/png href=../assets/image/logo.png>
+<div class="header-content">
             <div class="logo-section">
                 <img src="../assets/image/logo.png" alt="NS Logo" class="logo">
             </div>
@@ -110,3 +112,4 @@ $crew_no = $_SESSION['crew_no'] ?? 'N/A';
     <?php include '../includes/footer.php'; ?>
 </body>
 </html>
+

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 session_start();
 require_once __DIR__ . '/../config/database.php';
 
@@ -141,7 +141,8 @@ $show_intro = ($current_step === 0);
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <link rel="icon type=image/png href=../assets/image/logo.png>
+<meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($exam_section . ' ' . $exam_name); ?> - Examination</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -268,11 +269,11 @@ $show_intro = ($current_step === 0);
                                         <button class="btn-nav btn-review" onclick="reviewAnswers()">REVIEW</button>
                                         <button class="btn-nav btn-back" onclick="navigateQuestion('back')" 
                                                 <?php echo ($current_step <= 1) ? 'disabled' : ''; ?>>
-                                            ← BACK
+                                            â† BACK
                                         </button>
                                         <?php if ($current_step < $total_questions): ?>
                                             <button class="btn-nav btn-next" onclick="navigateQuestion('next')">
-                                                NEXT →
+                                                NEXT â†’
                                             </button>
                                         <?php else: ?>
                                             <button class="btn-nav btn-submit" onclick="submitExam()">
@@ -825,3 +826,4 @@ function selectAnswer(questionId, optionId, optionLetter) {
     </script>
 </body>
 </html>
+

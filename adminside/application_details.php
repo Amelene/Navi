@@ -1,4 +1,4 @@
-v<?php
+﻿v<?php
 session_start();
 
 // Check if user is logged in
@@ -50,7 +50,8 @@ try {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <link rel="icon type=image/png href=../assets/image/logo.png>
+<meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Application Details - <?php echo htmlspecialchars($application['application_id']); ?></title>
     <link rel="stylesheet" href="../assets/css/application_details.css?v=<?php echo time(); ?>">
@@ -64,11 +65,11 @@ try {
             </div>
             <div class="header-right">
                 <div class="header-info">
-                    <p>📍 18 Leo St, Vermella Homes I, Almanza Uno, Las Pinas City,<br>
+                    <p>ðŸ“ 18 Leo St, Vermella Homes I, Almanza Uno, Las Pinas City,<br>
                     National Capital Region 1750, Philippines</p>
-                    <p>📞 +63 9172539709 / +63 2 88843101</p>
-                    <p>✉️ operations@navishipping.com.ph</p>
-                    <p>🌐 www.navishipping.com</p>
+                    <p>ðŸ“ž +63 9172539709 / +63 2 88843101</p>
+                    <p>âœ‰ï¸ operations@navishipping.com.ph</p>
+                    <p>ðŸŒ www.navishipping.com</p>
                 </div>
                 <div class="header-form-number">
                     <p>FORM: F - 021</p>
@@ -451,8 +452,8 @@ try {
                 
                 <!-- Navigation Buttons -->
                 <div class="form-actions">
-                    <a href="application.php" class="btn btn-back">← BACK TO LIST</a>
-                    <button onclick="window.print()" class="btn btn-print">🖨️ PRINT</button>
+                    <a href="application.php" class="btn btn-back">â† BACK TO LIST</a>
+                    <button onclick="window.print()" class="btn btn-print">ðŸ–¨ï¸ PRINT</button>
                 </div>
             </div>
         </div>
@@ -461,3 +462,4 @@ try {
     <?php include '../includes/footer.php'; ?>
 </body>
 </html>
+

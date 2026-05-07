@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 session_start();
 
 // Include database config
@@ -49,7 +49,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <link rel="icon type=image/png href=../assets/image/logo.png>
+<meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login - Navi Shipping</title>
     <link rel="stylesheet" href="../assets/css/login.css?v=<?php echo time(); ?>">
@@ -143,3 +144,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </script>
 </body>
 </html>
+
