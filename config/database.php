@@ -97,7 +97,7 @@ $defaultLive = [
     'DB_USER' => 'navizaft_navi',
     'DB_PASS' => 'Admin@navi',
     'DB_CHARSET' => 'utf8mb4',
-    'DB_DEBUG' => false,
+    'DB_DEBUG' => true,
 ];
 
 $useLocalDefaults = isLocalEnvironment();
