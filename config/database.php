@@ -1,20 +1,15 @@
 <?php
-/**
- * Database Configuration
- * 
- * I-update ang values based sa iyong MySQL Workbench settings
- */
 
 // Database Configuration
 define('DB_HOST', 'localhost');        // MySQL server
 define('DB_PORT', '3306');             // MySQL port (default: 3306)
-define('DB_NAME', 'navi_shipping');    // Database name
-define('DB_USER', 'root');             // MySQL username
-define('DB_PASS', '');                 // MySQL password (blank for XAMPP default)
+define('DB_NAME', 'navizaft_navi');    // Database name
+define('DB_USER', 'navizaft_navi');    // MySQL username
+define('DB_PASS', 'Admin@navi');       // MySQL password
 define('DB_CHARSET', 'utf8mb4');       // Character set
 
 // Error Reporting (set to false in production)
-define('DB_DEBUG', true);
+define('DB_DEBUG', false);
 
 /**
  * Database Connection Class
