@@ -33,6 +33,13 @@ $documentExpirySummary = [
 
 $recentActivities = [];
 
+$documentExpiryRows = [];
+$documentExpiryPeopleCounts = [
+	'critical' => 0,
+	'warning' => 0,
+	'normal' => 0
+];
+
 if (!isset($_SESSION['dashboard_tasks']) || !is_array($_SESSION['dashboard_tasks'])) {
 	$_SESSION['dashboard_tasks'] = [
 		[
@@ -212,6 +219,115 @@ try {
 		ORDER BY activity_time DESC
 		LIMIT 5
 	") ?: [];
+
+	$documentExpiryRowsRaw = $db->fetchAll("
+		SELECT
+			cd.id,
+			cd.crew_id,
+			cd.crew_no,
+			cd.document_category,
+			cd.file_name,
+			cd.expiration_date,
+			DATEDIFF(cd.expiration_date, CURDATE()) AS days_left,
+			COALESCE(NULLIF(TRIM(CONCAT(cm.first_name, ' ', cm.last_name)), ''), cd.crew_no, 'Unknown Crew') AS crew_name,
+			COALESCE(NULLIF(TRIM(p.position_name), ''), 'N/A') AS position_name
+		FROM crew_documents cd
+		LEFT JOIN crew_master cm ON cm.id = cd.crew_id OR cm.crew_no = cd.crew_no
+		LEFT JOIN positions p ON p.id = cm.position_id
+		WHERE cd.status = 'active'
+		  AND cd.expiration_date IS NOT NULL
+		  AND cd.expiration_date <> '0000-00-00'
+		ORDER BY cd.expiration_date ASC
+		LIMIT 50
+	") ?: [];
+
+	$peopleBuckets = [
+		'critical' => [],
+		'warning' => [],
+		'normal' => []
+	];
+
+	foreach ($documentExpiryRowsRaw as $row) {
+		$daysLeft = isset($row['days_left']) ? (int)$row['days_left'] : null;
+		if ($daysLeft === null) {
+			continue;
+		}
+
+		if ($daysLeft <= 7) {
+			$statusKey = 'critical';
+		} elseif ($daysLeft <= 30) {
+			$statusKey = 'warning';
+		} else {
+			continue; // skip beyond 30 days per requirement
+		}
+
+		$crewNoKey = trim((string)($row['crew_no'] ?? ''));
+		if ($crewNoKey === '') {
+			$crewNoKey = 'crew_id_' . (string)($row['crew_id'] ?? '');
+		}
+		$peopleBuckets[$statusKey][$crewNoKey] = true;
+
+		$rawCategory = trim((string)($row['document_category'] ?? ''));
+		$docLabel = ucwords(str_replace(['_', '-'], ' ', $rawCategory));
+
+		$fileNameForType = strtolower((string)($row['file_name'] ?? ''));
+		if ($docLabel === '' || strtolower($docLabel) === 'document') {
+			if (strpos($fileNameForType, 'nbi') !== false) {
+				$docLabel = 'NBI';
+			} elseif (strpos($fileNameForType, 'yellow') !== false && strpos($fileNameForType, 'fever') !== false) {
+				$docLabel = 'Yellow Fever';
+			} elseif (strpos($fileNameForType, 'passport') !== false) {
+				$docLabel = 'Passport';
+			} elseif (strpos($fileNameForType, 'seaman') !== false || strpos($fileNameForType, 'seamans') !== false) {
+				$docLabel = "Seaman's Book";
+			} elseif (strpos($fileNameForType, 'medical') !== false) {
+				$docLabel = 'Medical Certificate';
+			} elseif (strpos($fileNameForType, 'coc') !== false) {
+				$docLabel = 'COC';
+			} elseif (strpos($fileNameForType, 'cop') !== false) {
+				$docLabel = 'COP';
+			}
+		}
+
+		if ($docLabel === '' || strtolower($docLabel) === 'document') {
+			$docLabel = 'Unknown Document Type';
+		}
+
+		$expiryDateFormatted = '';
+		if (!empty($row['expiration_date'])) {
+			$expiryTimestamp = strtotime((string)$row['expiration_date']);
+			$expiryDateFormatted = $expiryTimestamp ? date('m-d-y', $expiryTimestamp) : (string)$row['expiration_date'];
+		}
+
+		$daysText = $daysLeft . ' day' . ($daysLeft === 1 ? '' : 's');
+		if ($daysLeft < 0) {
+			$daysText = abs($daysLeft) . ' day' . (abs($daysLeft) === 1 ? '' : 's') . ' overdue';
+		} elseif ($daysLeft === 0) {
+			$daysText = 'Today';
+		}
+
+		$crewNameRaw = trim((string)($row['crew_name'] ?? 'Unknown Crew'));
+		$crewNameDisplay = ucwords(strtolower($crewNameRaw));
+
+		$positionNameRaw = trim((string)($row['position_name'] ?? 'N/A'));
+		$positionNameDisplay = ucwords(strtolower($positionNameRaw));
+
+		$documentExpiryRows[] = [
+			'crew_name' => $crewNameDisplay,
+			'position_name' => $positionNameDisplay,
+			'document_label' => $docLabel,
+			'expiration_date' => $expiryDateFormatted,
+			'days_text' => $daysText,
+			'status_key' => $statusKey,
+			'status_label' => ucfirst($statusKey)
+		];
+	}
+
+	$documentExpiryPeopleCounts = [
+		'critical' => count($peopleBuckets['critical']),
+		'warning' => count($peopleBuckets['warning']),
+		'normal' => 0
+	];
 } catch (Exception $e) {
 	// Keep defaults to avoid dashboard crash
 }
@@ -457,55 +573,69 @@ try {
 					<div class="doc-expiry__stats">
 						<div class="doc-stat doc-stat--critical">
 							<div class="doc-stat__title">Critical ( < 7 days )</div>
-							<div class="doc-stat__value">3 People</div>
+							<div class="doc-stat__value"><?php echo (int)$documentExpiryPeopleCounts['critical']; ?> People</div>
 						</div>
 						<div class="doc-stat doc-stat--warning">
 							<div class="doc-stat__title">Warning (8-30 days)</div>
-							<div class="doc-stat__value">3 People</div>
+							<div class="doc-stat__value"><?php echo (int)$documentExpiryPeopleCounts['warning']; ?> People</div>
 						</div>
 						<div class="doc-stat doc-stat--normal">
 							<div class="doc-stat__title">Normal ( > 30 days)</div>
-							<div class="doc-stat__value">7 People</div>
+							<div class="doc-stat__value"><?php echo (int)$documentExpiryPeopleCounts['normal']; ?> People</div>
 						</div>
 					</div>
 
 					<div class="doc-expiry__list">
-						<div class="doc-row critical">
-							<div class="doc-row__top">
-								<strong>John Lim</strong>
-								<span class="doc-pill critical">critical</span>
+						<?php if (!empty($documentExpiryRows)): ?>
+							<?php foreach ($documentExpiryRows as $expiryItem): ?>
+								<div class="doc-row <?php echo htmlspecialchars(strtolower((string)$expiryItem['status_key'])); ?>">
+									<div class="doc-row__top">
+										<div class="doc-row__person">
+											<strong><?php echo htmlspecialchars((string)$expiryItem['crew_name']); ?></strong>
+											<div class="doc-row__rank"><?php echo htmlspecialchars((string)$expiryItem['position_name']); ?></div>
+										</div>
+										<span class="doc-pill <?php echo htmlspecialchars(strtolower((string)$expiryItem['status_key'])); ?>">
+											<?php echo htmlspecialchars((string)$expiryItem['status_label']); ?>
+										</span>
+									</div>
+									<div class="doc-row__meta">
+										<span class="doc-col doc-col--document">
+											<span class="doc-col__label">Document</span>
+											<span class="doc-col__value"><?php echo htmlspecialchars((string)$expiryItem['document_label']); ?></span>
+										</span>
+										<span class="doc-col doc-col--date">
+											<span class="doc-col__label">Expiry Date</span>
+											<span class="doc-col__value"><?php echo htmlspecialchars((string)$expiryItem['expiration_date']); ?></span>
+										</span>
+										<span class="doc-col doc-col--days">
+											<span class="doc-col__label">Days Remaining</span>
+											<span class="doc-col__value"><?php echo htmlspecialchars((string)$expiryItem['days_text']); ?></span>
+										</span>
+									</div>
+								</div>
+							<?php endforeach; ?>
+						<?php else: ?>
+							<div class="doc-row normal">
+								<div class="doc-row__top">
+									<strong>No expiring documents found</strong>
+									<span class="doc-pill normal">Normal</span>
+								</div>
+								<div class="doc-row__meta">
+									<span class="doc-col doc-col--document">
+										<span class="doc-col__label">Document</span>
+										<span class="doc-col__value">N/A</span>
+									</span>
+									<span class="doc-col doc-col--date">
+										<span class="doc-col__label">Expiry Date</span>
+										<span class="doc-col__value">N/A</span>
+									</span>
+									<span class="doc-col doc-col--days">
+										<span class="doc-col__label">Days Remaining</span>
+										<span class="doc-col__value">0 day</span>
+									</span>
+								</div>
 							</div>
-							<div class="doc-row__meta">
-								<span>Master</span>
-								<span>Master Marine COC</span>
-								<span>12-28-25</span>
-								<span>8 days</span>
-							</div>
-						</div>
-						<div class="doc-row warning">
-							<div class="doc-row__top">
-								<strong>Emily Bangis</strong>
-								<span class="doc-pill warning">warning</span>
-							</div>
-							<div class="doc-row__meta">
-								<span>Cook</span>
-								<span>Ship Cook Certificate</span>
-								<span>12-25-25</span>
-								<span>13 days</span>
-							</div>
-						</div>
-						<div class="doc-row normal">
-							<div class="doc-row__top">
-								<strong>Jake Co</strong>
-								<span class="doc-pill normal">normal</span>
-							</div>
-							<div class="doc-row__meta">
-								<span>Cadet</span>
-								<span>Master Marine COC</span>
-								<span>12-25-25</span>
-								<span>30 days</span>
-							</div>
-						</div>
+						<?php endif; ?>
 					</div>
 				</div>
 			</div>
