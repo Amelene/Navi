@@ -22,6 +22,9 @@ $category_display = ucwords(strtolower($category));
 // Include database config
 require_once '../config/database.php';
 
+// Logged-in crew reference
+$logged_in_crew_no = $_SESSION['crew_no'] ?? '';
+
 // Handle ID CHECK request
 $crew_data = null;
 $error = '';
@@ -57,41 +60,83 @@ if (isset($_POST['check_id'])) {
 
 // Handle PROCEED request
 if (isset($_POST['proceed'])) {
-    $crew_no = $_POST['crew_no'] ?? '';
+    $crew_no = trim($_POST['crew_no'] ?? '');
     $crew_name = $_POST['crew_name'] ?? '';
     $dept = $_POST['department'] ?? '';
     $cat = $_POST['category'] ?? '';
-    $vessel_type = $_POST['vessel_type'] ?? '';
+    $vessel_type = trim($_POST['vessel_type'] ?? '');
     $test_date = $_POST['date'] ?? '';
-    
-    // Here you can add logic to save the examination data
-    // For now, we'll just redirect or show success message
-    $_SESSION['exam_data'] = [
-        'crew_no' => $crew_no,
-        'crew_name' => $crew_name,
-        'department' => $dept,
-        'category' => $cat,
-        'vessel_type' => $vessel_type,
-        'test_date' => $test_date
-    ];
-    
-    // Get crew_id from database and store in session
-    try {
-        $db = Database::getInstance();
-        $crewInfo = $db->fetchOne("SELECT id FROM crew_master WHERE crew_no = ?", [$crew_no]);
-        if ($crewInfo) {
-            $_SESSION['crew_id'] = $crewInfo['id'];
+
+    // Re-validate crew on proceed (server-side protection)
+    $crew_data = null;
+    if (!empty($crew_no)) {
+        try {
+            $db = Database::getInstance();
+            $crew_data = $db->fetchOne(
+                "SELECT cm.crew_no, 
+                        CONCAT(cm.first_name, ' ', cm.last_name) as crew_name,
+                        d.department_name
+                 FROM crew_master cm
+                 LEFT JOIN departments d ON cm.department_id = d.id
+                 WHERE cm.crew_no = ? AND cm.user_status = 'active'",
+                [$crew_no]
+            );
+
+            if ($crew_data && isset($crew_data['crew_name'])) {
+                $crew_data['crew_name'] = ucwords(strtolower($crew_data['crew_name']));
+            }
+        } catch (Exception $e) {
+            $error = 'Error checking crew ID';
         }
-    } catch (Exception $e) {
-        // Log error but continue
-        error_log("Error getting crew_id: " . $e->getMessage());
     }
 
-    // Clear previous exam questions to force reload for new category
-    unset($_SESSION['exam_questions']);
-    
-    header('Location: examination.php');
-    exit();
+    // Must have valid checked crew
+    if (!$error && !$crew_data) {
+        $error = 'Please perform a valid ID CHECK first.';
+    }
+
+    // Only logged-in crew can proceed
+    if (!$error && strcasecmp($crew_no, $logged_in_crew_no) !== 0) {
+        $error = 'You can only proceed using the currently logged-in Crew ID.';
+    }
+
+    // Deck requires vessel type selection
+    if (
+        !$error &&
+        strtoupper($department) === 'DECK' &&
+        !in_array($vessel_type, ['Oil Tanker', 'Dry Cargo'], true)
+    ) {
+        $error = 'Please select a vessel type before proceeding.';
+    }
+
+    if (!$error) {
+        $_SESSION['exam_data'] = [
+            'crew_no' => $crew_no,
+            'crew_name' => $crew_name,
+            'department' => $dept,
+            'category' => $cat,
+            'vessel_type' => $vessel_type,
+            'test_date' => $test_date
+        ];
+
+        // Get crew_id from database and store in session
+        try {
+            $db = Database::getInstance();
+            $crewInfo = $db->fetchOne("SELECT id FROM crew_master WHERE crew_no = ?", [$crew_no]);
+            if ($crewInfo) {
+                $_SESSION['crew_id'] = $crewInfo['id'];
+            }
+        } catch (Exception $e) {
+            // Log error but continue
+            error_log("Error getting crew_id: " . $e->getMessage());
+        }
+
+        // Clear previous exam questions to force reload for new category
+        unset($_SESSION['exam_questions']);
+
+        header('Location: examination.php');
+        exit();
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -201,8 +246,14 @@ if (isset($_POST['proceed'])) {
 
                 <div class="button-group">
                     <button type="submit" name="check_id" class="btn btn-check">ID CHECK</button>
-                    <button type="submit" name="proceed" class="btn btn-proceed" 
-                        <?php echo empty($crew_data) ? 'disabled' : ''; ?>>
+                    <button type="submit" name="proceed" id="proceedBtn" class="btn btn-proceed"
+                        <?php
+                        $is_deck = strtoupper($department) === 'DECK';
+                        $posted_vessel_type = $_POST['vessel_type'] ?? '';
+                        $crew_matches_login = isset($_POST['crew_no']) && strcasecmp(trim($_POST['crew_no']), $logged_in_crew_no) === 0;
+                        $disable_proceed = empty($crew_data) || !$crew_matches_login || ($is_deck && empty($posted_vessel_type));
+                        echo $disable_proceed ? 'disabled' : '';
+                        ?>>
                         PROCEED
                     </button>
                 </div>
@@ -215,18 +266,48 @@ if (isset($_POST['proceed'])) {
     </div>
 
     <script>
+        function updateProceedState() {
+            const proceedBtn = document.getElementById('proceedBtn');
+            if (!proceedBtn) return;
+
+            const checkedCrewExists = <?php echo !empty($crew_data) ? 'true' : 'false'; ?>;
+            const isDeck = <?php echo strtoupper($department) === 'DECK' ? 'true' : 'false'; ?>;
+
+            const crewNoInput = document.getElementById('crew_no');
+            const vesselTypeInput = document.getElementById('vessel_type');
+
+            const inputCrewNo = (crewNoInput?.value || '').trim().toLowerCase();
+            const loggedInCrewNo = <?php echo json_encode(strtolower((string)$logged_in_crew_no)); ?>;
+            const crewMatchesLogin = inputCrewNo !== '' && inputCrewNo === loggedInCrewNo;
+
+            const vesselSelected = !isDeck || ((vesselTypeInput?.value || '').trim() !== '');
+
+            proceedBtn.disabled = !(checkedCrewExists && crewMatchesLogin && vesselSelected);
+        }
+
         function selectVesselType(button, value) {
             // Remove active class from all buttons
             document.querySelectorAll('.vessel-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            
+
             // Add active class to clicked button
             button.classList.add('active');
-            
+
             // Set hidden input value
             document.getElementById('vessel_type').value = value;
+
+            // Recompute proceed button state
+            updateProceedState();
         }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const crewNoInput = document.getElementById('crew_no');
+            if (crewNoInput) {
+                crewNoInput.addEventListener('input', updateProceedState);
+            }
+            updateProceedState();
+        });
     </script>
 </body>
 </html>
