@@ -145,6 +145,11 @@ if ($force_reload_questions || !isset($_SESSION['exam_questions']) || empty($_SE
 // Get current question index from URL or default to intro
 $current_step = isset($_GET['step']) ? (int)$_GET['step'] : 0;
 $show_intro = ($current_step === 0);
+
+// Stable server-side exam end timestamp (in ms) to prevent client-side timer drift/reset glitches
+$exam_start_time = (int)($_SESSION['exam_start_time'] ?? time());
+$exam_duration_seconds = (int)($time_limit * 60);
+$exam_end_timestamp_ms = ($exam_start_time + $exam_duration_seconds) * 1000;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -336,6 +341,7 @@ $show_intro = ($current_step === 0);
         let examStarted = <?php echo $show_intro ? 'false' : 'true'; ?>;
         let isNavigating = false; // Flag to prevent beforeunload prompt during navigation
         let timerInitialized = false;
+        const SERVER_EXAM_END_MS = <?php echo (int)$exam_end_timestamp_ms; ?>;
 
         function getModalElements() {
             return {
@@ -413,22 +419,10 @@ $show_intro = ($current_step === 0);
         }
 
         function startExam() {
-            // Clear any previous exam data from sessionStorage
+            // Clear answers/review only; timer baseline is controlled by server session
             sessionStorage.removeItem('exam_answers');
             sessionStorage.removeItem('exam_review_marks');
-            sessionStorage.removeItem('exam_end_time');
-            sessionStorage.removeItem('exam_started_at');
-            sessionStorage.removeItem('exam_time_limit_seconds');
 
-            // Persist baseline values for this exam run
-            const startedAt = Date.now();
-            const timeLimitSeconds = <?php echo $time_limit * 60; ?>;
-            const endTime = startedAt + (timeLimitSeconds * 1000);
-
-            sessionStorage.setItem('exam_started_at', String(startedAt));
-            sessionStorage.setItem('exam_time_limit_seconds', String(timeLimitSeconds));
-            sessionStorage.setItem('exam_end_time', String(endTime));
-            
             // Redirect to first question and force fresh DB load
             isNavigating = true;
             window.location.href = 'examination.php?refresh=1&step=1';
@@ -438,30 +432,9 @@ $show_intro = ($current_step === 0);
             if (timerInitialized) return;
             timerInitialized = true;
 
-            const defaultLimitSeconds = <?php echo $time_limit * 60; ?>;
+            const endTime = SERVER_EXAM_END_MS;
 
-            // Recover persisted baseline; if missing, create once and keep fixed for this run
-            let startedAt = parseInt(sessionStorage.getItem('exam_started_at'), 10);
-            let timeLimitSeconds = parseInt(sessionStorage.getItem('exam_time_limit_seconds'), 10);
-            let endTime = parseInt(sessionStorage.getItem('exam_end_time'), 10);
-
-            if (!startedAt || Number.isNaN(startedAt)) {
-                startedAt = Date.now();
-                sessionStorage.setItem('exam_started_at', String(startedAt));
-            }
-
-            if (!timeLimitSeconds || Number.isNaN(timeLimitSeconds)) {
-                timeLimitSeconds = defaultLimitSeconds;
-                sessionStorage.setItem('exam_time_limit_seconds', String(timeLimitSeconds));
-            }
-
-            // Hard fallback from started_at + limit (prevents accidental reset to 30:00 on next page)
-            if (!endTime || Number.isNaN(endTime)) {
-                endTime = startedAt + (timeLimitSeconds * 1000);
-                sessionStorage.setItem('exam_end_time', String(endTime));
-            }
-
-            // Strict monotonic countdown from fixed endTime
+            // Initialize once from server baseline
             timeRemaining = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
             updateTimerDisplay();
 
@@ -472,7 +445,7 @@ $show_intro = ($current_step === 0);
             timerInterval = setInterval(function() {
                 const syncedRemaining = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
 
-                // Never increase remaining time (prevents 23:23 -> 23:24 jumps)
+                // Strictly non-increasing to avoid 23:23 -> 23:24 visual jump
                 if (typeof timeRemaining !== 'number' || Number.isNaN(timeRemaining)) {
                     timeRemaining = syncedRemaining;
                 } else {
@@ -483,10 +456,9 @@ $show_intro = ($current_step === 0);
 
                 if (timeRemaining <= 0) {
                     clearInterval(timerInterval);
-                    sessionStorage.removeItem('exam_end_time');
                     submitExam(true); // Auto-submit when time is up
                 }
-            }, 1000);
+            }, 250);
         }
         
         function updateTimerDisplay() {
