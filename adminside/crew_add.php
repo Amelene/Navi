@@ -15,7 +15,7 @@ unset($_SESSION['crew_add_errors'], $_SESSION['crew_add_old']);
 try {
     $db = Database::getInstance();
 
-    $positions = $db->fetchAll("SELECT id, position_name FROM positions ORDER BY position_name");
+    $positions = $db->fetchAll("SELECT id, position_name FROM positions WHERE department = 'Crew' ORDER BY position_name");
     $vessels = $db->fetchAll("SELECT id, vessel_name FROM vessels ORDER BY vessel_name");
     $departments = $db->fetchAll("SELECT id, department_name FROM departments ORDER BY department_name");
 

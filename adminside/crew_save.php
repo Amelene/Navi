@@ -72,6 +72,13 @@ try {
     $db = Database::getInstance();
 
     $existing = $db->fetchOne("SELECT id FROM crew_master WHERE crew_no = ? LIMIT 1", [$crew_no]);
+    $validPosition = $db->fetchOne("SELECT id FROM positions WHERE id = ? AND department = 'Crew' LIMIT 1", [$position_id]);
+    if (!$validPosition) {
+        $_SESSION['crew_add_errors'] = ['Selected position is invalid for Crew department.'];
+        $_SESSION['crew_add_old'] = $_POST;
+        header('Location: crew_add.php');
+        exit();
+    }
     if ($existing) {
         $_SESSION['crew_add_errors'] = ['Crew No already exists.'];
         $_SESSION['crew_add_old'] = $_POST;

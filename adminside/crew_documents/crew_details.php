@@ -38,7 +38,7 @@ try {
         exit();
     }
 
-    $positions = $db->fetchAll("SELECT id, position_name FROM positions ORDER BY position_name");
+    $positions = $db->fetchAll("SELECT id, position_name FROM positions WHERE department = 'Crew' ORDER BY position_name");
     $vessels   = $db->fetchAll("SELECT id, vessel_name FROM vessels ORDER BY vessel_name");
     
 } catch (Exception $e) {

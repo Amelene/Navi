@@ -32,7 +32,7 @@ try {
     );
 
     $vessels = $db->fetchAll("SELECT id, vessel_name FROM vessels ORDER BY vessel_name ASC");
-    $positions = $db->fetchAll("SELECT id, position_name FROM positions ORDER BY position_name ASC");
+    $positions = $db->fetchAll("SELECT id, position_name FROM positions WHERE department = 'Crew' ORDER BY position_name ASC");
     
 } catch (Exception $e) {
     error_log("Error fetching applications: " . $e->getMessage());

@@ -16,6 +16,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $crew_no = $_POST['crew_no'] ?? '';
         if (empty($crew_no)) throw new Exception("Crew number is required");
 
+        $positionId = !empty($_POST['position_id']) ? (int)$_POST['position_id'] : null;
+        if ($positionId !== null) {
+            $validPosition = $db->fetchOne(
+                "SELECT id FROM positions WHERE id = ? AND department = 'Crew' LIMIT 1",
+                [$positionId]
+            );
+            if (!$validPosition) {
+                throw new Exception("Selected position is invalid for Crew department.");
+            }
+        }
+
         $conn->beginTransaction();
 
         $sql = "UPDATE crew_master SET 
@@ -69,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_POST['phone']               ?? '',
             $_POST['address']             ?? '',
             $_POST['crew_status']         ?? 'on_vacation',
-            !empty($_POST['position_id']) ? (int)$_POST['position_id'] : null,
+            $positionId,
             !empty($_POST['vessel_id'])   ? (int)$_POST['vessel_id']   : null,
             $_POST['emergency_name']         ?? null,
             $_POST['emergency_relationship'] ?? null,

@@ -123,7 +123,7 @@ try {
     $position_id = 0;
 
     if ($selectedPositionId > 0) {
-        $position = $db->fetchOne("SELECT id FROM positions WHERE id = ? LIMIT 1", [$selectedPositionId]);
+        $position = $db->fetchOne("SELECT id FROM positions WHERE id = ? AND department = 'Crew' LIMIT 1", [$selectedPositionId]);
         $position_id = (int)($position['id'] ?? 0);
     }
 
@@ -131,7 +131,7 @@ try {
     if ($position_id <= 0) {
         $positionName = trim((string)($application['position_applied'] ?? ''));
         $normalizedPositionName = strtoupper(preg_replace('/\s+/', ' ', $positionName));
-        $allPositions = $db->fetchAll("SELECT id, position_name FROM positions");
+        $allPositions = $db->fetchAll("SELECT id, position_name FROM positions WHERE department = 'Crew'");
 
         foreach ($allPositions as $p) {
             $dbPos = strtoupper(preg_replace('/\s+/', ' ', trim((string)$p['position_name'])));
