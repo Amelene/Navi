@@ -686,6 +686,7 @@ try {
 
 		const overviewAllValues = overviewChartDatasets.flatMap(ds => Array.isArray(ds.data) ? ds.data : []);
 		const overviewMaxValue = overviewAllValues.length ? Math.max(...overviewAllValues, 0) : 0;
+		const overviewTickValues = [20, 40, 60, 80, 100];
 
 		new Chart(ovCtx, {
 			type: 'bar',
@@ -705,10 +706,16 @@ try {
 				scales: {
 					y: {
 						beginAtZero: true,
-						suggestedMax: overviewMaxValue <= 5 ? 5 : undefined,
+						min: 0,
+						max: 100,
+						afterBuildTicks: (axis) => {
+							axis.ticks = [{ value: 0 }, ...overviewTickValues.map(v => ({ value: v }))];
+						},
 						ticks: {
 							precision: 0,
-							stepSize: overviewMaxValue <= 5 ? 1 : undefined
+							callback: function(value) {
+								return value === 0 || overviewTickValues.includes(value) ? value : '';
+							}
 						}
 					}
 				},
