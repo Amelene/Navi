@@ -19,21 +19,40 @@ try {
     
     function identifyCrewFromFilename($filename, $db) {
         $nameWithoutExt = strtolower(pathinfo($filename, PATHINFO_FILENAME));
+        $nameNormalized = preg_replace('/[^a-z0-9]+/i', ' ', $nameWithoutExt);
+        $nameNormalized = trim(preg_replace('/\s+/', ' ', $nameNormalized));
         $allCrew = $db->fetchAll("SELECT id, crew_no, first_name, last_name FROM crew_master");
-        
+
         foreach ($allCrew as $crew) {
-            $crew_no    = strtolower($crew['crew_no']);
-            $first_name = strtolower($crew['first_name']);
-            $last_name  = strtolower($crew['last_name']);
-            preg_match('/(\d+)$/', $crew_no, $matches);
+            $crew_no_raw = strtolower((string)$crew['crew_no']);
+            $first_name  = strtolower((string)$crew['first_name']);
+            $last_name   = strtolower((string)$crew['last_name']);
+
+            $crew_no_norm = preg_replace('/[^a-z0-9]+/i', ' ', $crew_no_raw);
+            $crew_no_norm = trim(preg_replace('/\s+/', ' ', $crew_no_norm));
+
+            preg_match('/(\d+)$/', $crew_no_raw, $matches);
             $crew_number = $matches[1] ?? '';
-            
-            if (
-                (!empty($crew_number) && strpos($nameWithoutExt, $crew_number) !== false) ||
-                strpos($nameWithoutExt, $crew_no)    !== false ||
-                strpos($nameWithoutExt, $first_name) !== false ||
-                strpos($nameWithoutExt, $last_name)  !== false
-            ) {
+
+            $hasCrewNoExact = false;
+            $hasCrewNumExact = false;
+            $hasNamePair = false;
+
+            if ($crew_no_norm !== '') {
+                $hasCrewNoExact = preg_match('/\b' . preg_quote($crew_no_norm, '/') . '\b/i', $nameNormalized) === 1;
+            }
+
+            if ($crew_number !== '') {
+                $hasCrewNumExact = preg_match('/\b' . preg_quote($crew_number, '/') . '\b/i', $nameNormalized) === 1;
+            }
+
+            if ($first_name !== '' && $last_name !== '') {
+                $firstMatch = preg_match('/\b' . preg_quote($first_name, '/') . '\b/i', $nameNormalized) === 1;
+                $lastMatch  = preg_match('/\b' . preg_quote($last_name, '/') . '\b/i', $nameNormalized) === 1;
+                $hasNamePair = $firstMatch && $lastMatch;
+            }
+
+            if ($hasCrewNoExact || $hasCrewNumExact || $hasNamePair) {
                 return [
                     'crew_id'   => $crew['id'],
                     'crew_no'   => $crew['crew_no'],
@@ -41,6 +60,7 @@ try {
                 ];
             }
         }
+
         return null;
     }
 
@@ -206,7 +226,7 @@ try {
     $uploadedFiles = [];
     $errors        = [];
     $allowedTypes  = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-    $maxFileSize   = 10 * 1024 * 1024; // 10MB
+    $maxFileSize   = 50 * 1024 * 1024; // 50MB
     $categories    = ['medical', 'contract', 'file201', 'nbi', 'yellowfever'];
     
     foreach ($categories as $category) {
@@ -228,9 +248,20 @@ try {
                 
                 $currentCrewId = $crew_id;
                 $currentCrewNo = $crew_no;
-                
-                if (empty($currentCrewId)) {
-                    $identifiedCrew = identifyCrewFromFilename($fileName, $db);
+
+                $identifiedCrew = identifyCrewFromFilename($fileName, $db);
+
+                if (!empty($currentCrewId)) {
+                    if (!$identifiedCrew) {
+                        $errors[] = "File $fileName: Filename must contain matching selected crew info (crew no or full name).";
+                        continue;
+                    }
+
+                    if (strtolower((string)$identifiedCrew['crew_no']) !== strtolower((string)$currentCrewNo)) {
+                        $errors[] = "File $fileName: Filename crew (" . $identifiedCrew['crew_no'] . ") does not match selected crew ($currentCrewNo). Upload rejected.";
+                        continue;
+                    }
+                } else {
                     if ($identifiedCrew) {
                         $currentCrewId = $identifiedCrew['crew_id'];
                         $currentCrewNo = $identifiedCrew['crew_no'];
@@ -245,7 +276,7 @@ try {
                     continue;
                 }
                 if ($fileSize > $maxFileSize) {
-                    $errors[] = "File $fileName: File size exceeds 10MB limit.";
+                    $errors[] = "File $fileName: File size exceeds 50MB limit.";
                     continue;
                 }
                 

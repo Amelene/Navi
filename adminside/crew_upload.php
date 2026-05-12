@@ -68,7 +68,7 @@ try {
                                     <?php endforeach; ?>
                                 </select>
                                 <p style="font-size: 0.75rem; color: #999; margin-top: 6px; margin-bottom: 0;">
-                                    Reminder: Include crew number (e.g., "001"), crew_no, first name, or last name in your filename for automatic identification
+                                    Reminder: Filename must match the selected crew (crew no or full name). If selected crew and filename do not match, upload will be rejected.
                                 </p>
                             </div>
                         </div>
