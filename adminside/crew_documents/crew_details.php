@@ -37,6 +37,9 @@ try {
         header('Location: ../crew.php');
         exit();
     }
+
+    $positions = $db->fetchAll("SELECT id, position_name FROM positions ORDER BY position_name");
+    $vessels   = $db->fetchAll("SELECT id, vessel_name FROM vessels ORDER BY vessel_name");
     
 } catch (Exception $e) {
     $_SESSION['error_message'] = "Error fetching crew details: " . $e->getMessage();
@@ -257,11 +260,27 @@ function formatDateInput($date) {
                                 <div class="section-content">
                                     <div class="detail-item">
                                         <span class="detail-label">Position:</span>
-                                        <span class="detail-value"><?php echo htmlspecialchars($crew['position_name'] ?? 'N/A'); ?></span>
+                                        <span class="detail-value view-mode"><?php echo htmlspecialchars($crew['position_name'] ?? 'N/A'); ?></span>
+                                        <select name="position_id" class="edit-mode" style="display: none;">
+                                            <option value="">Select Position</option>
+                                            <?php foreach ($positions as $p): ?>
+                                                <option value="<?php echo (int)$p['id']; ?>" <?php echo ((int)($crew['position_id'] ?? 0) === (int)$p['id']) ? 'selected' : ''; ?>>
+                                                    <?php echo htmlspecialchars($p['position_name']); ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
                                     </div>
                                     <div class="detail-item">
                                         <span class="detail-label">Vessel Assigned:</span>
-                                        <span class="detail-value"><?php echo htmlspecialchars($crew['vessel_name'] ?? 'N/A'); ?></span>
+                                        <span class="detail-value view-mode"><?php echo htmlspecialchars($crew['vessel_name'] ?? 'N/A'); ?></span>
+                                        <select name="vessel_id" class="edit-mode" style="display: none;">
+                                            <option value="">Select Vessel</option>
+                                            <?php foreach ($vessels as $v): ?>
+                                                <option value="<?php echo (int)$v['id']; ?>" <?php echo ((int)($crew['vessel_id'] ?? 0) === (int)$v['id']) ? 'selected' : ''; ?>>
+                                                    <?php echo htmlspecialchars($v['vessel_name']); ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
                                     </div>
                                     <div class="detail-item">
                                         <span class="detail-label">Date of Embarkation:</span>
