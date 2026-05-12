@@ -291,16 +291,18 @@
         width: 100% !important;
         min-height: 0 !important;
         margin: 0 !important;
-        padding: 8mm !important;
+        padding: 6mm !important;
         display: flex !important;
         justify-content: center !important;
         align-items: flex-start !important;
         background: #fff !important;
+        transform: scale(1.12) !important;
+        transform-origin: top center !important;
     }
 
     .certificate-card {
-        width: 186mm !important;
-        max-width: 186mm !important;
+        width: 180mm !important;
+        max-width: 180mm !important;
         margin: 0 !important;
         padding: 0 !important;
         background: #fff !important;
@@ -313,9 +315,9 @@
 
     .certificate-content {
         width: 100% !important;
-        border: 0.8mm solid #FF8A4C !important;
+        border: 0.85mm solid #FF8A4C !important;
         border-radius: 4mm !important;
-        padding: 8mm 10mm !important;
+        padding: 9mm 11mm !important;
         overflow: hidden !important;
         page-break-inside: avoid !important;
         break-inside: avoid !important;
