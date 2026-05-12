@@ -231,12 +231,14 @@
     }
 
     html, body {
-        width: 210mm !important;
-        min-width: 210mm !important;
+        width: auto !important;
+        min-width: 0 !important;
+        height: auto !important;
+        min-height: 0 !important;
         margin: 0 !important;
         padding: 0 !important;
         background: #fff !important;
-        overflow: hidden !important;
+        overflow: visible !important;
     }
 
     body * { visibility: hidden !important; }
@@ -265,32 +267,48 @@
         background: transparent !important;
         margin: 0 !important;
         padding: 0 !important;
-        width: 100% !important;
-        max-width: 100% !important;
+        width: auto !important;
+        max-width: none !important;
+        height: auto !important;
+        min-height: 0 !important;
+        overflow: visible !important;
     }
 
-    .dashboard::before { display: none !important; }
+    .dashboard::before,
+    .dashboard::after,
+    .main::before,
+    .main::after,
+    .main__content::before,
+    .main__content::after {
+        content: none !important;
+        display: none !important;
+        background: none !important;
+    }
 
     .certificate-container {
+        position: fixed !important;
+        inset: 0 !important;
         width: 100% !important;
-        min-height: auto !important;
+        min-height: 0 !important;
         margin: 0 !important;
-        padding: 0 !important;
+        padding: 8mm !important;
         display: flex !important;
         justify-content: center !important;
         align-items: flex-start !important;
+        background: #fff !important;
     }
 
     .certificate-card {
-        width: 190mm !important;              /* stable content width across Windows/Mac */
+        width: 190mm !important;
         max-width: 190mm !important;
-        margin: 8mm auto 0 auto !important;
+        margin: 0 !important;
         padding: 0 !important;
         background: #fff !important;
         border-radius: 0 !important;
         box-shadow: none !important;
         page-break-inside: avoid !important;
         break-inside: avoid !important;
+        break-after: avoid-page !important;
     }
 
     .certificate-content {
@@ -301,6 +319,7 @@
         overflow: hidden !important;
         page-break-inside: avoid !important;
         break-inside: avoid !important;
+        break-after: avoid-page !important;
     }
 
     .certificate-actions { display: none !important; }
