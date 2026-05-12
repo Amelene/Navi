@@ -686,7 +686,7 @@ try {
 
 		const overviewAllValues = overviewChartDatasets.flatMap(ds => Array.isArray(ds.data) ? ds.data : []);
 		const overviewMaxValue = overviewAllValues.length ? Math.max(...overviewAllValues, 0) : 0;
-		const overviewTickValues = [10, 20, 30, 40, 50];
+		const overviewTickValues = [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 
 		new Chart(ovCtx, {
 			type: 'bar',
