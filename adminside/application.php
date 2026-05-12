@@ -183,23 +183,25 @@ try {
                                                             </button>
                                                         <?php endif; ?>
 
-                                                        <?php if ($app['status'] !== 'on_hold'): ?>
-                                                            <form action="application_action.php" method="POST" style="display:inline;">
+                                                        <?php if ($app['status'] !== 'confirmed'): ?>
+                                                            <?php if ($app['status'] !== 'on_hold'): ?>
+                                                                <form action="application_action.php" method="POST" style="display:inline;">
+                                                                    <input type="hidden" name="application_id" value="<?php echo htmlspecialchars($app['application_id']); ?>">
+                                                                    <input type="hidden" name="action" value="on_hold">
+                                                                    <button type="submit" class="btn warn add" style="padding:6px 10px; min-width:auto; background:#f59e0b; border-color:#f59e0b;">
+                                                                        On Hold
+                                                                    </button>
+                                                                </form>
+                                                            <?php endif; ?>
+
+                                                            <form action="application_action.php" method="POST" style="display:inline;" onsubmit="return confirm('Delete this application and all related uploaded files? This cannot be undone.');">
                                                                 <input type="hidden" name="application_id" value="<?php echo htmlspecialchars($app['application_id']); ?>">
-                                                                <input type="hidden" name="action" value="on_hold">
-                                                                <button type="submit" class="btn warn add" style="padding:6px 10px; min-width:auto; background:#f59e0b; border-color:#f59e0b;">
-                                                                    On Hold
+                                                                <input type="hidden" name="action" value="delete">
+                                                                <button type="submit" class="btn warn add" style="padding:6px 10px; min-width:auto; background:#dc2626; border-color:#dc2626;">
+                                                                    Delete
                                                                 </button>
                                                             </form>
                                                         <?php endif; ?>
-
-                                                        <form action="application_action.php" method="POST" style="display:inline;" onsubmit="return confirm('Delete this application and all related uploaded files? This cannot be undone.');">
-                                                            <input type="hidden" name="application_id" value="<?php echo htmlspecialchars($app['application_id']); ?>">
-                                                            <input type="hidden" name="action" value="delete">
-                                                            <button type="submit" class="btn warn add" style="padding:6px 10px; min-width:auto; background:#dc2626; border-color:#dc2626;">
-                                                                Delete
-                                                            </button>
-                                                        </form>
 
                                                         <?php if ($app['status'] === 'confirmed'): ?>
                                                             <span style="color:#16a34a; font-weight:700;">Processed</span>
