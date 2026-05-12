@@ -142,10 +142,11 @@ try {
     // Get vessels for filter
     $vessels = $db->fetchAll("SELECT vessel_name FROM vessels ORDER BY vessel_name");
     
-    // Get positions for filter (Crew department via departments table, schema-safe)
+    // Get positions for filter (Crew-only by department column)
     $positions = $db->fetchAll("
         SELECT DISTINCT p.position_name
         FROM positions p
+        WHERE UPPER(TRIM(p.department)) = 'CREW'
         ORDER BY p.position_name
     ");
     
