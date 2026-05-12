@@ -32,6 +32,7 @@ try {
     );
 
     $vessels = $db->fetchAll("SELECT id, vessel_name FROM vessels ORDER BY vessel_name ASC");
+    $positions = $db->fetchAll("SELECT id, position_name FROM positions ORDER BY position_name ASC");
     
 } catch (Exception $e) {
     error_log("Error fetching applications: " . $e->getMessage());
@@ -233,6 +234,14 @@ try {
                 <input type="hidden" name="application_id" id="confirmApplicationId">
                 <input type="hidden" name="action" value="accept">
 
+                <label for="confirmPositionId" style="display:block; font-weight:600; margin-bottom:6px;">Select Position</label>
+                <select name="position_id" id="confirmPositionId" required style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:14px;">
+                    <option value="">-- Select Position --</option>
+                    <?php foreach ($positions as $p): ?>
+                        <option value="<?php echo (int)$p['id']; ?>"><?php echo htmlspecialchars($p['position_name']); ?></option>
+                    <?php endforeach; ?>
+                </select>
+
                 <label for="confirmVesselId" style="display:block; font-weight:600; margin-bottom:6px;">Select Vessel</label>
                 <select name="vessel_id" id="confirmVesselId" required style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:14px;">
                     <option value="">-- Select Vessel --</option>
@@ -255,6 +264,8 @@ try {
             const txt = document.getElementById('confirmVesselText');
             const appIdInput = document.getElementById('confirmApplicationId');
             const cancelBtn = document.getElementById('cancelConfirmVessel');
+            const positionSelect = document.getElementById('confirmPositionId');
+            const vesselSelect = document.getElementById('confirmVesselId');
 
             document.querySelectorAll('.btn-open-confirm-modal').forEach(btn => {
                 btn.addEventListener('click', function () {
@@ -264,6 +275,8 @@ try {
 
                     appIdInput.value = appId;
                     txt.textContent = `Applicant: ${name}${position ? ' | Position: ' + position : ''}. Please choose vessel assignment before confirming.`;
+                    if (positionSelect) positionSelect.value = '';
+                    if (vesselSelect) vesselSelect.value = '';
                     modal.style.display = 'flex';
                 });
             });

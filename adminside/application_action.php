@@ -119,43 +119,28 @@ try {
     $first_name = $nameParts[0] ?? 'N/A';
     $last_name = count($nameParts) > 1 ? implode(' ', array_slice($nameParts, 1)) : '';
 
-    $positionName = trim((string)($application['position_applied'] ?? ''));
-    $normalizedPositionName = preg_replace('/\s+/', ' ', strtolower($positionName));
-    $position = null;
-    $allPositions = $db->fetchAll("SELECT id, position_name FROM positions");
+    $selectedPositionId = (int)($_POST['position_id'] ?? 0);
+    $position_id = 0;
 
-    if ($normalizedPositionName !== '') {
+    if ($selectedPositionId > 0) {
+        $position = $db->fetchOne("SELECT id FROM positions WHERE id = ? LIMIT 1", [$selectedPositionId]);
+        $position_id = (int)($position['id'] ?? 0);
+    }
+
+    // fallback to strict resolver from position_applied only if no explicit selection was posted
+    if ($position_id <= 0) {
+        $positionName = trim((string)($application['position_applied'] ?? ''));
+        $normalizedPositionName = strtoupper(preg_replace('/\s+/', ' ', $positionName));
+        $allPositions = $db->fetchAll("SELECT id, position_name FROM positions");
+
         foreach ($allPositions as $p) {
-            $dbPos = preg_replace('/\s+/', ' ', strtolower(trim((string)$p['position_name'])));
+            $dbPos = strtoupper(preg_replace('/\s+/', ' ', trim((string)$p['position_name'])));
             if ($dbPos === $normalizedPositionName) {
-                $position = $p;
-                break;
-            }
-
-            $appParts = array_map('trim', explode('/', $normalizedPositionName));
-            $dbParts  = array_map('trim', explode('/', $dbPos));
-            $matched = false;
-            foreach ($appParts as $ap) {
-                foreach ($dbParts as $dp) {
-                    if ($ap !== '' && $dp !== '' && ($ap === $dp || str_contains($ap, $dp) || str_contains($dp, $ap))) {
-                        $matched = true;
-                        break 2;
-                    }
-                }
-            }
-            if ($matched) {
-                $position = $p;
+                $position_id = (int)$p['id'];
                 break;
             }
         }
     }
-
-    // Fallback: if no matching position in application, use first available position
-    if (!$position) {
-        $position = $allPositions[0] ?? null;
-    }
-
-    $position_id = (int)($position['id'] ?? 0);
 
     // Required in current schema/form: position_id and vessel_id
     // Use admin-selected vessel from confirm modal.
@@ -163,7 +148,7 @@ try {
     $vessel_id = (int)($vessel['id'] ?? 0);
 
     if ($position_id <= 0) {
-        throw new Exception('Cannot confirm: no position record available in system.');
+        throw new Exception('Cannot confirm: please select a valid position.');
     }
     if ($vessel_id <= 0) {
         throw new Exception('Cannot confirm: no vessel record available for assignment.');
