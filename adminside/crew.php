@@ -142,8 +142,8 @@ try {
     // Get vessels for filter
     $vessels = $db->fetchAll("SELECT vessel_name FROM vessels ORDER BY vessel_name");
     
-    // Get positions for filter
-    $positions = $db->fetchAll("SELECT position_name FROM positions WHERE position_name IN ('MASTER', 'CHIEF OFFICER', '2ND OFFICER', '3RD OFFICER', 'BOSUN', 'AB', 'DECK CADET', 'CHIEF ENGINEER', '2ND ENGINEER', '3RD ENGINEER', '4TH ENGINEER', 'WELDER', 'OILER', 'WIPER', 'ENGINE CADET') ORDER BY position_name");
+    // Get positions for filter (all Crew department positions)
+    $positions = $db->fetchAll("SELECT position_name FROM positions WHERE department = 'Crew' ORDER BY position_name");
     
 } catch (Exception $e) {
     die("Error: " . $e->getMessage());
