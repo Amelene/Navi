@@ -25,10 +25,13 @@ try {
             name,
             DATE_FORMAT(submitted_at, '%m - %d - %Y') as date_submitted,
             DATE_FORMAT(submitted_at, '%h:%i %p') as time_submitted,
-            status
+            status,
+            position_applied
         FROM applications 
         ORDER BY submitted_at DESC"
     );
+
+    $vessels = $db->fetchAll("SELECT id, vessel_name FROM vessels ORDER BY vessel_name ASC");
     
 } catch (Exception $e) {
     error_log("Error fetching applications: " . $e->getMessage());
@@ -113,6 +116,18 @@ try {
                         </div>
                     </div>
 
+                    <?php if (isset($_SESSION['success_message'])): ?>
+                        <div class="alert alert-success" style="margin-bottom:10px;">
+                            <?php echo htmlspecialchars($_SESSION['success_message']); unset($_SESSION['success_message']); ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if (isset($_SESSION['error_message'])): ?>
+                        <div class="alert alert-error" style="margin-bottom:10px;">
+                            <?php echo htmlspecialchars($_SESSION['error_message']); unset($_SESSION['error_message']); ?>
+                        </div>
+                    <?php endif; ?>
+
                     <div class="table-container">
                         <div class="table-wrap">
                             <table class="crew-table">
@@ -154,19 +169,42 @@ try {
                                                 <td class="fw-bold"><?php echo htmlspecialchars($app['time_submitted']); ?></td>
                                                 <td class="crew-status <?php echo $status_class; ?>"><?php echo $status_text; ?></td>
                                                 <td>
-                                                    <?php if ($app['status'] === 'pending' || $app['status'] === 'on_hold'): ?>
-                                                        <form action="application_action.php" method="POST" style="display:inline-flex; gap:6px;">
+                                                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                                                        <?php if ($app['status'] === 'pending' || $app['status'] === 'on_hold'): ?>
+                                                            <button
+                                                                type="button"
+                                                                class="btn primary upload btn-open-confirm-modal"
+                                                                style="padding:6px 10px; min-width:auto;"
+                                                                data-application-id="<?php echo htmlspecialchars($app['application_id']); ?>"
+                                                                data-applicant-name="<?php echo htmlspecialchars($app['name']); ?>"
+                                                                data-position-applied="<?php echo htmlspecialchars((string)($app['position_applied'] ?? '')); ?>"
+                                                            >
+                                                                Confirm
+                                                            </button>
+                                                        <?php endif; ?>
+
+                                                        <?php if ($app['status'] !== 'on_hold'): ?>
+                                                            <form action="application_action.php" method="POST" style="display:inline;">
+                                                                <input type="hidden" name="application_id" value="<?php echo htmlspecialchars($app['application_id']); ?>">
+                                                                <input type="hidden" name="action" value="on_hold">
+                                                                <button type="submit" class="btn warn add" style="padding:6px 10px; min-width:auto; background:#f59e0b; border-color:#f59e0b;">
+                                                                    On Hold
+                                                                </button>
+                                                            </form>
+                                                        <?php endif; ?>
+
+                                                        <form action="application_action.php" method="POST" style="display:inline;" onsubmit="return confirm('Delete this application and all related uploaded files? This cannot be undone.');">
                                                             <input type="hidden" name="application_id" value="<?php echo htmlspecialchars($app['application_id']); ?>">
-                                                            <?php if ($app['status'] !== 'confirmed'): ?>
-                                                                <button type="submit" name="action" value="accept" class="btn primary upload" style="padding:6px 10px; min-width:auto;">Accept</button>
-                                                            <?php endif; ?>
-                                                            <?php if ($app['status'] !== 'on_hold'): ?>
-                                                                <button type="submit" name="action" value="decline" class="btn warn add" style="padding:6px 10px; min-width:auto; background:#dc2626; border-color:#dc2626;">Decline</button>
-                                                            <?php endif; ?>
+                                                            <input type="hidden" name="action" value="delete">
+                                                            <button type="submit" class="btn warn add" style="padding:6px 10px; min-width:auto; background:#dc2626; border-color:#dc2626;">
+                                                                Delete
+                                                            </button>
                                                         </form>
-                                                    <?php else: ?>
-                                                        <span style="color:#16a34a; font-weight:700;">Processed</span>
-                                                    <?php endif; ?>
+
+                                                        <?php if ($app['status'] === 'confirmed'): ?>
+                                                            <span style="color:#16a34a; font-weight:700;">Processed</span>
+                                                        <?php endif; ?>
+                                                    </div>
                                                 </td>
                                                 <td><a href="application_details.php?id=<?php echo urlencode($app['application_id']); ?>" class="link-action">VIEW DETAILS</a></td>
                                             </tr>
@@ -183,5 +221,59 @@ try {
     </div>
 
     <?php include '../includes/footer.php'; ?>
+
+    <div id="confirmVesselModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:9999; align-items:center; justify-content:center;">
+        <div style="background:#fff; border-radius:10px; width:min(520px, 92vw); padding:18px;">
+            <h3 style="margin:0 0 10px 0; color:#0f172a;">Confirm Applicant to Crew</h3>
+            <p id="confirmVesselText" style="margin:0 0 14px 0; color:#475569; font-size:14px;"></p>
+
+            <form action="application_action.php" method="POST" id="confirmVesselForm">
+                <input type="hidden" name="application_id" id="confirmApplicationId">
+                <input type="hidden" name="action" value="accept">
+
+                <label for="confirmVesselId" style="display:block; font-weight:600; margin-bottom:6px;">Select Vessel</label>
+                <select name="vessel_id" id="confirmVesselId" required style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:14px;">
+                    <option value="">-- Select Vessel --</option>
+                    <?php foreach ($vessels as $v): ?>
+                        <option value="<?php echo (int)$v['id']; ?>"><?php echo htmlspecialchars($v['vessel_name']); ?></option>
+                    <?php endforeach; ?>
+                </select>
+
+                <div style="display:flex; justify-content:flex-end; gap:8px;">
+                    <button type="button" id="cancelConfirmVessel" class="btn" style="background:#e2e8f0; border-color:#e2e8f0; color:#0f172a;">Cancel</button>
+                    <button type="submit" class="btn primary upload">Confirm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            const modal = document.getElementById('confirmVesselModal');
+            const txt = document.getElementById('confirmVesselText');
+            const appIdInput = document.getElementById('confirmApplicationId');
+            const cancelBtn = document.getElementById('cancelConfirmVessel');
+
+            document.querySelectorAll('.btn-open-confirm-modal').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const appId = this.getAttribute('data-application-id') || '';
+                    const name = this.getAttribute('data-applicant-name') || '';
+                    const position = this.getAttribute('data-position-applied') || '';
+
+                    appIdInput.value = appId;
+                    txt.textContent = `Applicant: ${name}${position ? ' | Position: ' + position : ''}. Please choose vessel assignment before confirming.`;
+                    modal.style.display = 'flex';
+                });
+            });
+
+            cancelBtn?.addEventListener('click', function () {
+                modal.style.display = 'none';
+            });
+
+            modal?.addEventListener('click', function (e) {
+                if (e.target === modal) modal.style.display = 'none';
+            });
+        })();
+    </script>
 </body>
 </html>
