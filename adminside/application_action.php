@@ -122,8 +122,9 @@ try {
     $positionName = trim((string)($application['position_applied'] ?? ''));
     $normalizedPositionName = preg_replace('/\s+/', ' ', strtolower($positionName));
     $position = null;
+    $allPositions = $db->fetchAll("SELECT id, position_name FROM positions");
+
     if ($normalizedPositionName !== '') {
-        $allPositions = $db->fetchAll("SELECT id, position_name FROM positions");
         foreach ($allPositions as $p) {
             $dbPos = preg_replace('/\s+/', ' ', strtolower(trim((string)$p['position_name'])));
             if ($dbPos === $normalizedPositionName) {
@@ -149,6 +150,11 @@ try {
         }
     }
 
+    // Fallback: if no matching position in application, use first available position
+    if (!$position) {
+        $position = $allPositions[0] ?? null;
+    }
+
     $position_id = (int)($position['id'] ?? 0);
 
     // Required in current schema/form: position_id and vessel_id
@@ -157,7 +163,7 @@ try {
     $vessel_id = (int)($vessel['id'] ?? 0);
 
     if ($position_id <= 0) {
-        throw new Exception('Cannot confirm: position_applied has no matching position record.');
+        throw new Exception('Cannot confirm: no position record available in system.');
     }
     if ($vessel_id <= 0) {
         throw new Exception('Cannot confirm: no vessel record available for assignment.');
