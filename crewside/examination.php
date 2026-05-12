@@ -417,10 +417,17 @@ $show_intro = ($current_step === 0);
             sessionStorage.removeItem('exam_answers');
             sessionStorage.removeItem('exam_review_marks');
             sessionStorage.removeItem('exam_end_time');
+            sessionStorage.removeItem('exam_started_at');
+            sessionStorage.removeItem('exam_time_limit_seconds');
 
-            // Set end time (current time + time limit)
-            const endTime = Date.now() + (<?php echo $time_limit; ?> * 60 * 1000);
-            sessionStorage.setItem('exam_end_time', endTime);
+            // Persist baseline values for this exam run
+            const startedAt = Date.now();
+            const timeLimitSeconds = <?php echo $time_limit * 60; ?>;
+            const endTime = startedAt + (timeLimitSeconds * 1000);
+
+            sessionStorage.setItem('exam_started_at', String(startedAt));
+            sessionStorage.setItem('exam_time_limit_seconds', String(timeLimitSeconds));
+            sessionStorage.setItem('exam_end_time', String(endTime));
             
             // Redirect to first question and force fresh DB load
             isNavigating = true;
@@ -431,37 +438,45 @@ $show_intro = ($current_step === 0);
             if (timerInitialized) return;
             timerInitialized = true;
 
-            // Always use one stable end time for this exam session
+            const defaultLimitSeconds = <?php echo $time_limit * 60; ?>;
+
+            // Recover persisted baseline; if missing, create once and keep fixed for this run
+            let startedAt = parseInt(sessionStorage.getItem('exam_started_at'), 10);
+            let timeLimitSeconds = parseInt(sessionStorage.getItem('exam_time_limit_seconds'), 10);
             let endTime = parseInt(sessionStorage.getItem('exam_end_time'), 10);
+
+            if (!startedAt || Number.isNaN(startedAt)) {
+                startedAt = Date.now();
+                sessionStorage.setItem('exam_started_at', String(startedAt));
+            }
+
+            if (!timeLimitSeconds || Number.isNaN(timeLimitSeconds)) {
+                timeLimitSeconds = defaultLimitSeconds;
+                sessionStorage.setItem('exam_time_limit_seconds', String(timeLimitSeconds));
+            }
+
+            // Hard fallback from started_at + limit (prevents accidental reset to 30:00 on next page)
             if (!endTime || Number.isNaN(endTime)) {
-                endTime = Date.now() + (<?php echo $time_limit; ?> * 60 * 1000);
+                endTime = startedAt + (timeLimitSeconds * 1000);
                 sessionStorage.setItem('exam_end_time', String(endTime));
             }
 
-            // Initial compute once
-            timeRemaining = Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
+            // Strict monotonic countdown from fixed endTime
+            timeRemaining = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
             updateTimerDisplay();
 
-            // Clear any previous interval (safety)
             if (timerInterval) {
                 clearInterval(timerInterval);
             }
 
-            // Tick down smoothly every second, with occasional drift correction
-            let tickCount = 0;
             timerInterval = setInterval(function() {
-                tickCount++;
+                const syncedRemaining = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
 
-                // Smooth local decrement
-                timeRemaining = Math.max(0, timeRemaining - 1);
-
-                // Drift correction every 5 ticks only (prevents jumpy UI)
-                if (tickCount % 5 === 0) {
-                    const syncedRemaining = Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
-                    // Only sync if drift is significant
-                    if (Math.abs(syncedRemaining - timeRemaining) > 1) {
-                        timeRemaining = syncedRemaining;
-                    }
+                // Never increase remaining time (prevents 23:23 -> 23:24 jumps)
+                if (typeof timeRemaining !== 'number' || Number.isNaN(timeRemaining)) {
+                    timeRemaining = syncedRemaining;
+                } else {
+                    timeRemaining = Math.min(timeRemaining, syncedRemaining);
                 }
 
                 updateTimerDisplay();
