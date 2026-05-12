@@ -335,6 +335,7 @@ $show_intro = ($current_step === 0);
         let timerInterval;
         let examStarted = <?php echo $show_intro ? 'false' : 'true'; ?>;
         let isNavigating = false; // Flag to prevent beforeunload prompt during navigation
+        let timerInitialized = false;
 
         function getModalElements() {
             return {
@@ -427,29 +428,44 @@ $show_intro = ($current_step === 0);
         }
 
         function startTimer() {
-            const endTime = parseInt(sessionStorage.getItem('exam_end_time'));
-            
-            if (!endTime) {
-                // Fallback if somehow missing
-                const newEndTime = Date.now() + (<?php echo $time_limit; ?> * 60 * 1000);
-                sessionStorage.setItem('exam_end_time', newEndTime);
-                timeRemaining = <?php echo $time_limit * 60; ?>;
-            } else {
-                // Calculate remaining time based on fixed end time
-                timeRemaining = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
+            if (timerInitialized) return;
+            timerInitialized = true;
+
+            // Always use one stable end time for this exam session
+            let endTime = parseInt(sessionStorage.getItem('exam_end_time'), 10);
+            if (!endTime || Number.isNaN(endTime)) {
+                endTime = Date.now() + (<?php echo $time_limit; ?> * 60 * 1000);
+                sessionStorage.setItem('exam_end_time', String(endTime));
             }
-            
-            // Update display immediately
+
+            // Initial compute once
+            timeRemaining = Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
             updateTimerDisplay();
-            
+
+            // Clear any previous interval (safety)
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+
+            // Tick down smoothly every second, with occasional drift correction
+            let tickCount = 0;
             timerInterval = setInterval(function() {
-                // Recalculate every second to stay accurate
-                timeRemaining = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
-                
-                // Update timer display
+                tickCount++;
+
+                // Smooth local decrement
+                timeRemaining = Math.max(0, timeRemaining - 1);
+
+                // Drift correction every 5 ticks only (prevents jumpy UI)
+                if (tickCount % 5 === 0) {
+                    const syncedRemaining = Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
+                    // Only sync if drift is significant
+                    if (Math.abs(syncedRemaining - timeRemaining) > 1) {
+                        timeRemaining = syncedRemaining;
+                    }
+                }
+
                 updateTimerDisplay();
-                
-                // Check if time is up
+
                 if (timeRemaining <= 0) {
                     clearInterval(timerInterval);
                     sessionStorage.removeItem('exam_end_time');
