@@ -267,6 +267,31 @@ try {
             const positionSelect = document.getElementById('confirmPositionId');
             const vesselSelect = document.getElementById('confirmVesselId');
 
+            function normalizeText(v) {
+                return (v || '').toString().trim().replace(/\s+/g, ' ').toUpperCase();
+            }
+
+            function autoSelectPositionFromApplied(appliedPosition) {
+                if (!positionSelect) return;
+                const target = normalizeText(appliedPosition);
+                if (!target) {
+                    positionSelect.value = '';
+                    return;
+                }
+
+                let matchedValue = '';
+                Array.from(positionSelect.options).forEach(opt => {
+                    if (matchedValue) return;
+                    if (!opt.value) return;
+                    const optText = normalizeText(opt.textContent);
+                    if (optText === target) {
+                        matchedValue = opt.value;
+                    }
+                });
+
+                positionSelect.value = matchedValue || '';
+            }
+
             document.querySelectorAll('.btn-open-confirm-modal').forEach(btn => {
                 btn.addEventListener('click', function () {
                     const appId = this.getAttribute('data-application-id') || '';
@@ -275,7 +300,7 @@ try {
 
                     appIdInput.value = appId;
                     txt.textContent = `Applicant: ${name}${position ? ' | Position: ' + position : ''}. Please choose vessel assignment before confirming.`;
-                    if (positionSelect) positionSelect.value = '';
+                    autoSelectPositionFromApplied(position);
                     if (vesselSelect) vesselSelect.value = '';
                     modal.style.display = 'flex';
                 });
