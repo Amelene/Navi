@@ -144,10 +144,8 @@ try {
     
     // Get positions for filter (Crew department via departments table, schema-safe)
     $positions = $db->fetchAll("
-        SELECT p.position_name
+        SELECT DISTINCT p.position_name
         FROM positions p
-        LEFT JOIN departments d ON p.department_id = d.id
-        WHERE UPPER(TRIM(d.department_name)) = 'CREW'
         ORDER BY p.position_name
     ");
     
