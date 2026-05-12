@@ -686,8 +686,18 @@ try {
 
 		const overviewAllValues = overviewChartDatasets.flatMap(ds => Array.isArray(ds.data) ? ds.data : []);
 		const overviewMaxValue = overviewAllValues.length ? Math.max(...overviewAllValues, 0) : 0;
-		const overviewTickValues = [5, 10, 15, 20, 30];
+let overviewTickValues;
 
+if (overviewMaxValue <= 10) {
+    // Kapag 10 pababa ang crew, zoom-in tayo (0 to 10)
+    overviewTickValues = [0, 2, 4, 6, 8, 10];
+} else if (overviewMaxValue <= 20) {
+    // Kapag umabot ng 11-20 ang crew, adjust sa 20 max
+    overviewTickValues = [0, 5, 10, 15, 20];
+} else {
+    // Kapag marami na, gamitin na yung 20, 40, 60, 80, 100 na gusto mo
+    overviewTickValues = [0, 20, 40, 60, 80, 100];
+}
 		new Chart(ovCtx, {
 			type: 'bar',
 			data: {
