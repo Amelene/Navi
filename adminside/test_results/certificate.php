@@ -2,7 +2,23 @@
 session_start();
 require_once '../../config/database.php';
 
-require_once '../../vendor/autoload.php';
+$autoloadPaths = [
+    __DIR__ . '/../../vendor/autoload.php',
+    dirname(__DIR__, 3) . '/vendor/autoload.php'
+];
+
+$autoloadLoaded = false;
+foreach ($autoloadPaths as $autoloadPath) {
+    if (file_exists($autoloadPath)) {
+        require_once $autoloadPath;
+        $autoloadLoaded = true;
+        break;
+    }
+}
+
+if (!$autoloadLoaded) {
+    error_log('Certificate PDF: vendor autoload not found. Checked: ' . implode(' | ', $autoloadPaths));
+}
 
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -55,7 +71,7 @@ try {
     header('Location: ../tests.php');
     exit();
 }
-if ($pdf_mode) {
+if ($pdf_mode && class_exists('Dompdf\Dompdf')) {
     $logoPath = realpath('../../assets/image/logo.png');
     $logoDataUri = '';
     if ($logoPath && file_exists($logoPath)) {
