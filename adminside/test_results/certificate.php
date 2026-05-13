@@ -235,23 +235,23 @@ if ($pdf_mode) {
                 }
 
                 .score-main {
-                    font-size: 12.8mm;
+                    font-size: 10.8mm;
                     line-height: 1;
                     font-weight: 700;
                     color: '.$scoreColor.';
-                    margin: 0 0 1.7mm 0;
+                    margin: 0 0 1.2mm 0;
                 }
 
                 .score-status {
-                    font-size: 12.4mm;
+                    font-size: 10.6mm;
                     line-height: 1;
                     font-weight: 700;
                     color: '.$scoreColor.';
-                    margin: 0 0 1.7mm 0;
+                    margin: 0 0 1.2mm 0;
                 }
 
                 .score-sub {
-                    font-size: 4.6mm;
+                    font-size: 4.2mm;
                     font-weight: 700;
                     color: #4a4a4a;
                     margin: 0;
