@@ -112,9 +112,10 @@ if ($pdf_mode) {
                 .certificate {
                     border: 1.1mm solid #ff7a3d;
                     border-radius: 4mm;
-                    padding: 9mm 12mm 8mm 12mm;
+                    padding: 14mm 16mm 13mm 16mm;
                     position: relative;
                     box-sizing: border-box;
+                    min-height: 270mm;
                 }
 
                 .corner {
@@ -139,14 +140,14 @@ if ($pdf_mode) {
                     border-color: transparent #0a7d98 transparent transparent;
                 }
 
-                .logo { margin: 1mm 0 4.5mm 0; }
-                .logo img { height: 9.5mm; width: auto; }
+                .logo { margin: 1mm 0 7.5mm 0; }
+                .logo img { height: 12.5mm; width: auto; }
 
                 .title {
                     text-align: center;
-                    font-size: 15.5mm;
+                    font-size: 17.5mm;
                     line-height: 1.02;
-                    margin: 0 0 2mm 0;
+                    margin: 0 0 2.6mm 0;
                     font-family: DejaVu Serif, serif;
                     font-weight: 700;
                     color: #17345f;
@@ -154,16 +155,16 @@ if ($pdf_mode) {
 
                 .company {
                     text-align: center;
-                    font-size: 4.2mm;
-                    letter-spacing: 0.95mm;
+                    font-size: 5mm;
+                    letter-spacing: 1.2mm;
                     font-weight: 700;
-                    margin-bottom: 5mm;
+                    margin-bottom: 8mm;
                     color: #17345f;
                 }
 
                 .name {
                     text-align: center;
-                    font-size: 8.7mm;
+                    font-size: 10.8mm;
                     line-height: 1.08;
                     font-weight: 700;
                     margin: 0;
@@ -171,31 +172,31 @@ if ($pdf_mode) {
                 }
 
                 .underline {
-                    width: 74mm;
-                    height: 0.5mm;
+                    width: 90mm;
+                    height: 0.6mm;
                     background: #17345f;
-                    margin: 1.4mm auto 3.6mm auto;
+                    margin: 2.2mm auto 5.2mm auto;
                 }
 
                 .completion {
                     text-align: center;
-                    font-size: 4.5mm;
-                    margin-bottom: 6mm;
+                    font-size: 5.2mm;
+                    margin-bottom: 8.5mm;
                     font-style: italic;
                     color: #17345f;
                 }
 
                 .details-table {
-                    width: 72%;
-                    margin: 0 auto 5.8mm auto;
+                    width: 80%;
+                    margin: 0 auto 8mm auto;
                     border-collapse: collapse;
                     color: #17345f;
                 }
 
                 .details-table td {
                     padding: 1.05mm 0;
-                    font-size: 4.4mm;
-                    line-height: 1.15;
+                    font-size: 5.2mm;
+                    line-height: 1.2;
                 }
 
                 .details-label {
@@ -213,12 +214,12 @@ if ($pdf_mode) {
 
                 .divider {
                     border-top: 0.35mm solid #dedede;
-                    margin: 5.8mm 0 5.3mm 0;
+                    margin: 8.2mm 0 8mm 0;
                 }
 
                 .scores {
-                    width: 58%;
-                    margin: 0 auto 5.2mm auto;
+                    width: 72%;
+                    margin: 0 auto 8mm auto;
                     border-collapse: collapse;
                     text-align: center;
                 }
@@ -234,40 +235,40 @@ if ($pdf_mode) {
                 }
 
                 .score-main {
-                    font-size: 13.2mm;
+                    font-size: 14.8mm;
                     line-height: 1;
                     font-weight: 700;
                     color: '.$scoreColor.';
-                    margin: 0 0 1.3mm 0;
+                    margin: 0 0 2.2mm 0;
                 }
 
                 .score-status {
-                    font-size: 11mm;
+                    font-size: 14mm;
                     line-height: 1;
                     font-weight: 700;
                     color: '.$scoreColor.';
-                    margin: 0 0 1.3mm 0;
+                    margin: 0 0 2.2mm 0;
                 }
 
                 .score-sub {
-                    font-size: 4.9mm;
+                    font-size: 5.3mm;
                     font-weight: 700;
                     color: #4a4a4a;
                     margin: 0;
                 }
 
                 .description {
-                    width: 78%;
-                    margin: 0 auto 6.8mm auto;
+                    width: 82%;
+                    margin: 0 auto 10mm auto;
                     text-align: center;
-                    font-size: 4.7mm;
-                    line-height: 1.35;
+                    font-size: 5.2mm;
+                    line-height: 1.4;
                     color: #17345f;
                 }
 
                 .signatures {
                     width: 90%;
-                    margin: 0 auto 5.6mm auto;
+                    margin: 0 auto 8.5mm auto;
                     border-collapse: collapse;
                 }
 
@@ -280,17 +281,17 @@ if ($pdf_mode) {
 
                 .line {
                     border-top: 0.35mm solid #17345f;
-                    margin-bottom: 1.6mm;
+                    margin-bottom: 2.2mm;
                 }
 
                 .sign-label {
-                    font-size: 4.6mm;
+                    font-size: 5.2mm;
                     font-weight: 700;
                 }
 
                 .footer-text {
                     text-align: center;
-                    font-size: 5mm;
+                    font-size: 5.8mm;
                     font-weight: 700;
                     color: #007ca0;
                     letter-spacing: 0.25mm;
