@@ -2,7 +2,7 @@
 
 header('Content-Type: application/json');
 
-$apiKey = getenv('GROQ_API_KEY') ?: 'PASTE_YOUR_GROQ_API_KEY';
+$apiKey = getenv('GROQ_API_KEY') ?: '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';
 $input = $_POST['message'] ?? 'Recommend a crew assignment';
 
 if (!function_exists('curl_init')) {
