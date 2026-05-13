@@ -106,66 +106,251 @@ if ($pdf_mode) {
         <head>
             <meta charset="UTF-8">
             <style>
-                @page { size: A4 portrait; margin: 10mm; }
-                body { margin: 0; font-family: DejaVu Sans, Arial, sans-serif; color: #2c3e50; }
-                .certificate { border: 3px solid #FF8A4C; border-radius: 12px; padding: 30px 36px; position: relative; }
-                .corner { position: absolute; top: 0; right: 0; width: 0; height: 0; border-style: solid; border-width: 0 90px 90px 0; border-color: transparent #FF8A4C transparent transparent; }
-                .corner:after { content: ""; position: absolute; top: 2px; right: -90px; width: 0; height: 0; border-style: solid; border-width: 0 88px 88px 0; border-color: transparent #126E82 transparent transparent; }
-                .logo { margin-bottom: 18px; }
-                .logo img { height: 36px; }
-                .title { text-align: center; font-size: 48px; font-weight: 700; margin: 0; font-family: DejaVu Serif, serif; }
-                .company { text-align: center; font-size: 14px; letter-spacing: 2px; font-weight: 700; margin-bottom: 18px; }
-                .name { text-align: center; font-size: 34px; font-weight: 700; margin: 10px 0 2px; }
-                .underline { width: 260px; height: 2px; background: #2c3e50; margin: 0 auto 14px; }
-                .completion { text-align: center; font-size: 14px; margin-bottom: 18px; font-style: italic; }
-                .row { margin: 6px 0; font-size: 14px; }
-                .label { display: inline-block; width: 180px; font-weight: 700; }
-                .divider { border-top: 1px solid #ddd; margin: 18px 0; }
-                .scores { text-align: center; margin-bottom: 16px; }
-                .score-main { font-size: 52px; font-weight: 700; color: '.$scoreColor.'; }
-                .score-status { font-size: 44px; font-weight: 700; color: '.$scoreColor.'; margin-top: 6px; }
-                .score-sub { font-size: 18px; font-weight: 700; color: #666; }
-                .description { text-align: center; font-size: 15px; line-height: 1.5; margin: 18px 0 26px; }
-                .signatures { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-                .signatures td { width: 50%; text-align: center; padding: 0 14px; }
-                .line { border-top: 1px solid #2c3e50; margin-bottom: 6px; }
-                .footer-text { text-align: center; font-size: 16px; font-weight: 700; color: #126E82; letter-spacing: 0.4px; }
+                @page { size: A4 portrait; margin: 8mm; }
+                body { margin: 0; font-family: DejaVu Sans, Arial, sans-serif; color: #17345f; }
+                .page { width: 194mm; margin: 0 auto; }
+                .certificate {
+                    border: 1.1mm solid #ff7a3d;
+                    border-radius: 4mm;
+                    padding: 9mm 12mm 8mm 12mm;
+                    position: relative;
+                    box-sizing: border-box;
+                }
+
+                .corner {
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    width: 0;
+                    height: 0;
+                    border-style: solid;
+                    border-width: 0 24mm 24mm 0;
+                    border-color: transparent #ff7a3d transparent transparent;
+                }
+                .corner:after {
+                    content: "";
+                    position: absolute;
+                    top: 0.4mm;
+                    right: -24mm;
+                    width: 0;
+                    height: 0;
+                    border-style: solid;
+                    border-width: 0 23.2mm 23.2mm 0;
+                    border-color: transparent #0a7d98 transparent transparent;
+                }
+
+                .logo { margin: 1mm 0 4.5mm 0; }
+                .logo img { height: 9.5mm; width: auto; }
+
+                .title {
+                    text-align: center;
+                    font-size: 15.5mm;
+                    line-height: 1.02;
+                    margin: 0 0 2mm 0;
+                    font-family: DejaVu Serif, serif;
+                    font-weight: 700;
+                    color: #17345f;
+                }
+
+                .company {
+                    text-align: center;
+                    font-size: 4.2mm;
+                    letter-spacing: 0.95mm;
+                    font-weight: 700;
+                    margin-bottom: 5mm;
+                    color: #17345f;
+                }
+
+                .name {
+                    text-align: center;
+                    font-size: 8.7mm;
+                    line-height: 1.08;
+                    font-weight: 700;
+                    margin: 0;
+                    color: #17345f;
+                }
+
+                .underline {
+                    width: 74mm;
+                    height: 0.5mm;
+                    background: #17345f;
+                    margin: 1.4mm auto 3.6mm auto;
+                }
+
+                .completion {
+                    text-align: center;
+                    font-size: 4.5mm;
+                    margin-bottom: 6mm;
+                    font-style: italic;
+                    color: #17345f;
+                }
+
+                .details-table {
+                    width: 72%;
+                    margin: 0 auto 5.8mm auto;
+                    border-collapse: collapse;
+                    color: #17345f;
+                }
+
+                .details-table td {
+                    padding: 1.05mm 0;
+                    font-size: 4.4mm;
+                    line-height: 1.15;
+                }
+
+                .details-label {
+                    width: 50%;
+                    font-weight: 700;
+                    text-align: left;
+                    padding-right: 10mm;
+                }
+
+                .details-value {
+                    width: 50%;
+                    font-weight: 400;
+                    text-align: left;
+                }
+
+                .divider {
+                    border-top: 0.35mm solid #dedede;
+                    margin: 5.8mm 0 5.3mm 0;
+                }
+
+                .scores {
+                    width: 58%;
+                    margin: 0 auto 5.2mm auto;
+                    border-collapse: collapse;
+                    text-align: center;
+                }
+
+                .scores td {
+                    width: 50%;
+                    vertical-align: top;
+                    color: #17345f;
+                }
+
+                .scores .mid {
+                    border-left: 0.35mm solid #e2e2e2;
+                }
+
+                .score-main {
+                    font-size: 13.2mm;
+                    line-height: 1;
+                    font-weight: 700;
+                    color: '.$scoreColor.';
+                    margin: 0 0 1.3mm 0;
+                }
+
+                .score-status {
+                    font-size: 11mm;
+                    line-height: 1;
+                    font-weight: 700;
+                    color: '.$scoreColor.';
+                    margin: 0 0 1.3mm 0;
+                }
+
+                .score-sub {
+                    font-size: 4.9mm;
+                    font-weight: 700;
+                    color: #4a4a4a;
+                    margin: 0;
+                }
+
+                .description {
+                    width: 78%;
+                    margin: 0 auto 6.8mm auto;
+                    text-align: center;
+                    font-size: 4.7mm;
+                    line-height: 1.35;
+                    color: #17345f;
+                }
+
+                .signatures {
+                    width: 90%;
+                    margin: 0 auto 5.6mm auto;
+                    border-collapse: collapse;
+                }
+
+                .signatures td {
+                    width: 50%;
+                    text-align: center;
+                    color: #17345f;
+                    padding: 0 4mm;
+                }
+
+                .line {
+                    border-top: 0.35mm solid #17345f;
+                    margin-bottom: 1.6mm;
+                }
+
+                .sign-label {
+                    font-size: 4.6mm;
+                    font-weight: 700;
+                }
+
+                .footer-text {
+                    text-align: center;
+                    font-size: 5mm;
+                    font-weight: 700;
+                    color: #007ca0;
+                    letter-spacing: 0.25mm;
+                }
             </style>
         </head>
         <body>
-            <div class="certificate">
-                <div class="corner"></div>
-                <div class="logo">'.($logoDataUri ? '<img src="'.$logoDataUri.'" alt="NSC Logo">' : '').'</div>
-                <h1 class="title">Certificate</h1>
-                <div class="company">NAVI SHIPPING</div>
-                <div class="name">'.$name.'</div>
-                <div class="underline"></div>
-                <div class="completion">'.$completionText.'</div>
+            <div class="page">
+                <div class="certificate">
+                    <div class="corner"></div>
 
-                <div class="row"><span class="label">Department:</span> '.$department.'</div>
-                <div class="row"><span class="label">Test performed:</span> '.$testDate.'</div>
-                <div class="row"><span class="label">Category:</span> '.$category.'</div>
-                <div class="row"><span class="label">Test time used:</span> '.$time_taken_formatted.'</div>
+                    <div class="logo">'.($logoDataUri ? '<img src="'.$logoDataUri.'" alt="NSC Logo">' : '').'</div>
 
-                <div class="divider"></div>
+                    <div class="title">Certificate</div>
+                    <div class="company">NAVI SHIPPING</div>
 
-                <div class="scores">
-                    <div class="score-main">'.$score.'</div>
-                    <div class="score-sub">Overall Score</div>
-                    <div class="score-status">'.$status.'</div>
-                    <div class="score-sub">'.$passing.'</div>
+                    <div class="name">'.$name.'</div>
+                    <div class="underline"></div>
+
+                    <div class="completion">'.$completionText.'</div>
+
+                    <table class="details-table">
+                        <tr><td class="details-label">Department:</td><td class="details-value">'.$department.'</td></tr>
+                        <tr><td class="details-label">Test performed:</td><td class="details-value">'.$testDate.'</td></tr>
+                        <tr><td class="details-label">Category:</td><td class="details-value">'.$category.'</td></tr>
+                        <tr><td class="details-label">Test time used:</td><td class="details-value">'.$time_taken_formatted.'</td></tr>
+                    </table>
+
+                    <div class="divider"></div>
+
+                    <table class="scores">
+                        <tr>
+                            <td>
+                                <p class="score-main">'.$score.'</p>
+                                <p class="score-sub">Overall Score</p>
+                            </td>
+                            <td class="mid">
+                                <p class="score-status">'.$status.'</p>
+                                <p class="score-sub">'.$passing.'</p>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div class="description">'.$description.'</div>
+
+                    <table class="signatures">
+                        <tr>
+                            <td>
+                                <div class="line"></div>
+                                <div class="sign-label">Signature of Assessor</div>
+                            </td>
+                            <td>
+                                <div class="line"></div>
+                                <div class="sign-label">Signature of Candidate</div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div class="footer-text">NAVIgating Excellence Towards Innovative Shipping</div>
                 </div>
-
-                <div class="description">'.$description.'</div>
-
-                <table class="signatures">
-                    <tr>
-                        <td><div class="line"></div>Signature of Assessor</td>
-                        <td><div class="line"></div>Signature of Candidate</td>
-                    </tr>
-                </table>
-
-                <div class="footer-text">NAVIgating Excellence Towards Innovative Shipping</div>
             </div>
         </body>
         </html>';
