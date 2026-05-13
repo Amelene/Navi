@@ -512,7 +512,7 @@ if ($download_file_mode) {
                                 <?php if ($exam['result_status'] === 'PASSED'): ?>
                                     This certificate confirms that the awardee has demonstrated the required level of competency.
                                 <?php else: ?>
-                                    This certificate confirms completion of the exam. Further training is recommended.
+                                    This certificate confirms completion of the exam.
                                 <?php endif; ?>
                             </div>
 
