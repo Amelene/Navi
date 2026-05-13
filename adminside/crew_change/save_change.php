@@ -73,11 +73,15 @@ try {
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             $data
         );
-        $id = (int)$db->lastInsertId();
+        $inserted = $db->fetchOne("SELECT id FROM crew_changes ORDER BY id DESC LIMIT 1");
+        $id = (int)($inserted['id'] ?? 0);
+        if ($id <= 0) {
+            throw new Exception('Unable to retrieve newly added crew change ID.');
+        }
         $_SESSION['success_message'] = 'Crew change added successfully.';
     }
 
-    header('Location: crew_change_details.php?id=' . $id);
+    header('Location: crew_change_details.php?id=' . (int)$id);
     exit();
 
 } catch (Exception $e) {
