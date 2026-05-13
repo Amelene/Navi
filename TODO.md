@@ -1,4 +1,3 @@
-- [x] Update `adminside/test_results/certificate.php` to support download mode (`?download=1`) and cleaner PDF/print flow.
-- [x] Update button behavior so "Download Certificate" opens download mode and triggers print dialog for Save as PDF.
-- [x] Update `adminside/test_results/certificate.css` print styles to remove scaling/fixed hacks and stabilize A4 output.
-- [x] Verify updated logic and style consistency.
+- [ ] Remove recommendations variable assignment in `adminside/test_results/test_results.php`
+- [ ] Remove Recommendations section markup from `adminside/test_results/test_results.php`
+- [ ] Mark tasks as completed after edit

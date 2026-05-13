@@ -62,7 +62,6 @@ try {
 $analysis             = new ExamAnalysis();
 $strengths            = $analysis->getStrengths($attempt_id);
 $areasForImprovement  = $analysis->getAreasForImprovement($attempt_id);
-$recommendations      = $analysis->generateRecommendations($strengths, $areasForImprovement, $attempt_id);
 $functionScores       = $analysis->getFunctionScores($attempt_id);
 ?>
 <!DOCTYPE html>
@@ -240,27 +239,6 @@ $functionScores       = $analysis->getFunctionScores($attempt_id);
                         </div>
                     </div>
 
-                    <!-- Recommendations -->
-                    <div class="recommendations-section">
-                        <h3 class="section-title">RECOMMENDATIONS</h3>
-                        <div class="recommendations-content">
-                            <?php if (!empty($recommendations)): ?>
-                                <ol class="recommendations-list">
-                                    <?php foreach ($recommendations as $recommendation): ?>
-                                        <li><?php echo htmlspecialchars($recommendation); ?></li>
-                                    <?php endforeach; ?>
-                                </ol>
-                            <?php else: ?>
-                                <p>No recommendations generated yet.</p>
-                                <?php if (!empty($_SESSION['groq_debug'])): ?>
-                                    <details style="margin-top:10px;">
-                                        <summary style="cursor:pointer;">Show Groq debug error</summary>
-                                        <pre style="white-space:pre-wrap;word-break:break-word;background:#f8fafc;padding:10px;border:1px solid #e5e7eb;border-radius:6px;"><?php echo htmlspecialchars(print_r($_SESSION['groq_debug'], true)); ?></pre>
-                                    </details>
-                                <?php endif; ?>
-                            <?php endif; ?>
-                        </div>
-                    </div>
 
                     <!-- Certificate Button -->
                     <div class="certificate-section">
