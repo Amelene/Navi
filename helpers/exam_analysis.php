@@ -1,7 +1,7 @@
 
 <?php
 require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/gemini_client.php';
+require_once __DIR__ . '/groq_client.php';
 
 class ExamAnalysis
 {
@@ -177,14 +177,14 @@ class ExamAnalysis
                 }
             }
 
-            $gemini = new GeminiClient();
-            $generatedText = $gemini->generateRecommendations((array)$strengths, (array)$improvements);
+            $groq = new GroqClient();
+            $generatedText = $groq->generateRecommendations((array)$strengths, (array)$improvements);
 
             if (!is_string($generatedText) || trim($generatedText) === '') {
                 if (session_status() === PHP_SESSION_ACTIVE) {
-                    $errorInfo = $gemini->getLastError();
+                    $errorInfo = $groq->getLastError();
                     if (!empty($errorInfo)) {
-                        $_SESSION['gemini_debug'] = $errorInfo;
+                        $_SESSION['groq_debug'] = $errorInfo;
                     }
                 }
                 return [];
@@ -198,10 +198,10 @@ class ExamAnalysis
 
             return $parsed;
         } catch (Throwable $e) {
-            error_log('Gemini recommendation generation failed: ' . $e->getMessage());
+            error_log('Groq recommendation generation failed: ' . $e->getMessage());
             if (session_status() === PHP_SESSION_ACTIVE) {
-                $_SESSION['gemini_debug'] = [
-                    'message' => 'Gemini recommendation generation failed',
+                $_SESSION['groq_debug'] = [
+                    'message' => 'Groq recommendation generation failed',
                     'details' => $e->getMessage(),
                     'time' => date('Y-m-d H:i:s')
                 ];

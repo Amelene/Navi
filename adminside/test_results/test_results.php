@@ -252,10 +252,10 @@ $functionScores       = $analysis->getFunctionScores($attempt_id);
                                 </ol>
                             <?php else: ?>
                                 <p>No recommendations generated yet.</p>
-                                <?php if (!empty($_SESSION['gemini_debug'])): ?>
+                                <?php if (!empty($_SESSION['groq_debug'])): ?>
                                     <details style="margin-top:10px;">
-                                        <summary style="cursor:pointer;">Show Gemini debug error</summary>
-                                        <pre style="white-space:pre-wrap;word-break:break-word;background:#f8fafc;padding:10px;border:1px solid #e5e7eb;border-radius:6px;"><?php echo htmlspecialchars(print_r($_SESSION['gemini_debug'], true)); ?></pre>
+                                        <summary style="cursor:pointer;">Show Groq debug error</summary>
+                                        <pre style="white-space:pre-wrap;word-break:break-word;background:#f8fafc;padding:10px;border:1px solid #e5e7eb;border-radius:6px;"><?php echo htmlspecialchars(print_r($_SESSION['groq_debug'], true)); ?></pre>
                                     </details>
                                 <?php endif; ?>
                             <?php endif; ?>
