@@ -72,6 +72,7 @@ try {
     exit();
 }
 if ($pdf_mode) {
+    error_log('Certificate PDF debug: autoloadLoaded=' . ($autoloadLoaded ? '1' : '0') . ', dompdfClass=' . (class_exists('Dompdf\Dompdf') ? '1' : '0') . ', include_path=' . get_include_path());
     if (class_exists('Dompdf\Dompdf')) {
         $logoPath = realpath('../../assets/image/logo.png');
         $logoDataUri = '';
@@ -179,6 +180,17 @@ if ($pdf_mode) {
         $dompdf->render();
 
         $dompdf->stream('certificate_' . $attempt_id . '.pdf', ['Attachment' => true]);
+        exit();
+    }
+
+    if (isset($_GET['debug']) && $_GET['debug'] == '1') {
+        header('Content-Type: text/plain; charset=UTF-8');
+        echo "PDF mode active but Dompdf class is missing.\n";
+        echo "Checked autoload paths:\n";
+        foreach ($autoloadPaths as $path) {
+            echo "- " . $path . ' => ' . (file_exists($path) ? 'FOUND' : 'MISSING') . "\n";
+        }
+        echo "class_exists('Dompdf\\\\Dompdf'): " . (class_exists('Dompdf\Dompdf') ? 'YES' : 'NO') . "\n";
         exit();
     }
 
