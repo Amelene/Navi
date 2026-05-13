@@ -1,3 +1,0 @@
-- [ ] Remove recommendations variable assignment in `adminside/test_results/test_results.php`
-- [ ] Remove Recommendations section markup from `adminside/test_results/test_results.php`
-- [ ] Mark tasks as completed after edit
