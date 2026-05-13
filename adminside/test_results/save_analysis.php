@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $strengths             = $analysis->getStrengths($attempt_id);
         $areas_for_improvement = $analysis->getAreasForImprovement($attempt_id);
-        $recommendations       = $analysis->generateRecommendations($strengths, $areas_for_improvement);
+        $recommendations       = $analysis->generateRecommendations($strengths, $areas_for_improvement, (int)$attempt_id);
 
         $analysis->saveAnalysis($attempt_id, $strengths, $areas_for_improvement, $recommendations, $manual_recommendation);
 

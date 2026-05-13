@@ -63,6 +63,7 @@ $analysis             = new ExamAnalysis();
 $strengths            = $analysis->getStrengths($attempt_id);
 $areasForImprovement  = $analysis->getAreasForImprovement($attempt_id);
 $functionScores       = $analysis->getFunctionScores($attempt_id);
+$recommendations      = $analysis->generateRecommendations($strengths, $areasForImprovement, $attempt_id);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -239,6 +240,24 @@ $functionScores       = $analysis->getFunctionScores($attempt_id);
                         </div>
                     </div>
 
+
+                    <!-- AI Recommendations -->
+                    <div class="feedback-section" style="margin-top: 20px;">
+                        <h3 class="section-title">AI RECOMMENDATIONS</h3>
+                        <div class="feedback-content">
+                            <?php if (!empty($recommendations)): ?>
+                                <?php foreach ($recommendations as $item): ?>
+                                    <div class="feedback-item">
+                                        <span class="feedback-text"><?php echo htmlspecialchars($item); ?></span>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <div class="feedback-item">
+                                    <span class="feedback-text">No AI recommendations available yet.</span>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
 
                     <!-- Certificate Button -->
                     <div class="certificate-section">
