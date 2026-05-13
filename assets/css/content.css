@@ -498,7 +498,8 @@
 }
 
 .calendar-card {
-    padding: 16px 18px;
+    padding: 20px 22px;
+    min-height: 360px;
 }
 
 .mini-calendar__header {
@@ -525,7 +526,7 @@
 .mini-calendar__days {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 8px;
+    gap: 10px;
     text-align: center;
     font-size: 12px;
 }
@@ -538,8 +539,9 @@
 
 .mini-calendar__days span {
     color: #2d3436;
-    padding: 7px 0;
+    padding: 10px 0;
     border-radius: 6px;
+    min-height: 34px;
 }
 
 .mini-calendar__days span.muted {
