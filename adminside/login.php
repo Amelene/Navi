@@ -32,6 +32,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $isAllowedRole = $user && in_array((string)$user['role'], $allowedRoles, true);
         $isActive = $user && (string)$user['user_status'] === 'active';
         $passwordOk = $user && password_verify($password, (string)$user['password']);
+
+        // Temporary debug (no plaintext password)
+        @error_log('[LOGIN_DEBUG] email=' . $email
+            . ' found=' . ($user ? '1' : '0')
+            . ' role=' . ($user['role'] ?? 'null')
+            . ' status=' . ($user['user_status'] ?? 'null')
+            . ' allowed=' . ($isAllowedRole ? '1' : '0')
+            . ' active=' . ($isActive ? '1' : '0')
+            . ' pass_ok=' . ($passwordOk ? '1' : '0'));
         
         if ($user && $isAllowedRole && $isActive && $passwordOk) {
             // Login successful
