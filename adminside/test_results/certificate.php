@@ -72,118 +72,118 @@ try {
     exit();
 }
 if ($pdf_mode) {
-    if (!class_exists('Dompdf\Dompdf')) {
-        error_log('Certificate PDF: Dompdf class not found.');
-        header('Location: certificate.php?id=' . $attempt_id . '&pdf_error=1');
+    if (class_exists('Dompdf\Dompdf')) {
+        $logoPath = realpath('../../assets/image/logo.png');
+        $logoDataUri = '';
+        if ($logoPath && file_exists($logoPath)) {
+            $logoType = pathinfo($logoPath, PATHINFO_EXTENSION);
+            $logoData = base64_encode(file_get_contents($logoPath));
+            $logoDataUri = 'data:image/' . $logoType . ';base64,' . $logoData;
+        }
+
+        $name = htmlspecialchars($exam['crew_name']);
+        $department = htmlspecialchars($exam['department']);
+        $category = htmlspecialchars($exam['category']);
+        $testDate = date('m-d-Y', strtotime($exam['start_time']));
+        $score = number_format($exam['score'], 0) . '%';
+        $status = htmlspecialchars($exam['result_status']);
+        $passing = htmlspecialchars($exam['passing_score']) . '% passing score';
+
+        $completionText = $exam['result_status'] === 'PASSED'
+            ? 'has successfully completed NSC 1.0 Exam in'
+            : 'has completed NSC 1.0 Exam in';
+
+        $description = $exam['result_status'] === 'PASSED'
+            ? 'This certificate confirms that the awardee has demonstrated the required level of competency.'
+            : 'This certificate confirms completion of the exam. Further training is recommended.';
+
+        $scoreColor = $exam['result_status'] === 'PASSED' ? '#27ae60' : '#e74c3c';
+
+        $html = '
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                @page { size: A4 portrait; margin: 10mm; }
+                body { margin: 0; font-family: DejaVu Sans, Arial, sans-serif; color: #2c3e50; }
+                .certificate { border: 3px solid #FF8A4C; border-radius: 12px; padding: 30px 36px; position: relative; }
+                .corner { position: absolute; top: 0; right: 0; width: 0; height: 0; border-style: solid; border-width: 0 90px 90px 0; border-color: transparent #FF8A4C transparent transparent; }
+                .corner:after { content: ""; position: absolute; top: 2px; right: -90px; width: 0; height: 0; border-style: solid; border-width: 0 88px 88px 0; border-color: transparent #126E82 transparent transparent; }
+                .logo { margin-bottom: 18px; }
+                .logo img { height: 36px; }
+                .title { text-align: center; font-size: 48px; font-weight: 700; margin: 0; font-family: DejaVu Serif, serif; }
+                .company { text-align: center; font-size: 14px; letter-spacing: 2px; font-weight: 700; margin-bottom: 18px; }
+                .name { text-align: center; font-size: 34px; font-weight: 700; margin: 10px 0 2px; }
+                .underline { width: 260px; height: 2px; background: #2c3e50; margin: 0 auto 14px; }
+                .completion { text-align: center; font-size: 14px; margin-bottom: 18px; font-style: italic; }
+                .row { margin: 6px 0; font-size: 14px; }
+                .label { display: inline-block; width: 180px; font-weight: 700; }
+                .divider { border-top: 1px solid #ddd; margin: 18px 0; }
+                .scores { text-align: center; margin-bottom: 16px; }
+                .score-main { font-size: 52px; font-weight: 700; color: '.$scoreColor.'; }
+                .score-status { font-size: 44px; font-weight: 700; color: '.$scoreColor.'; margin-top: 6px; }
+                .score-sub { font-size: 18px; font-weight: 700; color: #666; }
+                .description { text-align: center; font-size: 15px; line-height: 1.5; margin: 18px 0 26px; }
+                .signatures { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                .signatures td { width: 50%; text-align: center; padding: 0 14px; }
+                .line { border-top: 1px solid #2c3e50; margin-bottom: 6px; }
+                .footer-text { text-align: center; font-size: 16px; font-weight: 700; color: #126E82; letter-spacing: 0.4px; }
+            </style>
+        </head>
+        <body>
+            <div class="certificate">
+                <div class="corner"></div>
+                <div class="logo">'.($logoDataUri ? '<img src="'.$logoDataUri.'" alt="NSC Logo">' : '').'</div>
+                <h1 class="title">Certificate</h1>
+                <div class="company">NAVI SHIPPING</div>
+                <div class="name">'.$name.'</div>
+                <div class="underline"></div>
+                <div class="completion">'.$completionText.'</div>
+
+                <div class="row"><span class="label">Department:</span> '.$department.'</div>
+                <div class="row"><span class="label">Test performed:</span> '.$testDate.'</div>
+                <div class="row"><span class="label">Category:</span> '.$category.'</div>
+                <div class="row"><span class="label">Test time used:</span> '.$time_taken_formatted.'</div>
+
+                <div class="divider"></div>
+
+                <div class="scores">
+                    <div class="score-main">'.$score.'</div>
+                    <div class="score-sub">Overall Score</div>
+                    <div class="score-status">'.$status.'</div>
+                    <div class="score-sub">'.$passing.'</div>
+                </div>
+
+                <div class="description">'.$description.'</div>
+
+                <table class="signatures">
+                    <tr>
+                        <td><div class="line"></div>Signature of Assessor</td>
+                        <td><div class="line"></div>Signature of Candidate</td>
+                    </tr>
+                </table>
+
+                <div class="footer-text">NAVIgating Excellence Towards Innovative Shipping</div>
+            </div>
+        </body>
+        </html>';
+
+        $options = new Options();
+        $options->set('isRemoteEnabled', true);
+        $options->set('isHtml5ParserEnabled', true);
+
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $dompdf->stream('certificate_' . $attempt_id . '.pdf', ['Attachment' => true]);
         exit();
     }
-    $logoPath = realpath('../../assets/image/logo.png');
-    $logoDataUri = '';
-    if ($logoPath && file_exists($logoPath)) {
-        $logoType = pathinfo($logoPath, PATHINFO_EXTENSION);
-        $logoData = base64_encode(file_get_contents($logoPath));
-        $logoDataUri = 'data:image/' . $logoType . ';base64,' . $logoData;
-    }
 
-    $name = htmlspecialchars($exam['crew_name']);
-    $department = htmlspecialchars($exam['department']);
-    $category = htmlspecialchars($exam['category']);
-    $testDate = date('m-d-Y', strtotime($exam['start_time']));
-    $score = number_format($exam['score'], 0) . '%';
-    $status = htmlspecialchars($exam['result_status']);
-    $passing = htmlspecialchars($exam['passing_score']) . '% passing score';
-
-    $completionText = $exam['result_status'] === 'PASSED'
-        ? 'has successfully completed NSC 1.0 Exam in'
-        : 'has completed NSC 1.0 Exam in';
-
-    $description = $exam['result_status'] === 'PASSED'
-        ? 'This certificate confirms that the awardee has demonstrated the required level of competency.'
-        : 'This certificate confirms completion of the exam. Further training is recommended.';
-
-    $scoreColor = $exam['result_status'] === 'PASSED' ? '#27ae60' : '#e74c3c';
-
-    $html = '
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="UTF-8">
-        <style>
-            @page { size: A4 portrait; margin: 10mm; }
-            body { margin: 0; font-family: DejaVu Sans, Arial, sans-serif; color: #2c3e50; }
-            .certificate { border: 3px solid #FF8A4C; border-radius: 12px; padding: 30px 36px; position: relative; }
-            .corner { position: absolute; top: 0; right: 0; width: 0; height: 0; border-style: solid; border-width: 0 90px 90px 0; border-color: transparent #FF8A4C transparent transparent; }
-            .corner:after { content: ""; position: absolute; top: 2px; right: -90px; width: 0; height: 0; border-style: solid; border-width: 0 88px 88px 0; border-color: transparent #126E82 transparent transparent; }
-            .logo { margin-bottom: 18px; }
-            .logo img { height: 36px; }
-            .title { text-align: center; font-size: 48px; font-weight: 700; margin: 0; font-family: DejaVu Serif, serif; }
-            .company { text-align: center; font-size: 14px; letter-spacing: 2px; font-weight: 700; margin-bottom: 18px; }
-            .name { text-align: center; font-size: 34px; font-weight: 700; margin: 10px 0 2px; }
-            .underline { width: 260px; height: 2px; background: #2c3e50; margin: 0 auto 14px; }
-            .completion { text-align: center; font-size: 14px; margin-bottom: 18px; font-style: italic; }
-            .row { margin: 6px 0; font-size: 14px; }
-            .label { display: inline-block; width: 180px; font-weight: 700; }
-            .divider { border-top: 1px solid #ddd; margin: 18px 0; }
-            .scores { text-align: center; margin-bottom: 16px; }
-            .score-main { font-size: 52px; font-weight: 700; color: '.$scoreColor.'; }
-            .score-status { font-size: 44px; font-weight: 700; color: '.$scoreColor.'; margin-top: 6px; }
-            .score-sub { font-size: 18px; font-weight: 700; color: #666; }
-            .description { text-align: center; font-size: 15px; line-height: 1.5; margin: 18px 0 26px; }
-            .signatures { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-            .signatures td { width: 50%; text-align: center; padding: 0 14px; }
-            .line { border-top: 1px solid #2c3e50; margin-bottom: 6px; }
-            .footer-text { text-align: center; font-size: 16px; font-weight: 700; color: #126E82; letter-spacing: 0.4px; }
-        </style>
-    </head>
-    <body>
-        <div class="certificate">
-            <div class="corner"></div>
-            <div class="logo">'.($logoDataUri ? '<img src="'.$logoDataUri.'" alt="NSC Logo">' : '').'</div>
-            <h1 class="title">Certificate</h1>
-            <div class="company">NAVI SHIPPING</div>
-            <div class="name">'.$name.'</div>
-            <div class="underline"></div>
-            <div class="completion">'.$completionText.'</div>
-
-            <div class="row"><span class="label">Department:</span> '.$department.'</div>
-            <div class="row"><span class="label">Test performed:</span> '.$testDate.'</div>
-            <div class="row"><span class="label">Category:</span> '.$category.'</div>
-            <div class="row"><span class="label">Test time used:</span> '.$time_taken_formatted.'</div>
-
-            <div class="divider"></div>
-
-            <div class="scores">
-                <div class="score-main">'.$score.'</div>
-                <div class="score-sub">Overall Score</div>
-                <div class="score-status">'.$status.'</div>
-                <div class="score-sub">'.$passing.'</div>
-            </div>
-
-            <div class="description">'.$description.'</div>
-
-            <table class="signatures">
-                <tr>
-                    <td><div class="line"></div>Signature of Assessor</td>
-                    <td><div class="line"></div>Signature of Candidate</td>
-                </tr>
-            </table>
-
-            <div class="footer-text">NAVIgating Excellence Towards Innovative Shipping</div>
-        </div>
-    </body>
-    </html>';
-
-    $options = new Options();
-    $options->set('isRemoteEnabled', true);
-    $options->set('isHtml5ParserEnabled', true);
-
-    $dompdf = new Dompdf($options);
-    $dompdf->loadHtml($html);
-    $dompdf->setPaper('A4', 'portrait');
-    $dompdf->render();
-
-    $dompdf->stream('certificate_' . $attempt_id . '.pdf', ['Attachment' => true]);
-    exit();
+    header('Content-Type: text/html; charset=UTF-8');
+    header('Content-Disposition: attachment; filename="certificate_' . $attempt_id . '.html"');
 }
 
 if ($download_file_mode) {
