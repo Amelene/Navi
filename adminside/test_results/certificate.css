@@ -299,8 +299,8 @@
     }
 
     .certificate-card {
-        width: 194mm !important;
-        max-width: 194mm !important;
+        width: 100% !important;
+        max-width: 100% !important;
         margin: 0 auto !important;
         padding: 0 !important;
         background: #fff !important;
