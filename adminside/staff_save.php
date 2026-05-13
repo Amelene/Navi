@@ -8,6 +8,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 }
 
 require_once '../config/database.php';
+require_once '../config/smtp.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: staff_add.php');
@@ -100,12 +101,93 @@ try {
 
     $db->commit();
 
-    // Store invitation-ready details (Option A: manual send)
+    $loginUrl = (isset($_SERVER['HTTP_HOST']) ? ('http://' . $_SERVER['HTTP_HOST']) : '') . '/php-project/adminside/login.php';
+    $fullName = trim($first_name . ' ' . $middle_name . ' ' . $last_name);
+
+    // Send credentials via SMTP (uses native mail() fallback if PHPMailer is unavailable)
+    $emailSent = false;
+    $emailError = '';
+
+    try {
+        $smtp = getSmtpConfig();
+
+        $subject = 'Your Staff Account Credentials';
+        $messageHtml = '
+            <p>Hello ' . htmlspecialchars($fullName, ENT_QUOTES, 'UTF-8') . ',</p>
+            <p>Your staff account has been created successfully.</p>
+            <p><strong>Email:</strong> ' . htmlspecialchars($email, ENT_QUOTES, 'UTF-8') . '<br>
+            <strong>Temporary Password:</strong> ' . htmlspecialchars($tempPassword, ENT_QUOTES, 'UTF-8') . '<br>
+            <strong>Login URL:</strong> <a href="' . htmlspecialchars($loginUrl, ENT_QUOTES, 'UTF-8') . '">' . htmlspecialchars($loginUrl, ENT_QUOTES, 'UTF-8') . '</a></p>
+            <p>Please log in and change your password immediately.</p>
+            <p>Regards,<br>' . htmlspecialchars($smtp['from_name'], ENT_QUOTES, 'UTF-8') . '</p>
+        ';
+        $messageText = "Hello {$fullName},\n\n"
+            . "Your staff account has been created successfully.\n\n"
+            . "Email: {$email}\n"
+            . "Temporary Password: {$tempPassword}\n"
+            . "Login URL: {$loginUrl}\n\n"
+            . "Please log in and change your password immediately.\n\n"
+            . "Regards,\n{$smtp['from_name']}";
+
+        $vendorAutoload = dirname(__DIR__) . '/vendor/autoload.php';
+        if (file_exists($vendorAutoload)) {
+            require_once $vendorAutoload;
+        }
+
+        if (
+            class_exists('\\PHPMailer\\PHPMailer\\PHPMailer') &&
+            !empty($smtp['host']) &&
+            !empty($smtp['username']) &&
+            !empty($smtp['password'])
+        ) {
+            $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+            $mail->isSMTP();
+            $mail->Host = $smtp['host'];
+            $mail->SMTPAuth = true;
+            $mail->Username = $smtp['username'];
+            $mail->Password = $smtp['password'];
+            $mail->Port = (int)$smtp['port'];
+
+            if ($smtp['encryption'] === 'ssl') {
+                $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+            } else {
+                $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+            }
+
+            $mail->setFrom($smtp['from_email'], $smtp['from_name']);
+            $mail->addAddress($email, $fullName);
+            $mail->isHTML(true);
+            $mail->Subject = $subject;
+            $mail->Body = $messageHtml;
+            $mail->AltBody = $messageText;
+
+            $mail->send();
+            $emailSent = true;
+        } else {
+            // Fallback to native mail()
+            $headers  = "MIME-Version: 1.0\r\n";
+            $headers .= "Content-type:text/html;charset=UTF-8\r\n";
+            if (!empty($smtp['from_email'])) {
+                $headers .= 'From: ' . $smtp['from_name'] . ' <' . $smtp['from_email'] . ">\r\n";
+            }
+
+            $emailSent = @mail($email, $subject, $messageHtml, $headers);
+            if (!$emailSent) {
+                $emailError = 'SMTP mailer is unavailable and native mail() failed.';
+            }
+        }
+    } catch (Throwable $mailEx) {
+        $emailSent = false;
+        $emailError = $mailEx->getMessage();
+    }
+
     $_SESSION['staff_add_success'] = [
         'email' => $email,
         'temp_password' => $tempPassword,
-        'login_url' => (isset($_SERVER['HTTP_HOST']) ? ('http://' . $_SERVER['HTTP_HOST']) : '') . '/php-project/adminside/login.php',
-        'full_name' => trim($first_name . ' ' . $middle_name . ' ' . $last_name)
+        'login_url' => $loginUrl,
+        'full_name' => $fullName,
+        'email_sent' => $emailSent,
+        'email_error' => $emailError
     ];
 
     header('Location: staff_add.php');

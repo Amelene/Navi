@@ -161,7 +161,15 @@ unset($_SESSION['staff_add_success'], $_SESSION['staff_add_error']);
                             <div><strong>Email:</strong> <?php echo htmlspecialchars($successData['email'] ?? ''); ?></div>
                             <div><strong>Temporary Password:</strong> <?php echo htmlspecialchars($successData['temp_password'] ?? ''); ?></div>
                             <div><strong>Login URL:</strong> <?php echo htmlspecialchars($successData['login_url'] ?? ''); ?></div>
-                            <div><strong>Message:</strong> I-send ito via email manually habang wala pang SMTP integration.</div>
+                            <?php if (!empty($successData['email_sent'])): ?>
+                                <div><strong>Email Status:</strong> Sent via SMTP successfully.</div>
+                            <?php else: ?>
+                                <div><strong>Email Status:</strong> Failed to send via SMTP.</div>
+                                <?php if (!empty($successData['email_error'])): ?>
+                                    <div><strong>Reason:</strong> <?php echo htmlspecialchars($successData['email_error']); ?></div>
+                                <?php endif; ?>
+                                <div><strong>Action:</strong> I-send muna manually habang inaayos ang SMTP credentials/server access.</div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 <?php endif; ?>

@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitac2d307f4ed514763a8119f3523066bb
+class ComposerStaticInit4cac33adcc6c9c788eb25b0df4818eac
 {
     public static $files = array (
         '72243e5536b63e298acb6476f01f1aff' => __DIR__ . '/..' . '/thecodingmachine/safe/lib/special_cases.php',
@@ -97,6 +97,10 @@ class ComposerStaticInitac2d307f4ed514763a8119f3523066bb
             'Svg\\' => 4,
             'Sabberworm\\CSS\\' => 15,
         ),
+        'P' =>
+        array (
+            'PHPMailer\\PHPMailer\\' => 20,
+        ),
         'M' =>
         array (
             'Masterminds\\' => 12,
@@ -119,6 +123,10 @@ class ComposerStaticInitac2d307f4ed514763a8119f3523066bb
         'Sabberworm\\CSS\\' =>
         array (
             0 => __DIR__ . '/..' . '/sabberworm/php-css-parser/src',
+        ),
+        'PHPMailer\\PHPMailer\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/phpmailer/phpmailer/src',
         ),
         'Masterminds\\' =>
         array (
@@ -225,9 +233,9 @@ class ComposerStaticInitac2d307f4ed514763a8119f3523066bb
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitac2d307f4ed514763a8119f3523066bb::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitac2d307f4ed514763a8119f3523066bb::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitac2d307f4ed514763a8119f3523066bb::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit4cac33adcc6c9c788eb25b0df4818eac::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit4cac33adcc6c9c788eb25b0df4818eac::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit4cac33adcc6c9c788eb25b0df4818eac::$classMap;
 
         }, null, ClassLoader::class);
     }
