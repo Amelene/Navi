@@ -22,33 +22,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $db = Database::getInstance();
         
-        // Fetch user by normalized email; validate role/status in PHP for clearer handling.
+        // Fetch by email only (do not block by role/status during auth step).
         $user = $db->fetchOne(
             "SELECT * FROM users WHERE LOWER(TRIM(email)) = ? LIMIT 1",
             [$email]
         );
 
-        $allowedRoles = ['admin','staff','hr_manager','accounting_officer','crewing_officer','finance_manager'];
-        $isAllowedRole = $user && in_array((string)$user['role'], $allowedRoles, true);
-        $isActive = $user && (string)$user['user_status'] === 'active';
-        $passwordOk = $user && password_verify($password, (string)$user['password']);
-
-        // Temporary debug (no plaintext password)
-        @error_log('[LOGIN_DEBUG] email=' . $email
-            . ' found=' . ($user ? '1' : '0')
-            . ' role=' . ($user['role'] ?? 'null')
-            . ' status=' . ($user['user_status'] ?? 'null')
-            . ' allowed=' . ($isAllowedRole ? '1' : '0')
-            . ' active=' . ($isActive ? '1' : '0')
-            . ' pass_ok=' . ($passwordOk ? '1' : '0'));
+        // TEMPORARY compatibility:
+        // some rows may still have plain-text password from older flow.
+        $passwordOk = false;
+        if ($user) {
+            $storedPassword = (string)($user['password'] ?? '');
+            $passwordOk = password_verify($password, $storedPassword) || hash_equals($storedPassword, $password);
+        }
         
-        if ($user && $isAllowedRole && $isActive && $passwordOk) {
+        if ($user && $passwordOk) {
+            // Auto-heal plain-text legacy password to hashed password.
+            $storedPassword = (string)($user['password'] ?? '');
+            if (!password_get_info($storedPassword)['algo']) {
+                $newHash = password_hash($password, PASSWORD_DEFAULT);
+                $db->execute("UPDATE users SET password = ? WHERE id = ?", [$newHash, (int)$user['id']]);
+            }
+
+            // Ensure role and status are compatible for login.
+            $allowedRoles = ['admin','staff','hr_manager','accounting_officer','crewing_officer','finance_manager'];
+            $userRole = (string)($user['role'] ?? '');
+            $userStatus = (string)($user['user_status'] ?? '');
+            $normalizedRole = $userRole === '' ? 'staff' : $userRole;
+            $normalizedStatus = $userStatus === '' ? 'active' : $userStatus;
+
+            if (!in_array($normalizedRole, $allowedRoles, true)) {
+                $normalizedRole = 'staff';
+            }
+            if ($normalizedStatus !== 'active') {
+                $normalizedStatus = 'active';
+            }
+
+            if ($normalizedRole !== $userRole || $normalizedStatus !== $userStatus) {
+                $db->execute(
+                    "UPDATE users SET role = ?, user_status = ? WHERE id = ?",
+                    [$normalizedRole, $normalizedStatus, (int)$user['id']]
+                );
+            }
+
             // Login successful
             $_SESSION['logged_in'] = true;
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_email'] = $user['email'];
-            $_SESSION['user_role'] = $user['role'];
-            
+            $_SESSION['user_role'] = $normalizedRole;
+
             header('Location: index.php');
             exit();
         } else {
