@@ -62,7 +62,7 @@ try {
 $analysis             = new ExamAnalysis();
 $strengths            = $analysis->getStrengths($attempt_id);
 $areasForImprovement  = $analysis->getAreasForImprovement($attempt_id);
-$recommendations      = $analysis->generateRecommendations($strengths, $areasForImprovement);
+$recommendations      = $analysis->generateRecommendations($strengths, $areasForImprovement, $attempt_id);
 $functionScores       = $analysis->getFunctionScores($attempt_id);
 ?>
 <!DOCTYPE html>
