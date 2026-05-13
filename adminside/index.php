@@ -584,47 +584,60 @@ try {
 					</div>
 
 					<div class="card events-card">
-						<div class="card__title">UPCOMING EVENTS</div>
+						<div class="card__header">
+							<div class="card__title">UPCOMING EVENTS</div>
+							<button class="card__icon task-add-btn" id="openEventModal" type="button" title="Add Event">
+								<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><line x1="12" y1="14" x2="12" y2="18"></line><line x1="10" y1="16" x2="14" y2="16"></line></svg>
+							</button>
+						</div>
 						<ul class="event-list">
-							<?php if (!empty($upcomingTasks)): ?>
-								<?php foreach (array_slice($upcomingTasks, 0, 5) as $task): ?>
+							<?php if (!empty($upcomingEvents)): ?>
+								<?php foreach (array_slice($upcomingEvents, 0, 5) as $event): ?>
 									<?php
-										$eventTitle = trim((string)($task['title'] ?? 'Untitled Event'));
-										$eventDateRaw = trim((string)($task['date'] ?? ''));
-										$eventPriority = strtolower(trim((string)($task['priority'] ?? 'medium')));
+										$eventTitle = trim((string)($event['title'] ?? 'Untitled Event'));
+										$eventDateRaw = trim((string)($event['date'] ?? ''));
+										$eventTimeRaw = trim((string)($event['time'] ?? ''));
+										$eventType = strtolower(trim((string)($event['type'] ?? 'meeting')));
 
 										$eventMetaDate = $eventDateRaw;
-										$eventMetaTime = 'All Day';
 										if ($eventDateRaw !== '' && strtotime($eventDateRaw) !== false) {
 											$eventMetaDate = date('m-d-y', strtotime($eventDateRaw));
 										}
 
-										$eventBadgeClass = 'meeting';
-										$eventBadgeText = 'Meeting';
-										if ($eventPriority === 'high') {
-											$eventBadgeClass = 'cert';
-											$eventBadgeText = 'High';
-										} elseif ($eventPriority === 'low') {
-											$eventBadgeClass = 'contact';
-											$eventBadgeText = 'Low';
-										} else {
-											$eventBadgeClass = 'training';
-											$eventBadgeText = 'Medium';
+										$eventMetaTime = 'All Day';
+										if ($eventTimeRaw !== '' && preg_match('/^\d{2}:\d{2}$/', $eventTimeRaw)) {
+											$eventMetaTime = date('g:i A', strtotime('1970-01-01 ' . $eventTimeRaw . ':00'));
 										}
+
+										$eventBadgeClass = in_array($eventType, ['contact', 'training', 'cert', 'meeting'], true) ? $eventType : 'meeting';
+										$eventBadgeTextMap = [
+											'contact' => 'Contact',
+											'training' => 'Training',
+											'cert' => 'Certification',
+											'meeting' => 'Meeting'
+										];
+										$eventBadgeText = $eventBadgeTextMap[$eventBadgeClass];
 									?>
 									<li>
 										<div>
 											<div class="event-title"><?php echo htmlspecialchars($eventTitle); ?></div>
 											<div class="event-meta"><?php echo htmlspecialchars($eventMetaDate); ?> &nbsp; • &nbsp; <?php echo htmlspecialchars($eventMetaTime); ?></div>
 										</div>
-										<span class="event-badge <?php echo htmlspecialchars($eventBadgeClass); ?>"><?php echo htmlspecialchars($eventBadgeText); ?></span>
+										<div style="display:flex; align-items:center; gap:8px;">
+											<span class="event-badge <?php echo htmlspecialchars($eventBadgeClass); ?>"><?php echo htmlspecialchars($eventBadgeText); ?></span>
+											<form method="POST" class="task-delete-form">
+												<input type="hidden" name="dashboard_event_action" value="delete">
+												<input type="hidden" name="event_id" value="<?php echo htmlspecialchars((string)($event['id'] ?? '')); ?>">
+												<button type="submit" class="task-delete-btn" title="Delete event">×</button>
+											</form>
+										</div>
 									</li>
 								<?php endforeach; ?>
 							<?php else: ?>
 								<li>
 									<div>
 										<div class="event-title">No upcoming events yet.</div>
-										<div class="event-meta">Add a task to display it here and on the calendar.</div>
+										<div class="event-meta">Click calendar icon to add one.</div>
 									</div>
 									<span class="event-badge meeting">Info</span>
 								</li>
@@ -714,6 +727,44 @@ try {
 	</div>
 
     <?php include '../includes/footer.php'; ?>
+
+	<div class="task-modal" id="eventModal" aria-hidden="true">
+		<div class="task-modal__backdrop" id="eventModalBackdrop"></div>
+		<div class="task-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="eventModalTitle">
+			<div class="task-modal__header">
+				<h3 id="eventModalTitle">Add Upcoming Event</h3>
+				<button type="button" class="task-modal__close" id="closeEventModal">×</button>
+			</div>
+			<form method="POST" class="task-modal__form">
+				<input type="hidden" name="dashboard_event_action" value="add">
+				<label>
+					Event Title
+					<input type="text" name="event_title" required maxlength="120" placeholder="e.g. Client Meeting">
+				</label>
+				<label>
+					Date
+					<input type="date" name="event_date" required>
+				</label>
+				<label>
+					Time
+					<input type="time" name="event_time">
+				</label>
+				<label>
+					Type
+					<select name="event_type">
+						<option value="contact">Contact</option>
+						<option value="training">Training</option>
+						<option value="cert">Certification</option>
+						<option value="meeting" selected>Meeting</option>
+					</select>
+				</label>
+				<div class="task-modal__actions">
+					<button type="button" class="btn ghost" id="cancelEventModal">Cancel</button>
+					<button type="submit" class="btn primary">Save Event</button>
+				</div>
+			</form>
+		</div>
+	</div>
 
 	<div class="task-modal" id="taskModal" aria-hidden="true">
 		<div class="task-modal__backdrop" id="taskModalBackdrop"></div>
@@ -851,11 +902,21 @@ try {
 			];
 		}, $upcomingTasks)); ?>;
 
-		const taskDatesSet = new Set(
-			dashboardTasks
-				.map(task => (task.date || '').trim())
-				.filter(date => /^\d{4}-\d{2}-\d{2}$/.test(date))
-		);
+		const dashboardEvents = <?php echo json_encode(array_map(function ($event) {
+			return [
+				'title' => (string)($event['title'] ?? ''),
+				'date' => (string)($event['date'] ?? ''),
+				'time' => (string)($event['time'] ?? ''),
+				'type' => (string)($event['type'] ?? 'meeting')
+			];
+		}, $upcomingEvents)); ?>;
+
+		const allCalendarDates = [
+			...dashboardTasks.map(task => (task.date || '').trim()),
+			...dashboardEvents.map(event => (event.date || '').trim())
+		].filter(date => /^\d{4}-\d{2}-\d{2}$/.test(date));
+
+		const taskDatesSet = new Set(allCalendarDates);
 
 		const today = new Date();
 		let currentMonthDate = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -924,6 +985,29 @@ try {
 
 		renderMiniCalendar(currentMonthDate);
 
+		const eventModal = document.getElementById('eventModal');
+		const openEventModalBtn = document.getElementById('openEventModal');
+		const closeEventModalBtn = document.getElementById('closeEventModal');
+		const cancelEventModalBtn = document.getElementById('cancelEventModal');
+		const eventModalBackdrop = document.getElementById('eventModalBackdrop');
+
+		function openEventModal() {
+			if (!eventModal) return;
+			eventModal.classList.add('is-open');
+			eventModal.setAttribute('aria-hidden', 'false');
+		}
+
+		function closeEventModal() {
+			if (!eventModal) return;
+			eventModal.classList.remove('is-open');
+			eventModal.setAttribute('aria-hidden', 'true');
+		}
+
+		if (openEventModalBtn) openEventModalBtn.addEventListener('click', openEventModal);
+		if (closeEventModalBtn) closeEventModalBtn.addEventListener('click', closeEventModal);
+		if (cancelEventModalBtn) cancelEventModalBtn.addEventListener('click', closeEventModal);
+		if (eventModalBackdrop) eventModalBackdrop.addEventListener('click', closeEventModal);
+
 		const taskModal = document.getElementById('taskModal');
 		const openTaskModalBtn = document.getElementById('openTaskModal');
 		const closeTaskModalBtn = document.getElementById('closeTaskModal');
@@ -948,9 +1032,11 @@ try {
 		if (taskModalBackdrop) taskModalBackdrop.addEventListener('click', closeTaskModal);
 
 		document.addEventListener('keydown', function (event) {
-			if (event.key === 'Escape') closeTaskModal();
+			if (event.key === 'Escape') {
+				closeTaskModal();
+				closeEventModal();
+			}
 		});
 	</script>
 </body>
-</html>
 </html>
