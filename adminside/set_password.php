@@ -3,6 +3,18 @@ session_start();
 
 require_once '../config/database.php';
 
+// Avoid session confusion: if someone is already logged in (e.g., admin),
+// clear session before handling staff password setup link.
+if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
+    $_SESSION = [];
+    if (ini_get('session.use_cookies')) {
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
+    }
+    session_destroy();
+    session_start();
+}
+
 function redirectWithError(string $message): void
 {
     $_SESSION['set_password_error'] = $message;
