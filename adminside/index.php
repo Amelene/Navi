@@ -523,41 +523,49 @@ try {
 					<div class="card events-card">
 						<div class="card__title">UPCOMING EVENTS</div>
 						<ul class="event-list">
-							<li>
-								<div>
-									<div class="event-title">New Crew Member Added</div>
-									<div class="event-meta">12-12-25 &nbsp; • &nbsp; 10:00 AM</div>
-								</div>
-								<span class="event-badge contact">Contact</span>
-							</li>
-							<li>
-								<div>
-									<div class="event-title">Safety Traning Session</div>
-									<div class="event-meta">12-15-25 &nbsp; • &nbsp; 8:00 AM</div>
-								</div>
-								<span class="event-badge training">Training</span>
-							</li>
-							<li>
-								<div>
-									<div class="event-title">Certificate Verification</div>
-									<div class="event-meta">12-15-25 &nbsp; • &nbsp; 8:00 AM</div>
-								</div>
-								<span class="event-badge cert">Certification</span>
-							</li>
-							<li>
-								<div>
-									<div class="event-title">Client Meeting</div>
-									<div class="event-meta">12-18-25 &nbsp; • &nbsp; 3:00 PM</div>
-								</div>
-								<span class="event-badge meeting">Meeting</span>
-							</li>
-							<li>
-								<div>
-									<div class="event-title">Meeting with staff</div>
-									<div class="event-meta">12-20-25 &nbsp; • &nbsp; 3:00 PM</div>
-								</div>
-								<span class="event-badge meeting">Meeting</span>
-							</li>
+							<?php if (!empty($upcomingTasks)): ?>
+								<?php foreach (array_slice($upcomingTasks, 0, 5) as $task): ?>
+									<?php
+										$eventTitle = trim((string)($task['title'] ?? 'Untitled Event'));
+										$eventDateRaw = trim((string)($task['date'] ?? ''));
+										$eventPriority = strtolower(trim((string)($task['priority'] ?? 'medium')));
+
+										$eventMetaDate = $eventDateRaw;
+										$eventMetaTime = 'All Day';
+										if ($eventDateRaw !== '' && strtotime($eventDateRaw) !== false) {
+											$eventMetaDate = date('m-d-y', strtotime($eventDateRaw));
+										}
+
+										$eventBadgeClass = 'meeting';
+										$eventBadgeText = 'Meeting';
+										if ($eventPriority === 'high') {
+											$eventBadgeClass = 'cert';
+											$eventBadgeText = 'High';
+										} elseif ($eventPriority === 'low') {
+											$eventBadgeClass = 'contact';
+											$eventBadgeText = 'Low';
+										} else {
+											$eventBadgeClass = 'training';
+											$eventBadgeText = 'Medium';
+										}
+									?>
+									<li>
+										<div>
+											<div class="event-title"><?php echo htmlspecialchars($eventTitle); ?></div>
+											<div class="event-meta"><?php echo htmlspecialchars($eventMetaDate); ?> &nbsp; • &nbsp; <?php echo htmlspecialchars($eventMetaTime); ?></div>
+										</div>
+										<span class="event-badge <?php echo htmlspecialchars($eventBadgeClass); ?>"><?php echo htmlspecialchars($eventBadgeText); ?></span>
+									</li>
+								<?php endforeach; ?>
+							<?php else: ?>
+								<li>
+									<div>
+										<div class="event-title">No upcoming events yet.</div>
+										<div class="event-meta">Add a task to display it here and on the calendar.</div>
+									</div>
+									<span class="event-badge meeting">Info</span>
+								</li>
+							<?php endif; ?>
 						</ul>
 					</div>
 				</div>
