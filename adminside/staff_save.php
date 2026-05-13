@@ -64,9 +64,9 @@ try {
         redirectWithError('Email already exists in users table.');
     }
 
-    // Generate temporary password
-    $tempPassword = 'Temp@' . random_int(100000, 999999);
-    $passwordHash = password_hash($tempPassword, PASSWORD_DEFAULT);
+    // Create placeholder password; user will set real password via email link
+    $placeholderPassword = bin2hex(random_bytes(32));
+    $passwordHash = password_hash($placeholderPassword, PASSWORD_DEFAULT);
 
     $db->beginTransaction();
 
@@ -102,7 +102,20 @@ try {
     $db->commit();
 
     $loginUrl = (isset($_SERVER['HTTP_HOST']) ? ('http://' . $_SERVER['HTTP_HOST']) : '') . '/php-project/adminside/login.php';
+    $setPasswordBaseUrl = (isset($_SERVER['HTTP_HOST']) ? ('http://' . $_SERVER['HTTP_HOST']) : '') . '/php-project/adminside/set_password.php';
     $fullName = trim($first_name . ' ' . $middle_name . ' ' . $last_name);
+
+    // Generate one-time password setup token (24h expiry)
+    $setupToken = bin2hex(random_bytes(32));
+    $setupTokenHash = hash('sha256', $setupToken);
+    $expiresAt = date('Y-m-d H:i:s', strtotime('+24 hours'));
+
+    $db->execute(
+        "INSERT INTO password_setup_tokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)",
+        [$authUserId, $setupTokenHash, $expiresAt]
+    );
+
+    $setPasswordUrl = $setPasswordBaseUrl . '?token=' . urlencode($setupToken);
 
     // Send credentials via SMTP (uses native mail() fallback if PHPMailer is unavailable)
     $emailSent = false;
@@ -111,22 +124,23 @@ try {
     try {
         $smtp = getSmtpConfig();
 
-        $subject = 'Your Staff Account Credentials';
+        $subject = 'Set Your Staff Account Password';
         $messageHtml = '
             <p>Hello ' . htmlspecialchars($fullName, ENT_QUOTES, 'UTF-8') . ',</p>
             <p>Your staff account has been created successfully.</p>
-            <p><strong>Email:</strong> ' . htmlspecialchars($email, ENT_QUOTES, 'UTF-8') . '<br>
-            <strong>Temporary Password:</strong> ' . htmlspecialchars($tempPassword, ENT_QUOTES, 'UTF-8') . '<br>
-            <strong>Login URL:</strong> <a href="' . htmlspecialchars($loginUrl, ENT_QUOTES, 'UTF-8') . '">' . htmlspecialchars($loginUrl, ENT_QUOTES, 'UTF-8') . '</a></p>
-            <p>Please log in and change your password immediately.</p>
+            <p><strong>Email:</strong> ' . htmlspecialchars($email, ENT_QUOTES, 'UTF-8') . '</p>
+            <p>Please click the link below to create your password:</p>
+            <p><a href="' . htmlspecialchars($setPasswordUrl, ENT_QUOTES, 'UTF-8') . '">' . htmlspecialchars($setPasswordUrl, ENT_QUOTES, 'UTF-8') . '</a></p>
+            <p>This link will expire in 24 hours.</p>
+            <p><strong>Login URL:</strong> <a href="' . htmlspecialchars($loginUrl, ENT_QUOTES, 'UTF-8') . '">' . htmlspecialchars($loginUrl, ENT_QUOTES, 'UTF-8') . '</a></p>
             <p>Regards,<br>' . htmlspecialchars($smtp['from_name'], ENT_QUOTES, 'UTF-8') . '</p>
         ';
         $messageText = "Hello {$fullName},\n\n"
             . "Your staff account has been created successfully.\n\n"
             . "Email: {$email}\n"
-            . "Temporary Password: {$tempPassword}\n"
+            . "Set your password here: {$setPasswordUrl}\n"
+            . "This link will expire in 24 hours.\n\n"
             . "Login URL: {$loginUrl}\n\n"
-            . "Please log in and change your password immediately.\n\n"
             . "Regards,\n{$smtp['from_name']}";
 
         $vendorAutoload = dirname(__DIR__) . '/vendor/autoload.php';
@@ -183,8 +197,8 @@ try {
 
     $_SESSION['staff_add_success'] = [
         'email' => $email,
-        'temp_password' => $tempPassword,
         'login_url' => $loginUrl,
+        'set_password_url' => $setPasswordUrl,
         'full_name' => $fullName,
         'email_sent' => $emailSent,
         'email_error' => $emailError

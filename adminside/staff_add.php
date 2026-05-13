@@ -159,16 +159,18 @@ unset($_SESSION['staff_add_success'], $_SESSION['staff_add_error']);
                         <strong>Staff added successfully.</strong>
                         <div class="invite-box">
                             <div><strong>Email:</strong> <?php echo htmlspecialchars($successData['email'] ?? ''); ?></div>
-                            <div><strong>Temporary Password:</strong> <?php echo htmlspecialchars($successData['temp_password'] ?? ''); ?></div>
                             <div><strong>Login URL:</strong> <?php echo htmlspecialchars($successData['login_url'] ?? ''); ?></div>
                             <?php if (!empty($successData['email_sent'])): ?>
-                                <div><strong>Email Status:</strong> Sent via SMTP successfully.</div>
+                                <div><strong>Email Status:</strong> Password setup link sent via SMTP successfully.</div>
                             <?php else: ?>
-                                <div><strong>Email Status:</strong> Failed to send via SMTP.</div>
+                                <div><strong>Email Status:</strong> Failed to send password setup link via SMTP.</div>
                                 <?php if (!empty($successData['email_error'])): ?>
                                     <div><strong>Reason:</strong> <?php echo htmlspecialchars($successData['email_error']); ?></div>
                                 <?php endif; ?>
-                                <div><strong>Action:</strong> I-send muna manually habang inaayos ang SMTP credentials/server access.</div>
+                                <?php if (!empty($successData['set_password_url'])): ?>
+                                    <div><strong>Manual Setup Link:</strong> <?php echo htmlspecialchars($successData['set_password_url']); ?></div>
+                                <?php endif; ?>
+                                <div><strong>Action:</strong> I-send muna manually ang password setup link habang inaayos ang SMTP credentials/server access.</div>
                             <?php endif; ?>
                         </div>
                     </div>
