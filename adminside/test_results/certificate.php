@@ -112,10 +112,10 @@ if ($pdf_mode) {
                 .certificate {
                     border: 1.1mm solid #ff7a3d;
                     border-radius: 4mm;
-                    padding: 10mm 12mm 9mm 12mm;
+                    padding: 10mm 12mm 4mm 12mm;
                     position: relative;
                     box-sizing: border-box;
-                    min-height: 248mm;
+                    min-height: auto;
                 }
 
                 .corner {
