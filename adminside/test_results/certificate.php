@@ -141,7 +141,7 @@ if ($pdf_mode) {
                 }
 
                 .logo { margin: 0.8mm 0 5.5mm 0; }
-                .logo img { height: 12.5mm; width: auto; }
+                .logo img { height: 14.5mm; width: auto; }
 
                 .title {
                     text-align: center;
@@ -282,6 +282,7 @@ if ($pdf_mode) {
                 .line {
                     border-top: 0.32mm solid #17345f;
                     margin-bottom: 1.6mm;
+                    margin-top: 12mm;
                 }
 
                 .sign-label {
