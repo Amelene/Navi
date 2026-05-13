@@ -1,7 +1,6 @@
-# Gemini NSC Recommendations Integration TODO
+# TODO - Groq AI Recommendation Endpoint
 
-- [x] Create `helpers/gemini_client.php` to call Gemini API using `GEMINI_API_KEY` from `.env`.
-- [x] Update `helpers/exam_analysis.php` to generate recommendations via Gemini with fallback logic.
-- [x] Update `crewside/process_exam.php` to generate/store analysis after exam submission.
-- [x] Update `crewside/exam_results.php` to render strengths, areas for improvement, and recommendations from session.
-- [x] Validate PHP syntax for updated files.
+- [x] Create `ai-recommend.php` endpoint (POST message -> Groq API -> JSON reply)
+- [x] Create `ai-recommend-test.html` test page (textarea + button + fetch)
+- [x] Add error handling for missing API key, cURL error, invalid API response
+- [x] Final review of created files

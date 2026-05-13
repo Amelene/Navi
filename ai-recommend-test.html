@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Recommendation Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 30px auto; padding: 0 16px; }
+        textarea { width: 100%; min-height: 140px; margin-bottom: 12px; padding: 10px; }
+        button { padding: 10px 16px; cursor: pointer; }
+        pre { background: #111; color: #f1f1f1; padding: 12px; white-space: pre-wrap; border-radius: 6px; margin-top: 12px; }
+    </style>
+</head>
+<body>
+    <h2>Groq AI Recommend Test</h2>
+
+    <textarea id="msg" placeholder="Type prompt here...">Rank: Captain
+Experience: 10 years tanker
+Certificates: complete
+Recommend vessel assignment</textarea>
+
+    <br>
+    <button onclick="send()">Generate AI</button>
+
+    <pre id="out">Waiting...</pre>
+
+    <script>
+        function send() {
+            const msg = document.getElementById('msg').value;
+            const out = document.getElementById('out');
+            out.innerText = 'Loading...';
+
+            const formData = new FormData();
+            formData.append('message', msg);
+
+            fetch('ai-recommend.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    out.innerText = data.reply;
+                } else {
+                    out.innerText = 'Error: ' + (data.error || 'Unknown error');
+                }
+            })
+            .catch(err => {
+                out.innerText = 'Request failed: ' + err.message;
+            });
+        }
+    </script>
+</body>
+</html>
