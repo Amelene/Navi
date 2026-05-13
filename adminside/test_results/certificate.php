@@ -186,12 +186,12 @@ if ($pdf_mode) {
                     font-size: 16px;
                     font-weight: bold;
                     letter-spacing: 4px;
-                    margin: 5mm 0 15mm 0;
+                    margin: 5mm 0 10mm 0;
                     color: #17345f;
                 }
 
                 .name {
-                    font-size: 38px;
+                    font-size: 36px;
                     font-weight: bold;
                     color: #17345f;
                     margin-bottom: 2mm;
@@ -199,22 +199,22 @@ if ($pdf_mode) {
                 }
 
                 .underline {
-                    width: 140mm;
+                    width: 130mm;
                     height: 0.6mm;
                     background: #17345f;
-                    margin: 0 auto 8mm auto;
+                    margin: 0 auto 6mm auto;
                 }
 
                 .completion {
-                    font-size: 16px;
+                    font-size: 15px;
                     font-style: italic;
-                    margin-bottom: 15mm;
+                    margin-bottom: 12mm;
                 }
 
                 .details-table {
                     width: 80%;
-                    margin: 0 auto 10mm auto;
-                    font-size: 16px;
+                    margin: 0 auto 8mm auto;
+                    font-size: 15px;
                     border-collapse: collapse;
                 }
 
@@ -234,7 +234,7 @@ if ($pdf_mode) {
 
                 .score-section {
                     width: 80%;
-                    margin: 0 auto 15mm auto;
+                    margin: 0 auto 12mm auto;
                 }
 
                 .score-box {
@@ -260,15 +260,15 @@ if ($pdf_mode) {
 
                 .description {
                     font-size: 15px;
-                    line-height: 1.5;
+                    line-height: 1.45;
                     width: 85%;
-                    margin: 0 auto 25mm auto;
+                    margin: 0 auto 18mm auto;
                     color: #17345f;
                 }
 
                 .signatures {
                     width: 90%;
-                    margin: 0 auto 15mm auto;
+                    margin: 0 auto 10mm auto;
                 }
 
                 .sig-line {
