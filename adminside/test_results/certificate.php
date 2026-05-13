@@ -239,7 +239,7 @@ if ($pdf_mode) {
                     line-height: 1;
                     font-weight: 700;
                     color: '.$scoreColor.';
-                    margin: 0 0 2.2mm 0;
+                    margin: 0 0 1.7mm 0;
                 }
 
                 .score-status {
@@ -247,7 +247,7 @@ if ($pdf_mode) {
                     line-height: 1;
                     font-weight: 700;
                     color: '.$scoreColor.';
-                    margin: 0 0 2.2mm 0;
+                    margin: 0 0 1.7mm 0;
                 }
 
                 .score-sub {
