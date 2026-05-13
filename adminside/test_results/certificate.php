@@ -135,7 +135,7 @@ if ($pdf_mode) {
                     width: 100%;
                     position: relative;
                     box-sizing: border-box;
-                    padding: 5mm 7mm 5mm;
+                    padding: 20mm;
                     background-color: white;
                     overflow: hidden;
                     page-break-inside: avoid;
