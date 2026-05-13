@@ -1,6 +1,4 @@
-# TODO - Groq AI Recommendation Endpoint
-
-- [x] Create `ai-recommend.php` endpoint (POST message -> Groq API -> JSON reply)
-- [x] Create `ai-recommend-test.html` test page (textarea + button + fetch)
-- [x] Add error handling for missing API key, cURL error, invalid API response
-- [x] Final review of created files
+- [x] Update `adminside/test_results/certificate.php` to support download mode (`?download=1`) and cleaner PDF/print flow.
+- [x] Update button behavior so "Download Certificate" opens download mode and triggers print dialog for Save as PDF.
+- [x] Update `adminside/test_results/certificate.css` print styles to remove scaling/fixed hacks and stabilize A4 output.
+- [x] Verify updated logic and style consistency.

@@ -286,24 +286,22 @@
     }
 
     .certificate-container {
-        position: fixed !important;
-        inset: 0 !important;
+        position: static !important;
         width: 100% !important;
         min-height: 0 !important;
         margin: 0 !important;
-        padding: 6mm !important;
+        padding: 0 !important;
         display: flex !important;
         justify-content: center !important;
         align-items: flex-start !important;
         background: #fff !important;
-        transform: scale(1.12) !important;
-        transform-origin: top center !important;
+        transform: none !important;
     }
 
     .certificate-card {
-        width: 180mm !important;
-        max-width: 180mm !important;
-        margin: 0 !important;
+        width: 194mm !important;
+        max-width: 194mm !important;
+        margin: 0 auto !important;
         padding: 0 !important;
         background: #fff !important;
         border-radius: 0 !important;
@@ -373,4 +371,30 @@
         size: A4 portrait;
         margin: 8mm;
     }
+}
+
+.download-mode .dashboard > *:not(.main),
+.download-mode .sidebar,
+.download-mode footer {
+    display: none !important;
+}
+
+.download-mode .dashboard,
+.download-mode .main,
+.download-mode .main__content {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    background: #fff !important;
+}
+
+.download-mode .certificate-container {
+    min-height: 0 !important;
+    padding: 10mm 0 !important;
+}
+
+.download-mode .certificate-actions {
+    display: none !important;
 }

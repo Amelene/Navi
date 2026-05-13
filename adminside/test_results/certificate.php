@@ -8,6 +8,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 }
 
 $attempt_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$download_mode = isset($_GET['download']) && $_GET['download'] == '1';
 
 try {
     $db = Database::getInstance();
@@ -59,12 +60,14 @@ try {
     <link rel="stylesheet" href="certificate.css?v=<?php echo time(); ?>">
 </head>
 <body>
-    <div class="dashboard">
+    <div class="dashboard <?php echo $download_mode ? 'download-mode' : ''; ?>">
+        <?php if (!$download_mode): ?>
         <?php
         $GLOBALS['base_path'] = '../../';
         $GLOBALS['nav_path']  = '../';
         include '../../includes/sidebar.php';
         ?>
+        <?php endif; ?>
 
         <main class="main">
             <div class="main__content">
@@ -191,12 +194,28 @@ try {
         </main>
     </div>
 
+    <?php if (!$download_mode): ?>
     <?php include '../../includes/footer.php'; ?>
+    <?php endif; ?>
 
     <script>
-        document.querySelector('.btn-download-cert').addEventListener('click', function () {
-            window.print();
+        const downloadBtn = document.querySelector('.btn-download-cert');
+
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', function () {
+                const url = new URL(window.location.href);
+                url.searchParams.set('download', '1');
+                window.open(url.toString(), '_blank');
+            });
+        }
+
+        <?php if ($download_mode): ?>
+        window.addEventListener('load', function () {
+            setTimeout(function () {
+                window.print();
+            }, 300);
         });
+        <?php endif; ?>
     </script>
 </body>
 </html>
