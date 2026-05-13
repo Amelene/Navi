@@ -86,15 +86,34 @@ class ExamAnalysis
     public function getFunctionScores($attemptId)
     {
         $sql = "SELECT 
-                    q.function,
+                    COALESCE(NULLIF(TRIM(q.function), ''), 'General Maritime Knowledge') AS function_name,
                     COUNT(ea.id) AS total_questions,
                     SUM(CASE WHEN ea.is_correct = 1 THEN 1 ELSE 0 END) AS correct_answers
                 FROM exam_answers ea
                 JOIN questions q ON ea.question_id = q.id
                 WHERE ea.exam_attempt_id = ?
-                GROUP BY q.function";
+                GROUP BY COALESCE(NULLIF(TRIM(q.function), ''), 'General Maritime Knowledge')
+                ORDER BY total_questions DESC";
 
-        return $this->db->fetchAll($sql, [$attemptId]);
+        $rows = $this->db->fetchAll($sql, [$attemptId]);
+        $scores = [];
+
+        foreach ($rows as $row) {
+            $total = (int)($row['total_questions'] ?? 0);
+            $correct = (int)($row['correct_answers'] ?? 0);
+            if ($total <= 0) {
+                continue;
+            }
+
+            $scores[] = [
+                'function' => (string)$row['function_name'],
+                'total_questions' => $total,
+                'correct_answers' => $correct,
+                'percentage' => round(($correct / $total) * 100, 2),
+            ];
+        }
+
+        return $scores;
     }
 
     public function getStrengths($attemptId)
@@ -103,13 +122,25 @@ class ExamAnalysis
         $strengths = [];
 
         foreach ($functionScores as $score) {
-            $percentage = ($score['correct_answers'] / $score['total_questions']) * 100;
-            if ($percentage >= 80) {
+            // Require enough sample size or very high score
+            if (($score['percentage'] >= 80 && $score['total_questions'] >= 2) || $score['percentage'] >= 90) {
                 $strengths[] = $score['function'];
             }
         }
 
-        return $strengths;
+        // Fallback: if none found, pick best-performing function if score is decent
+        if (empty($strengths) && !empty($functionScores)) {
+            usort($functionScores, function ($a, $b) {
+                return $b['percentage'] <=> $a['percentage'];
+            });
+
+            $top = $functionScores[0];
+            if ($top['percentage'] >= 60) {
+                $strengths[] = $top['function'];
+            }
+        }
+
+        return array_values(array_unique($strengths));
     }
 
     public function getAreasForImprovement($attemptId)
@@ -118,13 +149,22 @@ class ExamAnalysis
         $improvements = [];
 
         foreach ($functionScores as $score) {
-            $percentage = ($score['correct_answers'] / $score['total_questions']) * 100;
-            if ($percentage < 70) {
+            // Require enough sample size or very low score
+            if (($score['percentage'] < 70 && $score['total_questions'] >= 2) || $score['percentage'] < 50) {
                 $improvements[] = $score['function'];
             }
         }
 
-        return $improvements;
+        // Fallback: if none found, pick lowest-performing function
+        if (empty($improvements) && !empty($functionScores)) {
+            usort($functionScores, function ($a, $b) {
+                return $a['percentage'] <=> $b['percentage'];
+            });
+
+            $improvements[] = $functionScores[0]['function'];
+        }
+
+        return array_values(array_unique($improvements));
     }
 
     public function generateRecommendations($strengths, $improvements, $attemptId = null)
