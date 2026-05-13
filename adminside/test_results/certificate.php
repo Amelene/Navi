@@ -138,7 +138,7 @@ if ($pdf_mode) {
                     box-sizing: border-box;
                     border: 1.6mm solid #ff7a3d;
                     border-radius: 6mm;
-                    padding: 5mm;
+                    padding: 10mm;
                     display: flex;
                     justify-content: center;
                     align-items: center;
@@ -183,7 +183,7 @@ if ($pdf_mode) {
                 }
 
                 .logo { margin-bottom: 5mm; }
-                .logo img { height: 12mm; width: auto; }
+                .logo img { height: 16mm; width: auto; }
 
                 .content-center {
                     text-align: center;
