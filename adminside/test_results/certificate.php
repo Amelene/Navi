@@ -174,7 +174,7 @@ if ($pdf_mode) {
                 .underline {
                     width: 82mm;
                     height: 0.5mm;
-                    background: #000000;
+                    background: #17345f;
                     margin: 1.8mm auto 4.2mm auto;
                 }
 
@@ -183,14 +183,14 @@ if ($pdf_mode) {
                     font-size: 4.6mm;
                     margin-bottom: 6.8mm;
                     font-style: italic;
-                    color: #000000;
+                    color: #17345f;
                 }
 
                 .details-table {
                     width: 76%;
                     margin: 0 auto 6.4mm auto;
                     border-collapse: collapse;
-                    color: #000000;
+                    color: #17345f;
                 }
 
                 .details-table td {
