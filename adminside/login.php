@@ -12,6 +12,9 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
 
 // Handle login form submission
 $error = '';
+$success = $_SESSION['set_password_success'] ?? '';
+unset($_SESSION['set_password_success']);
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
@@ -19,9 +22,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $db = Database::getInstance();
         
-        // Fetch user from database (admin/staff only)
+        // Fetch user from database (admin + mapped manager/officer roles)
         $user = $db->fetchOne(
-            "SELECT * FROM users WHERE email = ? AND user_status = 'active' AND role IN ('admin','staff')",
+            "SELECT * FROM users WHERE email = ? AND user_status = 'active' AND role IN ('admin','staff','hr_manager','accounting_officer','crewing_officer','finance_manager')",
             [$email]
         );
         
@@ -68,6 +71,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="login-box">
                 <h1 class="login-title">Admin Access Only</h1>
                 
+                <?php if ($success): ?>
+                    <div class="success-message" style="background:#ecfdf3;border:1px solid #abefc6;color:#067647;padding:10px;border-radius:8px;margin-bottom:12px;">
+                        <?php echo htmlspecialchars($success); ?>
+                    </div>
+                <?php endif; ?>
+
                 <?php if ($error): ?>
                     <div class="error-message"><?php echo $error; ?></div>
                 <?php endif; ?>
