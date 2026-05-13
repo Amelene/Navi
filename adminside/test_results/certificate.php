@@ -71,7 +71,12 @@ try {
     header('Location: ../tests.php');
     exit();
 }
-if ($pdf_mode && class_exists('Dompdf\Dompdf')) {
+if ($pdf_mode) {
+    if (!class_exists('Dompdf\Dompdf')) {
+        error_log('Certificate PDF: Dompdf class not found.');
+        header('Location: certificate.php?id=' . $attempt_id . '&pdf_error=1');
+        exit();
+    }
     $logoPath = realpath('../../assets/image/logo.png');
     $logoDataUri = '';
     if ($logoPath && file_exists($logoPath)) {
@@ -323,7 +328,7 @@ if ($download_file_mode) {
                         <!-- Action Buttons -->
                         <div class="certificate-actions">
                             <button class="btn-cert-action btn-close-cert" onclick="window.location.href='test_results.php?id=<?php echo htmlspecialchars($attempt_id); ?>'">Close</button>
-                            <button class="btn-cert-action btn-download-cert">Download Certificate</button>
+            <a class="btn-cert-action btn-download-cert" href="certificate.php?id=<?php echo htmlspecialchars($attempt_id); ?>&pdf=1">Download Certificate</a>
                         </div>
                     </div>
                 </div>
@@ -336,17 +341,6 @@ if ($download_file_mode) {
     <?php endif; ?>
 
     <script>
-        const downloadBtn = document.querySelector('.btn-download-cert');
-
-        if (downloadBtn) {
-            downloadBtn.addEventListener('click', function () {
-                const url = new URL(window.location.href);
-                url.searchParams.set('pdf', '1');
-                url.searchParams.delete('download');
-                url.searchParams.delete('download_file');
-                window.location.href = url.toString();
-            });
-        }
     </script>
 </body>
 </html>
