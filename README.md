@@ -299,4 +299,109 @@ This project is for educational/internal use.
 
 ---
 
+---
+
+## 🤖 Python AI Service Integration (PHP ↔ Python API ↔ Gemini)
+
+The recommendation engine now supports this architecture:
+
+```
+PHP System
+   ↓
+Python API Service
+   ↓
+Gemini API
+   ↓
+Response back to PHP
+   ↓
+Save to DB cache (exam_attempts.ai_recommendation)
+```
+
+### 1) Python service setup
+
+Location: `python_ai_service/`
+
+1. Create Python virtual environment:
+   - Windows (cmd):
+     ```bash
+     cd python_ai_service
+     python -m venv .venv
+     .venv\Scripts\activate
+     ```
+
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. Configure env:
+   - Copy `python_ai_service/.env.example` to `python_ai_service/.env`
+   - Set:
+     ```env
+     GEMINI_API_KEY=your_real_key
+     GEMINI_MODEL=gemini-flash-latest
+     AI_TIMEOUT_SECONDS=25
+     PORT=5001
+     ```
+
+4. Run service:
+   ```bash
+   python app.py
+   ```
+
+5. Health check:
+   - `GET http://127.0.0.1:5001/health`
+
+### 2) PHP app configuration
+
+In your root `.env`, set Python AI URL:
+
+```env
+PYTHON_AI_URL=http://127.0.0.1:5001
+```
+
+`helpers/gemini_client.php` now calls this Python endpoint:
+- `POST /recommendations`
+
+### 3) Request / Response contract
+
+**Request JSON**
+```json
+{
+  "provider": "gemini",
+  "strengths": ["Topic A", "Topic B"],
+  "improvements": ["Topic C"]
+}
+```
+
+**Success response**
+```json
+{
+  "ok": true,
+  "recommendations": [
+    "Recommendation 1",
+    "Recommendation 2"
+  ]
+}
+```
+
+**Error response**
+```json
+{
+  "ok": false,
+  "error": {
+    "message": "..."
+  },
+  "recommendations": []
+}
+```
+
+### 4) Caching behavior
+
+PHP still uses cache-first logic:
+- If `exam_attempts.ai_recommendation` already has data → reuse it.
+- If empty → call Python AI service, then save response for reuse.
+
+---
+
 **Happy Shipping! ⚓🚢**

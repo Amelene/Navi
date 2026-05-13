@@ -5,12 +5,14 @@ class GeminiClient
     private $apiKey;
     private $model;
     private $timeoutSeconds;
+    private $pythonAiUrl;
 
     public function __construct($apiKey = null, $model = null, $timeoutSeconds = 20)
     {
         $this->apiKey = $apiKey ?: getenv('GEMINI_API_KEY');
         $this->model = $model ?: getenv('GEMINI_MODEL') ?: 'gemini-flash-latest';
         $this->timeoutSeconds = (int)$timeoutSeconds;
+        $this->pythonAiUrl = rtrim((string)(getenv('PYTHON_AI_URL') ?: 'http://127.0.0.1:5001'), '/');
     }
 
     public function getLastError()
@@ -32,13 +34,13 @@ class GeminiClient
 
     public function isConfigured()
     {
-        return !empty($this->apiKey);
+        return !empty($this->pythonAiUrl);
     }
 
     public function generateRecommendations(array $strengths, array $improvements)
     {
         if (!$this->isConfigured()) {
-            $this->setLastError('GEMINI_API_KEY is missing or empty.');
+            $this->setLastError('PYTHON_AI_URL is missing or empty.');
             return null;
         }
 
@@ -47,30 +49,11 @@ class GeminiClient
             return null;
         }
 
-        $strengthText = empty($strengths) ? 'None identified' : implode(', ', $strengths);
-        $improvementText = empty($improvements) ? 'None identified' : implode(', ', $improvements);
-
-        $prompt = "You are assisting with NSC exam feedback for maritime crew.\n"
-            . "Create practical, concise recommendations.\n"
-            . "Return ONLY a numbered list with 3 to 5 items.\n"
-            . "Each item must be one sentence and actionable.\n\n"
-            . "Strengths: {$strengthText}\n"
-            . "Areas for Improvement: {$improvementText}\n";
-
-        $url = 'https://generativelanguage.googleapis.com/v1beta/models/' . rawurlencode($this->model) . ':generateContent?key=' . rawurlencode($this->apiKey);
-
+        $url = $this->pythonAiUrl . '/recommendations';
         $payload = [
-            'contents' => [
-                [
-                    'parts' => [
-                        ['text' => $prompt]
-                    ]
-                ]
-            ],
-            'generationConfig' => [
-                'temperature' => 0.4,
-                'maxOutputTokens' => 400
-            ]
+            'provider' => 'gemini',
+            'strengths' => array_values($strengths),
+            'improvements' => array_values($improvements),
         ];
 
         $ch = curl_init($url);
@@ -86,31 +69,52 @@ class GeminiClient
         curl_close($ch);
 
         if ($response === false || !empty($curlError)) {
-            $this->setLastError('Gemini cURL error', $curlError);
+            $this->setLastError('Python AI service cURL error', $curlError);
             return null;
         }
 
         $decoded = json_decode($response, true);
 
         if ($httpCode < 200 || $httpCode >= 300) {
-            $apiError = $decoded['error']['message'] ?? $response;
-            $apiStatus = $decoded['error']['status'] ?? null;
-            $this->setLastError('Gemini HTTP error ' . $httpCode, [
-                'status' => $apiStatus,
-                'message' => $apiError,
+            $serviceError = is_array($decoded)
+                ? ($decoded['error']['message'] ?? $decoded['message'] ?? 'Unknown service error')
+                : $response;
+
+            $this->setLastError('Python AI service HTTP error ' . $httpCode, [
+                'message' => $serviceError,
                 'raw_response' => $decoded ?: $response
             ]);
             return null;
         }
 
         if (!is_array($decoded)) {
-            $this->setLastError('Gemini invalid JSON response', $response);
+            $this->setLastError('Python AI service invalid JSON response', $response);
             return null;
         }
 
-        $text = $decoded['candidates'][0]['content']['parts'][0]['text'] ?? null;
-        if (!is_string($text) || trim($text) === '') {
-            $this->setLastError('Gemini empty text response', $decoded);
+        if (!($decoded['ok'] ?? false)) {
+            $this->setLastError(
+                'Python AI service returned failure',
+                $decoded['error'] ?? $decoded
+            );
+            return null;
+        }
+
+        $items = $decoded['recommendations'] ?? [];
+        if (!is_array($items)) {
+            $this->setLastError('Python AI service returned invalid recommendations payload', $decoded);
+            return null;
+        }
+
+        $lines = [];
+        foreach ($items as $item) {
+            if (is_string($item) && trim($item) !== '') {
+                $lines[] = trim($item);
+            }
+        }
+
+        if (empty($lines)) {
+            $this->setLastError('Python AI service returned empty recommendations', $decoded);
             return null;
         }
 
@@ -118,6 +122,6 @@ class GeminiClient
             unset($_SESSION['gemini_last_error']);
         }
 
-        return trim($text);
+        return implode("\n", $lines);
     }
 }
