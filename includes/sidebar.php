@@ -28,15 +28,6 @@
             <?php
             $current = basename($_SERVER['PHP_SELF']);
             $sessionRole = strtolower(trim($_SESSION['user_role'] ?? ''));
-            $roleAccessMap = [
-                'admin' => ['index.php', 'crew.php', 'staff.php', 'tests.php', 'rep.php', 'application.php', 'settings.php'],
-                'hr_manager' => ['index.php', 'staff.php', 'settings.php'],
-                'accounting_officer' => ['index.php', 'settings.php'],
-                'crewing_officer' => ['index.php', 'crew.php', 'rep.php', 'application.php', 'settings.php'],
-                'finance_manager' => ['index.php', 'rep.php', 'settings.php'],
-                'staff' => ['index.php', 'settings.php']
-            ];
-            $allowedHrefs = $roleAccessMap[$sessionRole] ?? $roleAccessMap['staff'];
 
             $navItems = [
                 ['href' => 'index.php',       'title' => 'Dashboard',       'img' => 'assets/image/dash.png'],
@@ -58,9 +49,6 @@
             ];
 
             foreach ($navItems as $item) {
-                if (!in_array($item['href'], $allowedHrefs, true)) {
-                    continue;
-                }
                 // determine active state
                 // When viewing crew_documents.php or crew.php, highlight Crew Management
                 $active = '';
