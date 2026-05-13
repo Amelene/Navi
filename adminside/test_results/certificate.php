@@ -108,13 +108,13 @@ if ($pdf_mode) {
             <style>
                 @page { 
                     size: A4 portrait; 
-                    margin: 0; 
+                    margin: 6mm; 
                 }
                 html, body { 
                     margin: 0; 
                     padding: 0;
-                    width: 210mm;
-                    height: 297mm;
+                    width: 100%;
+                    height: 100%;
                     font-family: DejaVu Sans, Arial, sans-serif; 
                     color: #17345f;
                     background: #ffffff;
@@ -123,10 +123,10 @@ if ($pdf_mode) {
                 /* Ang main border na nakadikit sa edges ng papel */
                 .certificate-container {
                     position: relative;
-                    width: 210mm;
-                    height: 297mm;
+                    width: 100%;
+                    height: 100%;
                     box-sizing: border-box;
-                    padding: 8mm;
+                    padding: 0;
                 }
 
                 .inner-border {
@@ -136,7 +136,7 @@ if ($pdf_mode) {
                     height: 100%;
                     position: relative;
                     box-sizing: border-box;
-                    padding: 12mm 14mm;
+                    padding: 8mm 10mm 6mm;
                     background-color: white;
                     overflow: hidden;
                     page-break-inside: avoid;
@@ -168,13 +168,13 @@ if ($pdf_mode) {
                     border-color: transparent #0a7d98 transparent transparent;
                 }
 
-                .logo { margin-bottom: 10mm; }
-                .logo img { height: 18mm; width: auto; }
+                .logo { margin-bottom: 8mm; }
+                .logo img { height: 16mm; width: auto; }
 
                 .content-center { text-align: center; }
 
                 .title {
-                    font-size: 55px;
+                    font-size: 50px;
                     font-family: DejaVu Serif, serif;
                     font-weight: bold;
                     color: #17345f;
@@ -186,35 +186,35 @@ if ($pdf_mode) {
                     font-size: 16px;
                     font-weight: bold;
                     letter-spacing: 4px;
-                    margin: 5mm 0 10mm 0;
+                    margin: 3mm 0 8mm 0;
                     color: #17345f;
                 }
 
                 .name {
-                    font-size: 36px;
+                    font-size: 34px;
                     font-weight: bold;
                     color: #17345f;
-                    margin-bottom: 2mm;
+                    margin-bottom: 1.5mm;
                     text-transform: uppercase;
                 }
 
                 .underline {
-                    width: 130mm;
+                    width: 125mm;
                     height: 0.6mm;
                     background: #17345f;
-                    margin: 0 auto 6mm auto;
+                    margin: 0 auto 5mm auto;
                 }
 
                 .completion {
-                    font-size: 15px;
+                    font-size: 14px;
                     font-style: italic;
-                    margin-bottom: 12mm;
+                    margin-bottom: 10mm;
                 }
 
                 .details-table {
-                    width: 80%;
-                    margin: 0 auto 8mm auto;
-                    font-size: 15px;
+                    width: 78%;
+                    margin: 0 auto 6mm auto;
+                    font-size: 14px;
                     border-collapse: collapse;
                 }
 
@@ -233,8 +233,8 @@ if ($pdf_mode) {
                 }
 
                 .score-section {
-                    width: 80%;
-                    margin: 0 auto 12mm auto;
+                    width: 86%;
+                    margin: 0 auto 10mm auto;
                 }
 
                 .score-box {
@@ -245,7 +245,7 @@ if ($pdf_mode) {
                 }
 
                 .score-main {
-                    font-size: 45px;
+                    font-size: 40px;
                     font-weight: bold;
                     color: '.$scoreColor.';
                     margin: 0;
@@ -259,16 +259,16 @@ if ($pdf_mode) {
                 }
 
                 .description {
-                    font-size: 15px;
+                    font-size: 14px;
                     line-height: 1.45;
-                    width: 85%;
-                    margin: 0 auto 18mm auto;
+                    width: 88%;
+                    margin: 0 auto 14mm auto;
                     color: #17345f;
                 }
 
                 .signatures {
-                    width: 90%;
-                    margin: 0 auto 10mm auto;
+                    width: 92%;
+                    margin: 0 auto 6mm auto;
                 }
 
                 .sig-line {
@@ -284,13 +284,13 @@ if ($pdf_mode) {
 
                 .footer-tagline {
                     position: absolute;
-                    bottom: 15mm;
+                    bottom: 10mm;
                     left: 0;
                     right: 0;
                     text-align: center;
                     font-weight: bold;
                     color: #0a7d98;
-                    font-size: 15px;
+                    font-size: 14px;
                 }
             </style>
         </head>
