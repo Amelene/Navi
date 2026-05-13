@@ -112,10 +112,10 @@ if ($pdf_mode) {
                 .certificate {
                     border: 1.1mm solid #ff7a3d;
                     border-radius: 4mm;
-                    padding: 12mm 14mm 11mm 14mm;
+                    padding: 10mm 12mm 9mm 12mm;
                     position: relative;
                     box-sizing: border-box;
-                    min-height: 260mm;
+                    min-height: 248mm;
                 }
 
                 .corner {
@@ -140,14 +140,14 @@ if ($pdf_mode) {
                     border-color: transparent #0a7d98 transparent transparent;
                 }
 
-                .logo { margin: 1mm 0 6mm 0; }
-                .logo img { height: 15mm; width: auto; }
+                .logo { margin: 0.8mm 0 5mm 0; }
+                .logo img { height: 12mm; width: auto; }
 
                 .title {
                     text-align: center;
-                    font-size: 16.2mm;
+                    font-size: 14.8mm;
                     line-height: 1.02;
-                    margin: 0 0 2.2mm 0;
+                    margin: 0 0 1.8mm 0;
                     font-family: DejaVu Serif, serif;
                     font-weight: 700;
                     color: #000000;
@@ -155,16 +155,16 @@ if ($pdf_mode) {
 
                 .company {
                     text-align: center;
-                    font-size: 4.6mm;
-                    letter-spacing: 1mm;
+                    font-size: 4.2mm;
+                    letter-spacing: 0.9mm;
                     font-weight: 700;
-                    margin-bottom: 6.4mm;
+                    margin-bottom: 5.2mm;
                     color: #000000;
                 }
 
                 .name {
                     text-align: center;
-                    font-size: 9.6mm;
+                    font-size: 8.6mm;
                     line-height: 1.08;
                     font-weight: 700;
                     margin: 0;
@@ -172,31 +172,31 @@ if ($pdf_mode) {
                 }
 
                 .underline {
-                    width: 82mm;
-                    height: 0.5mm;
+                    width: 76mm;
+                    height: 0.45mm;
                     background: #17345f;
-                    margin: 1.8mm auto 4.2mm auto;
+                    margin: 1.4mm auto 3.4mm auto;
                 }
 
                 .completion {
                     text-align: center;
-                    font-size: 4.6mm;
-                    margin-bottom: 6.8mm;
+                    font-size: 4.1mm;
+                    margin-bottom: 5.4mm;
                     font-style: italic;
                     color: #17345f;
                 }
 
                 .details-table {
-                    width: 76%;
-                    margin: 0 auto 6.4mm auto;
+                    width: 72%;
+                    margin: 0 auto 5.2mm auto;
                     border-collapse: collapse;
                     color: #17345f;
                 }
 
                 .details-table td {
                     padding: 1.05mm 0;
-                    font-size: 4.6mm;
-                    line-height: 1.18;
+                    font-size: 4.1mm;
+                    line-height: 1.14;
                 }
 
                 .details-label {
@@ -213,13 +213,13 @@ if ($pdf_mode) {
                 }
 
                 .divider {
-                    border-top: 0.35mm solid #dedede;
-                    margin: 6.8mm 0 6.5mm 0;
+                    border-top: 0.3mm solid #dedede;
+                    margin: 5.4mm 0 5mm 0;
                 }
 
                 .scores {
-                    width: 50%;
-                    margin: 0 auto 6.2mm auto;
+                    width: 48%;
+                    margin: 0 auto 4.8mm auto;
                     border-collapse: collapse;
                     text-align: center;
                 }
@@ -235,40 +235,40 @@ if ($pdf_mode) {
                 }
 
                 .score-main {
-                    font-size: 10.8mm;
+                    font-size: 9.2mm;
                     line-height: 1;
                     font-weight: 700;
                     color: '.$scoreColor.';
-                    margin: 0 0 1.2mm 0;
+                    margin: 0 0 0.9mm 0;
                 }
 
                 .score-status {
-                    font-size: 10.6mm;
+                    font-size: 9.2mm;
                     line-height: 1;
                     font-weight: 700;
                     color: '.$scoreColor.';
-                    margin: 0 0 1.2mm 0;
+                    margin: 0 0 0.9mm 0;
                 }
 
                 .score-sub {
-                    font-size: 4.2mm;
+                    font-size: 3.8mm;
                     font-weight: 700;
                     color: #4a4a4a;
                     margin: 0;
                 }
 
                 .description {
-                    width: 78%;
-                    margin: 0 auto 7.6mm auto;
+                    width: 75%;
+                    margin: 0 auto 8.4mm auto;
                     text-align: center;
-                    font-size: 4.5mm;
-                    line-height: 1.34;
+                    font-size: 4mm;
+                    line-height: 1.28;
                     color: #17345f;
                 }
 
                 .signatures {
-                    width: 90%;
-                    margin: 0 auto 6.6mm auto;
+                    width: 88%;
+                    margin: 0 auto 5.2mm auto;
                     border-collapse: collapse;
                 }
 
@@ -280,21 +280,21 @@ if ($pdf_mode) {
                 }
 
                 .line {
-                    border-top: 0.35mm solid #17345f;
-                    margin-bottom: 1.8mm;
+                    border-top: 0.32mm solid #17345f;
+                    margin-bottom: 1.5mm;
                 }
 
                 .sign-label {
-                    font-size: 4.6mm;
+                    font-size: 4.1mm;
                     font-weight: 700;
                 }
 
                 .footer-text {
                     text-align: center;
-                    font-size: 4.8mm;
+                    font-size: 4.2mm;
                     font-weight: 700;
                     color: #007ca0;
-                    letter-spacing: 0.25mm;
+                    letter-spacing: 0.18mm;
                 }
             </style>
         </head>
