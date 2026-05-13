@@ -13,7 +13,7 @@ require_once '../config/database.php';
 try {
     $db = Database::getInstance();
     
-    // Get filter parameters
+    // Get filter parameterss
     $search     = $_GET['search']     ?? '';
     $department = $_GET['department'] ?? '';
     $position   = $_GET['position']   ?? '';
@@ -137,10 +137,6 @@ try {
                             <input class="input-search" type="search" placeholder="Search..." id="searchInput" value="<?php echo htmlspecialchars($search); ?>">
                         </div>
                         <div class="crew-controls">
-                            <button class="btn ghost" onclick="toggleFilter('department')">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                                Department
-                            </button>
                             <button class="btn ghost" onclick="toggleFilter('position')">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                                 Position
@@ -156,7 +152,6 @@ try {
                                         <th>ID NO.</th>
                                         <th>NAME</th>
                                         <th>POSITION</th>
-                                        <th>DEPARTMENT</th>
                                         <th>STATUS</th>
                                         <th>INFORMATION</th>
                                     </tr>
@@ -168,7 +163,6 @@ try {
                                                 <td class="fw-bold"><?php echo htmlspecialchars($staff['staff_no']); ?></td>
                                                 <td class="fw-bold"><?php echo htmlspecialchars(strtoupper($staff['full_name'])); ?></td>
                                                 <td class="fw-bold"><?php echo htmlspecialchars(strtoupper($staff['position_name'] ?? 'N/A')); ?></td>
-                                                <td class="fw-bold"><?php echo htmlspecialchars(strtoupper($staff['department_name'] ?? 'N/A')); ?></td>
                                                 <td class="crew-status <?php 
                                                     echo $staff['staff_status'] === 'active'   ? 'success' : 
                                                         ($staff['staff_status'] === 'on_leave' ? 'warn'    : 'error'); 
@@ -182,7 +176,7 @@ try {
                                         <?php endforeach; ?>
                                     <?php else: ?>
                                         <tr>
-                                            <td colspan="6" style="text-align: center; padding: 40px;">
+                                            <td colspan="5" style="text-align: center; padding: 40px;">
                                                 No staff records found.
                                             </td>
                                         </tr>
