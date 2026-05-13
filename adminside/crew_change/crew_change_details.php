@@ -10,7 +10,9 @@ require_once '../../config/database.php';
 
 $change_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($change_id <= 0) {
-    $change_id = 1;
+    $_SESSION['error_message'] = 'Invalid crew change ID.';
+    header('Location: ../rep.php');
+    exit();
 }
 
 $messagesByGroup = [
@@ -23,17 +25,17 @@ $messagesByGroup = [
 
 $changeData = [
     'id' => $change_id,
-    'vessel_name' => 'MV FUTURE 1',
-    'position_name' => 'Master',
-    'crew_to_be_replaced' => 'Lucas A. Cruz',
-    'license_required' => 'Master Mariner (MM)',
-    'replacement_name' => 'Michael Johnson',
-    'replacement_license' => 'Master Mariner (MM)',
+    'vessel_name' => '',
+    'position_name' => '',
+    'crew_to_be_replaced' => '',
+    'license_required' => '',
+    'replacement_name' => '',
+    'replacement_license' => '',
     'status_type' => 'will_disembark',
-    'date_joined' => '2023-01-15',
-    'end_of_coe' => '2024-01-15',
-    'end_of_extension' => '2024-03-15',
-    'contact_number' => '0123456789',
+    'date_joined' => null,
+    'end_of_coe' => null,
+    'end_of_extension' => null,
+    'contact_number' => '',
     'target_joining_date' => null,
     'place_of_joining' => ''
 ];
@@ -102,6 +104,10 @@ try {
     $foundChange = $db->fetchOne("SELECT * FROM crew_changes WHERE id = ?", [$change_id]);
     if ($foundChange) {
         $changeData = array_merge($changeData, $foundChange);
+    } else {
+        $_SESSION['error_message'] = 'Crew change record not found.';
+        header('Location: ../rep.php');
+        exit();
     }
 
     $rows = $db->fetchAll(
