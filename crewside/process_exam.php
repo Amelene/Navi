@@ -1,7 +1,6 @@
 <?php
 session_start();
 require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/../helpers/exam_analysis.php';
 
 // Check if crew is logged in
 if (!isset($_SESSION['crew_logged_in']) || $_SESSION['crew_logged_in'] !== true) {
@@ -147,10 +146,6 @@ try {
         ]);
     }
     
-    // Generate strengths/improvements/recommendations after answers are saved
-    $analysisService = new ExamAnalysis();
-    $analysis = $analysisService->generateAnalysis($attempt_id);
-
     $db->commit();
     
     // Store results in session for results page
@@ -164,8 +159,7 @@ try {
         'time_taken' => $time_taken,
         'department' => $exam_data['department'],
         'category' => $exam_data['category'],
-        'vessel_type' => $exam_data['vessel_type'],
-        'analysis' => $analysis
+        'vessel_type' => $exam_data['vessel_type']
     ];
     
     // Clear exam session data

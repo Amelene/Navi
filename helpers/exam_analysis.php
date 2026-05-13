@@ -96,44 +96,19 @@ class ExamAnalysis
 
     public function generateRecommendations($strengths, $improvements)
     {
-        $fallback = $this->getFallbackRecommendations($strengths, $improvements);
-
         try {
             $gemini = new GeminiClient();
             $generatedText = $gemini->generateRecommendations((array)$strengths, (array)$improvements);
 
             if (!is_string($generatedText) || trim($generatedText) === '') {
-                return $fallback;
+                return [];
             }
 
-            $parsed = $this->parseRecommendationsText($generatedText);
-            return !empty($parsed) ? $parsed : $fallback;
+            return $this->parseRecommendationsText($generatedText);
         } catch (Throwable $e) {
             error_log('Gemini recommendation generation failed: ' . $e->getMessage());
-            return $fallback;
+            return [];
         }
-    }
-
-    private function getFallbackRecommendations($strengths, $improvements)
-    {
-        $recommendations = [];
-
-        if (empty($improvements)) {
-            $recommendations[] = "Excellent work! Continue to maintain high standards in all areas.";
-            $recommendations[] = "Keep practicing scenario-based questions to retain your current performance level.";
-            if (!empty($strengths)) {
-                $recommendations[] = "Use your strong areas (" . implode(', ', $strengths) . ") to mentor and support peers.";
-            }
-            return $recommendations;
-        }
-
-        foreach ($improvements as $area) {
-            $recommendations[] = "Focus on improving knowledge and skills in '{$area}'.";
-        }
-        $recommendations[] = "Allocate regular review sessions and prioritize weak functions first.";
-        $recommendations[] = "Take short quizzes after each review session to track progress.";
-
-        return $recommendations;
     }
 
     private function parseRecommendationsText($text)

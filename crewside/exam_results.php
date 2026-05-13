@@ -17,12 +17,6 @@ if (!isset($_SESSION['exam_result'])) {
 $result = $_SESSION['exam_result'];
 $total_questions = $result['total_questions'];
 
-// Get analysis from session (generated in process_exam.php)
-$analysis = $result['analysis'] ?? [];
-$strengths = (isset($analysis['strengths']) && is_array($analysis['strengths'])) ? $analysis['strengths'] : [];
-$areasForImprovement = (isset($analysis['areas_for_improvement']) && is_array($analysis['areas_for_improvement'])) ? $analysis['areas_for_improvement'] : [];
-$recommendations = (isset($analysis['recommendations']) && is_array($analysis['recommendations'])) ? $analysis['recommendations'] : [];
-
 // Get current date
 $date_issued = date('Y-m-d');
 ?>
@@ -105,68 +99,6 @@ $date_issued = date('Y-m-d');
             font-size: 14px;
         }
 
-        .analysis-panel {
-            margin: 20px auto 0;
-            max-width: 900px;
-            text-align: left;
-            border-top: 1px solid #e5e7eb;
-            padding-top: 20px;
-        }
-
-        .analysis-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .analysis-card {
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 14px 16px;
-        }
-
-        .analysis-card h3,
-        .recommendations-wrap h3 {
-            margin: 0 0 8px;
-            color: #FF7E5F;
-            font-size: 18px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .analysis-card ul,
-        .recommendations-wrap ol {
-            margin: 0;
-            padding-left: 20px;
-            color: #1f2937;
-        }
-
-        .analysis-card li,
-        .recommendations-wrap li {
-            margin-bottom: 6px;
-            line-height: 1.4;
-        }
-
-        .recommendations-wrap {
-            background: #fff;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 14px 16px;
-        }
-
-        .no-data {
-            color: #6b7280;
-            font-style: italic;
-        }
-
-        @media (max-width: 768px) {
-            .analysis-grid {
-                grid-template-columns: 1fr;
-            }
-        }
     </style>
 </head>
 <body>
@@ -245,49 +177,6 @@ $date_issued = date('Y-m-d');
                 <p class="release-message">
                     Your results will be officially released soon
                 </p>
-
-                <div class="analysis-panel">
-                    <div class="analysis-grid">
-                        <div class="analysis-card">
-                            <h3>Strengths</h3>
-                            <?php if (!empty($strengths)): ?>
-                                <ul>
-                                    <?php foreach ($strengths as $item): ?>
-                                        <li><?php echo htmlspecialchars((string)$item); ?></li>
-                                    <?php endforeach; ?>
-                                </ul>
-                            <?php else: ?>
-                                <p class="no-data">No specific strengths identified.</p>
-                            <?php endif; ?>
-                        </div>
-
-                        <div class="analysis-card">
-                            <h3>Areas for Improvement</h3>
-                            <?php if (!empty($areasForImprovement)): ?>
-                                <ul>
-                                    <?php foreach ($areasForImprovement as $item): ?>
-                                        <li><?php echo htmlspecialchars((string)$item); ?></li>
-                                    <?php endforeach; ?>
-                                </ul>
-                            <?php else: ?>
-                                <p class="no-data">No major improvement areas found.</p>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-
-                    <div class="recommendations-wrap">
-                        <h3>Recommendations</h3>
-                        <?php if (!empty($recommendations)): ?>
-                            <ol>
-                                <?php foreach ($recommendations as $item): ?>
-                                    <li><?php echo htmlspecialchars((string)$item); ?></li>
-                                <?php endforeach; ?>
-                            </ol>
-                        <?php else: ?>
-                            <p class="no-data">Recommendations are not available for this attempt.</p>
-                        <?php endif; ?>
-                    </div>
-                </div>
 
                 <div class="date-issued-container">
                     <div class="date-label">Date Issued</div>
