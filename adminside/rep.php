@@ -114,11 +114,22 @@ try {
                     </div>
                 </div>
 
-                <div class="card card--padded">
-                    <div class="card__header">
+                    <div class="card card--padded">
+                        <?php if (!empty($_SESSION['success_message'])): ?>
+                            <div style="background:#dcfce7;color:#166534;border:1px solid #bbf7d0;padding:10px 12px;border-radius:8px;margin-bottom:12px;">
+                                <?php echo htmlspecialchars($_SESSION['success_message']); unset($_SESSION['success_message']); ?>
+                            </div>
+                        <?php endif; ?>
+                        <?php if (!empty($_SESSION['error_message'])): ?>
+                            <div style="background:#fee2e2;color:#991b1b;border:1px solid #fecaca;padding:10px 12px;border-radius:8px;margin-bottom:12px;">
+                                <?php echo htmlspecialchars($_SESSION['error_message']); unset($_SESSION['error_message']); ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <div class="card__header">
                         <div class="card__title">Crew Records</div>
                         <div class="card__actions">
-                            <button class="btn primary upload" onclick="window.location.href='crew_change/crew_change_details.php'">Upload Files</button>
+                            <button class="btn primary upload" onclick="window.location.href='crew_change/crew_change_details.php?id=<?php echo !empty($crewChanges) ? (int)$crewChanges[0]['id'] : 1; ?>'">Upload Files</button>
                             <button class="btn warn add" onclick="window.location.href='crew_change/crew_change_form.php'">Add New</button>
                         </div>
                     </div>
