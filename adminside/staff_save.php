@@ -114,8 +114,6 @@ try {
     // Optional salary handling if column exists in your schema:
     // Not inserted here to avoid schema mismatch crashes.
 
-    $db->commit();
-
     $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
     $host = $_SERVER['HTTP_HOST'] ?? '';
     $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/adminside/staff_save.php'), '/\\');
@@ -132,6 +130,8 @@ try {
         "INSERT INTO password_setup_tokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)",
         [$authUserId, $setupTokenHash, $expiresAt]
     );
+
+    $db->commit();
 
     $setPasswordUrl = $setPasswordBaseUrl . '?token=' . urlencode($setupToken);
 
