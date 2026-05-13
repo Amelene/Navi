@@ -108,39 +108,41 @@ if ($pdf_mode) {
             <style>
                 @page { 
                     size: A4 portrait; 
-                    margin: 8mm; 
+                    margin: 0; 
                 }
                 html, body { 
                     margin: 0; 
                     padding: 0;
-                    width: 100%;
-                    height: 100%;
+                    width: 210mm;
+                    height: 297mm;
                     font-family: DejaVu Sans, Arial, sans-serif; 
                     color: #17345f;
+                    background: #ffffff;
                 }
                 
                 /* Ang main border na nakadikit sa edges ng papel */
                 .certificate-container {
                     position: relative;
-                    width: 100%;
-                    height: 100%;
+                    width: 210mm;
+                    height: 297mm;
                     box-sizing: border-box;
-                    padding: 0;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
+                    padding: 8mm;
                 }
 
                 .inner-border {
                     border: 1.2mm solid #ff7a3d;
                     border-radius: 5mm;
-                    width: calc(100% - 0mm);
-                    height: calc(100% - 0mm);
+                    width: 100%;
+                    height: 100%;
                     position: relative;
                     box-sizing: border-box;
-                    padding: 14mm 16mm;
+                    padding: 12mm 14mm;
                     background-color: white;
                     overflow: hidden;
+                    page-break-inside: avoid;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-between;
                 }
 
                 .corner-design {
