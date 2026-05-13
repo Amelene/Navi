@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../helpers/exam_analysis.php';
 
 // Check if crew is logged in
 if (!isset($_SESSION['crew_logged_in']) || $_SESSION['crew_logged_in'] !== true) {
@@ -16,6 +17,17 @@ if (!isset($_SESSION['exam_result'])) {
 
 $result = $_SESSION['exam_result'];
 $total_questions = $result['total_questions'];
+
+// Get recommendations from session, fallback to cached DB value
+$recommendations = $result['recommendations'] ?? [];
+if (empty($recommendations) && !empty($result['attempt_id'])) {
+    try {
+        $analysis = new ExamAnalysis();
+        $recommendations = $analysis->getCachedRecommendations((int)$result['attempt_id']);
+    } catch (Throwable $e) {
+        $recommendations = [];
+    }
+}
 
 // Get current date
 $date_issued = date('Y-m-d');
@@ -99,6 +111,33 @@ $date_issued = date('Y-m-d');
             font-size: 14px;
         }
 
+        .recommendations-box {
+            margin: 30px auto 10px;
+            max-width: 760px;
+            text-align: left;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 20px;
+        }
+
+        .recommendations-title {
+            color: #FF7E5F;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .recommendations-list {
+            margin: 0;
+            padding-left: 22px;
+            color: #1f2937;
+        }
+
+        .recommendations-list li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
     </style>
 </head>
 <body>
@@ -177,6 +216,19 @@ $date_issued = date('Y-m-d');
                 <p class="release-message">
                     Your results will be officially released soon
                 </p>
+
+                <div class="recommendations-box">
+                    <h3 class="recommendations-title">Recommendations</h3>
+                    <?php if (!empty($recommendations)): ?>
+                        <ol class="recommendations-list">
+                            <?php foreach ($recommendations as $item): ?>
+                                <li><?php echo htmlspecialchars((string)$item); ?></li>
+                            <?php endforeach; ?>
+                        </ol>
+                    <?php else: ?>
+                        <p>No recommendations available yet.</p>
+                    <?php endif; ?>
+                </div>
 
                 <div class="date-issued-container">
                     <div class="date-label">Date Issued</div>

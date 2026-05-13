@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../helpers/exam_analysis.php';
 
 // Check if crew is logged in
 if (!isset($_SESSION['crew_logged_in']) || $_SESSION['crew_logged_in'] !== true) {
@@ -147,6 +148,12 @@ try {
     }
     
     $db->commit();
+
+    // Generate and cache AI recommendations after successful exam save
+    $analysis = new ExamAnalysis();
+    $strengths = $analysis->getStrengths($attempt_id);
+    $areasForImprovement = $analysis->getAreasForImprovement($attempt_id);
+    $recommendations = $analysis->generateRecommendations($strengths, $areasForImprovement, $attempt_id);
     
     // Store results in session for results page
     $_SESSION['exam_result'] = [
@@ -159,7 +166,8 @@ try {
         'time_taken' => $time_taken,
         'department' => $exam_data['department'],
         'category' => $exam_data['category'],
-        'vessel_type' => $exam_data['vessel_type']
+        'vessel_type' => $exam_data['vessel_type'],
+        'recommendations' => $recommendations
     ];
     
     // Clear exam session data

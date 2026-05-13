@@ -83,6 +83,7 @@ CREATE TABLE IF NOT EXISTS exam_attempts (
     score DECIMAL(5,2) COMMENT 'Score percentage',
     total_questions INT,
     correct_answers INT,
+    ai_recommendation TEXT NULL COMMENT 'Cached AI recommendations JSON to avoid repeated generation',
     status ENUM('in_progress', 'completed', 'abandoned') DEFAULT 'in_progress',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     

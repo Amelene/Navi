@@ -18,11 +18,44 @@ class ExamAnalysis
         return $this->db->fetchOne($sql, [$attemptId]);
     }
 
+    public function getCachedRecommendations($attemptId)
+    {
+        $sql = "SELECT ai_recommendation FROM exam_attempts WHERE id = ? LIMIT 1";
+        $row = $this->db->fetchOne($sql, [$attemptId]);
+
+        if (!$row || !isset($row['ai_recommendation']) || trim((string)$row['ai_recommendation']) === '') {
+            return [];
+        }
+
+        $decoded = json_decode($row['ai_recommendation'], true);
+        if (!is_array($decoded)) {
+            return [];
+        }
+
+        $items = [];
+        foreach ($decoded as $item) {
+            if (is_string($item)) {
+                $clean = trim($item);
+                if ($clean !== '') {
+                    $items[] = $clean;
+                }
+            }
+        }
+
+        return array_values(array_unique($items));
+    }
+
+    public function cacheRecommendations($attemptId, array $recommendations)
+    {
+        $sql = "UPDATE exam_attempts SET ai_recommendation = ? WHERE id = ?";
+        $this->db->execute($sql, [json_encode(array_values($recommendations)), $attemptId]);
+    }
+
     public function generateAnalysis($attemptId)
     {
         $strengths = $this->getStrengths($attemptId);
         $improvements = $this->getAreasForImprovement($attemptId);
-        $recommendations = $this->generateRecommendations($strengths, $improvements);
+        $recommendations = $this->generateRecommendations($strengths, $improvements, $attemptId);
 
         $this->saveAnalysis($attemptId, $strengths, $improvements, $recommendations);
 
@@ -94,9 +127,16 @@ class ExamAnalysis
         return $improvements;
     }
 
-    public function generateRecommendations($strengths, $improvements)
+    public function generateRecommendations($strengths, $improvements, $attemptId = null)
     {
         try {
+            if ($attemptId !== null) {
+                $cached = $this->getCachedRecommendations($attemptId);
+                if (!empty($cached)) {
+                    return $cached;
+                }
+            }
+
             $gemini = new GeminiClient();
             $generatedText = $gemini->generateRecommendations((array)$strengths, (array)$improvements);
 
@@ -104,7 +144,13 @@ class ExamAnalysis
                 return [];
             }
 
-            return $this->parseRecommendationsText($generatedText);
+            $parsed = $this->parseRecommendationsText($generatedText);
+
+            if ($attemptId !== null && !empty($parsed)) {
+                $this->cacheRecommendations($attemptId, $parsed);
+            }
+
+            return $parsed;
         } catch (Throwable $e) {
             error_log('Gemini recommendation generation failed: ' . $e->getMessage());
             return [];
