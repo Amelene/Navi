@@ -108,13 +108,13 @@ if ($pdf_mode) {
             <style>
                 @page { 
                     size: A4 portrait; 
-                    margin: 4mm; 
+                    margin: 0; 
                 }
                 html, body { 
                     margin: 0; 
                     padding: 0;
-                    width: 100%;
-                    height: 100%;
+                    width: 210mm;
+                    height: 297mm;
                     font-family: DejaVu Sans, Arial, sans-serif; 
                     color: #17345f;
                     background: #ffffff;
@@ -123,26 +123,29 @@ if ($pdf_mode) {
                 /* Outer white page wrapper and orange page frame */
                 .certificate-container {
                     position: relative;
-                    width: 100%;
-                    height: 100%;
+                    width: 210mm;
+                    height: 297mm;
                     box-sizing: border-box;
-                    padding: 4mm;
                     display: flex;
                     justify-content: center;
                     align-items: center;
+                    page-break-inside: avoid;
+                    page-break-after: avoid;
                 }
 
                 .outer-border {
-                    width: 100%;
-                    height: 100%;
+                    width: calc(210mm - 8mm);
+                    height: calc(297mm - 8mm);
                     box-sizing: border-box;
                     border: 1.6mm solid #ff7a3d;
                     border-radius: 6mm;
-                    padding: 10mm;
+                    margin: 4mm;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     background: #ffffff;
+                    page-break-inside: avoid;
+                    page-break-after: avoid;
                 }
 
                 .inner-border {
@@ -150,13 +153,14 @@ if ($pdf_mode) {
                     height: 100%;
                     position: relative;
                     box-sizing: border-box;
-                    padding: 6mm 7mm 6mm;
+                    padding: 8mm 8mm 6mm;
                     background-color: white;
                     overflow: hidden;
                     page-break-inside: avoid;
+                    page-break-after: avoid;
                     display: flex;
                     flex-direction: column;
-                    justify-content: center;
+                    justify-content: space-between;
                 }
 
                 .corner-design {
