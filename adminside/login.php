@@ -16,19 +16,24 @@ $success = $_SESSION['set_password_success'] ?? '';
 unset($_SESSION['set_password_success']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = $_POST['email'] ?? '';
+    $email = trim(strtolower($_POST['email'] ?? ''));
     $password = $_POST['password'] ?? '';
     
     try {
         $db = Database::getInstance();
         
-        // Fetch user from database (admin + mapped manager/officer roles)
+        // Fetch user by normalized email; validate role/status in PHP for clearer handling.
         $user = $db->fetchOne(
-            "SELECT * FROM users WHERE email = ? AND user_status = 'active' AND role IN ('admin','staff','hr_manager','accounting_officer','crewing_officer','finance_manager')",
+            "SELECT * FROM users WHERE LOWER(TRIM(email)) = ? LIMIT 1",
             [$email]
         );
+
+        $allowedRoles = ['admin','staff','hr_manager','accounting_officer','crewing_officer','finance_manager'];
+        $isAllowedRole = $user && in_array((string)$user['role'], $allowedRoles, true);
+        $isActive = $user && (string)$user['user_status'] === 'active';
+        $passwordOk = $user && password_verify($password, (string)$user['password']);
         
-        if ($user && password_verify($password, $user['password'])) {
+        if ($user && $isAllowedRole && $isActive && $passwordOk) {
             // Login successful
             $_SESSION['logged_in'] = true;
             $_SESSION['user_id'] = $user['id'];
