@@ -217,18 +217,6 @@ $date_issued = date('Y-m-d');
                     Your results will be officially released soon
                 </p>
 
-                <div class="recommendations-box">
-                    <h3 class="recommendations-title">Recommendations</h3>
-                    <?php if (!empty($recommendations)): ?>
-                        <ol class="recommendations-list">
-                            <?php foreach ($recommendations as $item): ?>
-                                <li><?php echo htmlspecialchars((string)$item); ?></li>
-                            <?php endforeach; ?>
-                        </ol>
-                    <?php else: ?>
-                        <p>No recommendations available yet.</p>
-                    <?php endif; ?>
-                </div>
 
                 <div class="date-issued-container">
                     <div class="date-label">Date Issued</div>
