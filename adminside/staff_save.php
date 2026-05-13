@@ -101,8 +101,11 @@ try {
 
     $db->commit();
 
-    $loginUrl = (isset($_SERVER['HTTP_HOST']) ? ('http://' . $_SERVER['HTTP_HOST']) : '') . '/php-project/adminside/login.php';
-    $setPasswordBaseUrl = (isset($_SERVER['HTTP_HOST']) ? ('http://' . $_SERVER['HTTP_HOST']) : '') . '/php-project/adminside/set_password.php';
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? '';
+    $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/adminside/staff_save.php'), '/\\');
+    $loginUrl = ($host !== '' ? ($scheme . '://' . $host) : '') . $basePath . '/login.php';
+    $setPasswordBaseUrl = ($host !== '' ? ($scheme . '://' . $host) : '') . $basePath . '/set_password.php';
     $fullName = trim($first_name . ' ' . $middle_name . ' ' . $last_name);
 
     // Generate one-time password setup token (24h expiry)
