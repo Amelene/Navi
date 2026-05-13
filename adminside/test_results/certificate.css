@@ -223,6 +223,11 @@
 
 /* Print Styles */
 @media print {
+    @page {
+        size: A4 portrait;
+        margin: 0;
+    }
+
     * {
         box-sizing: border-box !important;
         -webkit-print-color-adjust: exact !important;
@@ -231,14 +236,12 @@
     }
 
     html, body {
-        width: auto !important;
-        min-width: 0 !important;
-        height: auto !important;
-        min-height: 0 !important;
+        width: 210mm !important;
+        height: 297mm !important;
         margin: 0 !important;
         padding: 0 !important;
         background: #fff !important;
-        overflow: visible !important;
+        overflow: hidden !important;
     }
 
     body * { visibility: hidden !important; }
@@ -267,11 +270,11 @@
         background: transparent !important;
         margin: 0 !important;
         padding: 0 !important;
-        width: auto !important;
-        max-width: none !important;
-        height: auto !important;
-        min-height: 0 !important;
-        overflow: visible !important;
+        width: 210mm !important;
+        height: 297mm !important;
+        max-width: 210mm !important;
+        min-height: 297mm !important;
+        overflow: hidden !important;
     }
 
     .dashboard::before,
@@ -287,22 +290,22 @@
 
     .certificate-container {
         position: static !important;
-        width: 100% !important;
-        min-height: 0 !important;
+        width: 210mm !important;
+        height: 297mm !important;
+        min-height: 297mm !important;
         margin: 0 !important;
         padding: 0 !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: flex-start !important;
+        display: block !important;
         background: #fff !important;
         transform: none !important;
     }
 
     .certificate-card {
-        width: 100% !important;
-        max-width: 100% !important;
-        margin: 0 auto !important;
-        padding: 0 !important;
+        width: 210mm !important;
+        height: 297mm !important;
+        max-width: 210mm !important;
+        margin: 0 !important;
+        padding: 6mm !important;
         background: #fff !important;
         border-radius: 0 !important;
         box-shadow: none !important;
@@ -313,6 +316,7 @@
 
     .certificate-content {
         width: 100% !important;
+        height: 100% !important;
         border: 0.85mm solid #FF8A4C !important;
         border-radius: 4mm !important;
         padding: 9mm 11mm !important;
@@ -324,7 +328,6 @@
 
     .certificate-actions { display: none !important; }
 
-    /* print-specific typography for better Windows scaling */
     .certificate-logo { margin-bottom: 4mm !important; }
     .certificate-logo img { height: 9mm !important; }
 
@@ -366,11 +369,6 @@
     .score-value.failed,
     .score-value.danger { color: #e74c3c !important; }
     .certificate-footer-text { color: #126E82 !important; }
-
-    @page {
-        size: A4 portrait;
-        margin: 8mm;
-    }
 }
 
 .download-mode .dashboard > *:not(.main),
