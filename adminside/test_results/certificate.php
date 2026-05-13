@@ -194,7 +194,7 @@ if ($pdf_mode) {
                 }
 
                 .details-table td {
-                    padding: 1.20mm 0;
+                    padding: 1.05mm 0;
                     font-size: 4.6mm;
                     line-height: 1.18;
                 }
@@ -235,7 +235,7 @@ if ($pdf_mode) {
                 }
 
                 .score-main {
-                    font-size: 12mm;
+                    font-size: 12.8mm;
                     line-height: 1;
                     font-weight: 700;
                     color: '.$scoreColor.';
@@ -243,7 +243,7 @@ if ($pdf_mode) {
                 }
 
                 .score-status {
-                    font-size: 12mm;
+                    font-size: 12.4mm;
                     line-height: 1;
                     font-weight: 700;
                     color: '.$scoreColor.';
@@ -263,7 +263,7 @@ if ($pdf_mode) {
                     text-align: center;
                     font-size: 4.5mm;
                     line-height: 1.34;
-                    color: #000000;
+                    color: #17345f;
                 }
 
                 .signatures {
@@ -275,7 +275,7 @@ if ($pdf_mode) {
                 .signatures td {
                     width: 50%;
                     text-align: center;
-                    color: #000000;
+                    color: #17345f;
                     padding: 0 4mm;
                 }
 
