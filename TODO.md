@@ -1,9 +1,7 @@
-# Upload Validation Fix TODO
+# Gemini NSC Recommendations Integration TODO
 
-- [x] Understand current upload flow and identify mismatch gap (`adminside/upload_crew_documents.php`)
-- [x] Confirm intended behavior with user (reject upload when filename crew info does not match selected crew)
-- [x] Add strict backend filename vs selected crew validation in `adminside/upload_crew_documents.php`
-- [x] Improve crew matching reliability in `identifyCrewFromFilename()`
-- [x] Update UX reminder text in `adminside/crew_upload.php`
-- [ ] Run PHP lint checks for edited files (PHP CLI not available in current environment)
-- [x] Mark completion summary
+- [x] Create `helpers/gemini_client.php` to call Gemini API using `GEMINI_API_KEY` from `.env`.
+- [x] Update `helpers/exam_analysis.php` to generate recommendations via Gemini with fallback logic.
+- [x] Update `crewside/process_exam.php` to generate/store analysis after exam submission.
+- [x] Update `crewside/exam_results.php` to render strengths, areas for improvement, and recommendations from session.
+- [ ] Validate PHP syntax for updated files.

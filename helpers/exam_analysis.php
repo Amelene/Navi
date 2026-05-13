@@ -1,6 +1,7 @@
 
 <?php
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/gemini_client.php';
 
 class ExamAnalysis
 {
@@ -95,16 +96,73 @@ class ExamAnalysis
 
     public function generateRecommendations($strengths, $improvements)
     {
+        $fallback = $this->getFallbackRecommendations($strengths, $improvements);
+
+        try {
+            $gemini = new GeminiClient();
+            $generatedText = $gemini->generateRecommendations((array)$strengths, (array)$improvements);
+
+            if (!is_string($generatedText) || trim($generatedText) === '') {
+                return $fallback;
+            }
+
+            $parsed = $this->parseRecommendationsText($generatedText);
+            return !empty($parsed) ? $parsed : $fallback;
+        } catch (Throwable $e) {
+            error_log('Gemini recommendation generation failed: ' . $e->getMessage());
+            return $fallback;
+        }
+    }
+
+    private function getFallbackRecommendations($strengths, $improvements)
+    {
         $recommendations = [];
 
         if (empty($improvements)) {
             $recommendations[] = "Excellent work! Continue to maintain high standards in all areas.";
-        } else {
-            foreach ($improvements as $area) {
-                $recommendations[] = "Focus on improving knowledge and skills in '{$area}'.";
+            $recommendations[] = "Keep practicing scenario-based questions to retain your current performance level.";
+            if (!empty($strengths)) {
+                $recommendations[] = "Use your strong areas (" . implode(', ', $strengths) . ") to mentor and support peers.";
+            }
+            return $recommendations;
+        }
+
+        foreach ($improvements as $area) {
+            $recommendations[] = "Focus on improving knowledge and skills in '{$area}'.";
+        }
+        $recommendations[] = "Allocate regular review sessions and prioritize weak functions first.";
+        $recommendations[] = "Take short quizzes after each review session to track progress.";
+
+        return $recommendations;
+    }
+
+    private function parseRecommendationsText($text)
+    {
+        $lines = preg_split('/\R+/', (string)$text);
+        $items = [];
+
+        foreach ($lines as $line) {
+            $clean = trim($line);
+            if ($clean === '') {
+                continue;
+            }
+
+            // Remove bullets or numbering prefixes like "1. ", "- ", "* "
+            $clean = preg_replace('/^\s*(?:[-*•]+|\d+[\).\s-]+)\s*/', '', $clean);
+            $clean = trim($clean);
+
+            if ($clean !== '') {
+                $items[] = $clean;
             }
         }
 
-        return $recommendations;
+        // Ensure unique and capped output
+        $items = array_values(array_unique($items));
+
+        if (count($items) > 5) {
+            $items = array_slice($items, 0, 5);
+        }
+
+        return $items;
     }
 }
