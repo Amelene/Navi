@@ -244,11 +244,21 @@ $functionScores       = $analysis->getFunctionScores($attempt_id);
                     <div class="recommendations-section">
                         <h3 class="section-title">RECOMMENDATIONS</h3>
                         <div class="recommendations-content">
-                            <ol class="recommendations-list">
-                                <?php foreach ($recommendations as $recommendation): ?>
-                                    <li><?php echo htmlspecialchars($recommendation); ?></li>
-                                <?php endforeach; ?>
-                            </ol>
+                            <?php if (!empty($recommendations)): ?>
+                                <ol class="recommendations-list">
+                                    <?php foreach ($recommendations as $recommendation): ?>
+                                        <li><?php echo htmlspecialchars($recommendation); ?></li>
+                                    <?php endforeach; ?>
+                                </ol>
+                            <?php else: ?>
+                                <p>No recommendations generated yet.</p>
+                                <?php if (!empty($_SESSION['gemini_debug'])): ?>
+                                    <details style="margin-top:10px;">
+                                        <summary style="cursor:pointer;">Show Gemini debug error</summary>
+                                        <pre style="white-space:pre-wrap;word-break:break-word;background:#f8fafc;padding:10px;border:1px solid #e5e7eb;border-radius:6px;"><?php echo htmlspecialchars(print_r($_SESSION['gemini_debug'], true)); ?></pre>
+                                    </details>
+                                <?php endif; ?>
+                            <?php endif; ?>
                         </div>
                     </div>
 

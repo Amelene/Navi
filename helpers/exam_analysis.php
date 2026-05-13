@@ -141,6 +141,12 @@ class ExamAnalysis
             $generatedText = $gemini->generateRecommendations((array)$strengths, (array)$improvements);
 
             if (!is_string($generatedText) || trim($generatedText) === '') {
+                if (session_status() === PHP_SESSION_ACTIVE) {
+                    $errorInfo = $gemini->getLastError();
+                    if (!empty($errorInfo)) {
+                        $_SESSION['gemini_debug'] = $errorInfo;
+                    }
+                }
                 return [];
             }
 
@@ -153,6 +159,13 @@ class ExamAnalysis
             return $parsed;
         } catch (Throwable $e) {
             error_log('Gemini recommendation generation failed: ' . $e->getMessage());
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                $_SESSION['gemini_debug'] = [
+                    'message' => 'Gemini recommendation generation failed',
+                    'details' => $e->getMessage(),
+                    'time' => date('Y-m-d H:i:s')
+                ];
+            }
             return [];
         }
     }

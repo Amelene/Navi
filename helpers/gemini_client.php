@@ -13,6 +13,23 @@ class GeminiClient
         $this->timeoutSeconds = (int)$timeoutSeconds;
     }
 
+    public function getLastError()
+    {
+        return $_SESSION['gemini_last_error'] ?? null;
+    }
+
+    private function setLastError($message, $details = null)
+    {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            $_SESSION['gemini_last_error'] = [
+                'message' => $message,
+                'details' => $details,
+                'time' => date('Y-m-d H:i:s')
+            ];
+        }
+        error_log('Gemini error: ' . $message . ($details ? ' | ' . (is_string($details) ? $details : json_encode($details)) : ''));
+    }
+
     public function isConfigured()
     {
         return !empty($this->apiKey);
@@ -21,6 +38,12 @@ class GeminiClient
     public function generateRecommendations(array $strengths, array $improvements)
     {
         if (!$this->isConfigured()) {
+            $this->setLastError('GEMINI_API_KEY is missing or empty.');
+            return null;
+        }
+
+        if (!function_exists('curl_init')) {
+            $this->setLastError('PHP cURL extension is not enabled.');
             return null;
         }
 
@@ -63,25 +86,36 @@ class GeminiClient
         curl_close($ch);
 
         if ($response === false || !empty($curlError)) {
-            error_log('Gemini cURL error: ' . $curlError);
-            return null;
-        }
-
-        if ($httpCode < 200 || $httpCode >= 300) {
-            error_log('Gemini HTTP error ' . $httpCode . ': ' . $response);
+            $this->setLastError('Gemini cURL error', $curlError);
             return null;
         }
 
         $decoded = json_decode($response, true);
+
+        if ($httpCode < 200 || $httpCode >= 300) {
+            $apiError = $decoded['error']['message'] ?? $response;
+            $apiStatus = $decoded['error']['status'] ?? null;
+            $this->setLastError('Gemini HTTP error ' . $httpCode, [
+                'status' => $apiStatus,
+                'message' => $apiError,
+                'raw_response' => $decoded ?: $response
+            ]);
+            return null;
+        }
+
         if (!is_array($decoded)) {
-            error_log('Gemini invalid JSON response');
+            $this->setLastError('Gemini invalid JSON response', $response);
             return null;
         }
 
         $text = $decoded['candidates'][0]['content']['parts'][0]['text'] ?? null;
         if (!is_string($text) || trim($text) === '') {
-            error_log('Gemini empty text response');
+            $this->setLastError('Gemini empty text response', $decoded);
             return null;
+        }
+
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            unset($_SESSION['gemini_last_error']);
         }
 
         return trim($text);
