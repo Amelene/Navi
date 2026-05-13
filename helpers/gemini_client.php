@@ -9,7 +9,7 @@ class GeminiClient
     public function __construct($apiKey = null, $model = null, $timeoutSeconds = 20)
     {
         $this->apiKey = $apiKey ?: getenv('GEMINI_API_KEY');
-        $this->model = $model ?: getenv('GEMINI_MODEL') ?: 'gemini-1.5-flash';
+        $this->model = $model ?: getenv('GEMINI_MODEL') ?: 'gemini-flash-latest';
         $this->timeoutSeconds = (int)$timeoutSeconds;
     }
 
