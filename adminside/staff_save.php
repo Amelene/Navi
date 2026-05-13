@@ -49,9 +49,24 @@ try {
         redirectWithError('Invalid staff status value.');
     }
 
-    if ($system_role !== 'staff') {
-        $system_role = 'staff';
+    $selectedPosition = $db->fetchOne("SELECT id, position_name FROM positions WHERE id = ? LIMIT 1", [$position_id]);
+    if (!$selectedPosition) {
+        redirectWithError('Invalid system access role selected.');
     }
+
+    $positionName = strtoupper(trim((string)($selectedPosition['position_name'] ?? '')));
+    $allowedRoleMap = [
+        'HR MANAGER' => 'hr_manager',
+        'ACCOUNTING OFFICER' => 'accounting_officer',
+        'CREWING OFFICER' => 'crewing_officer',
+        'FINANCE MANAGER' => 'finance_manager'
+    ];
+
+    if (!isset($allowedRoleMap[$positionName])) {
+        redirectWithError('Selected role is not allowed for system access.');
+    }
+
+    $system_role = $allowedRoleMap[$positionName];
 
     // Check duplicates
     $existingStaffNo = $db->fetchOne("SELECT id FROM staff WHERE staff_no = ?", [$staff_no]);
@@ -72,8 +87,8 @@ try {
 
     // Create user account
     $db->execute(
-        "INSERT INTO users (email, password, role, user_status) VALUES (?, ?, 'staff', 'active')",
-        [$email, $passwordHash]
+        "INSERT INTO users (email, password, role, user_status) VALUES (?, ?, ?, 'active')",
+        [$email, $passwordHash, $system_role]
     );
     $authUserId = (int)$db->lastInsertId();
 

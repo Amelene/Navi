@@ -27,14 +27,25 @@
         <ul class="sidebar__nav-list">
             <?php
             $current = basename($_SERVER['PHP_SELF']);
+            $sessionRole = strtolower(trim($_SESSION['user_role'] ?? ''));
+            $roleAccessMap = [
+                'admin' => ['index.php', 'crew.php', 'staff.php', 'tests.php', 'rep.php', 'application.php', 'settings.php'],
+                'hr_manager' => ['index.php', 'staff.php', 'settings.php'],
+                'accounting_officer' => ['index.php', 'settings.php'],
+                'crewing_officer' => ['index.php', 'crew.php', 'rep.php', 'application.php', 'settings.php'],
+                'finance_manager' => ['index.php', 'rep.php', 'settings.php'],
+                'staff' => ['index.php', 'settings.php']
+            ];
+            $allowedHrefs = $roleAccessMap[$sessionRole] ?? $roleAccessMap['staff'];
+
             $navItems = [
                 ['href' => 'index.php',       'title' => 'Dashboard',       'img' => 'assets/image/dash.png'],
-                ['href' => 'crew.php',         'title' => 'Crew Management', 'img' => 'assets/image/vessel.png'],
-                ['href' => 'staff.php',        'title' => 'Staff Management','img' => 'assets/image/staff.png'],
-                ['href' => 'tests.php',        'title' => 'NSC Result',      'img' => 'assets/image/test.png'],
-                ['href' => 'rep.php',          'title' => 'Crew Change',     'img' => 'assets/image/rep.png'],
-                ['href' => 'application.php',  'title' => 'Application Form','img' => 'assets/image/ap.png'],
-                ['href' => 'settings.php',     'title' => 'Settings',        'img' => 'assets/image/settings.png'],
+                ['href' => 'crew.php',        'title' => 'Crew Management', 'img' => 'assets/image/vessel.png'],
+                ['href' => 'staff.php',       'title' => 'Staff Management','img' => 'assets/image/staff.png'],
+                ['href' => 'tests.php',       'title' => 'NSC Result',      'img' => 'assets/image/test.png'],
+                ['href' => 'rep.php',         'title' => 'Crew Change',     'img' => 'assets/image/rep.png'],
+                ['href' => 'application.php', 'title' => 'Application Form','img' => 'assets/image/ap.png'],
+                ['href' => 'settings.php',    'title' => 'Settings',        'img' => 'assets/image/settings.png'],
             ];
             $perItemSizes = [
                 'index.php' => ['width' => '24px', 'height' => '24px'],
@@ -47,6 +58,9 @@
             ];
 
             foreach ($navItems as $item) {
+                if (!in_array($item['href'], $allowedHrefs, true)) {
+                    continue;
+                }
                 // determine active state
                 // When viewing crew_documents.php or crew.php, highlight Crew Management
                 $active = '';
