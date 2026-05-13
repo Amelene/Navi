@@ -120,28 +120,43 @@ if ($pdf_mode) {
                     background: #ffffff;
                 }
                 
-                /* Ang main border na nakadikit sa edges ng papel */
+                /* Outer white page wrapper and orange page frame */
                 .certificate-container {
                     position: relative;
                     width: 100%;
                     height: 100%;
                     box-sizing: border-box;
-                    padding: 0;
+                    padding: 4mm;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+
+                .outer-border {
+                    width: 100%;
+                    height: 100%;
+                    box-sizing: border-box;
+                    border: 1.6mm solid #ff7a3d;
+                    border-radius: 6mm;
+                    padding: 5mm;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    background: #ffffff;
                 }
 
                 .inner-border {
-                    border: 1.2mm solid #ff7a3d;
-                    border-radius: 5mm;
                     width: 100%;
+                    height: 100%;
                     position: relative;
                     box-sizing: border-box;
-                    padding: 20mm;
+                    padding: 6mm 7mm 6mm;
                     background-color: white;
                     overflow: hidden;
                     page-break-inside: avoid;
                     display: flex;
                     flex-direction: column;
-                    justify-content: space-between;
+                    justify-content: center;
                 }
 
                 .corner-design {
@@ -170,7 +185,14 @@ if ($pdf_mode) {
                 .logo { margin-bottom: 5mm; }
                 .logo img { height: 12mm; width: auto; }
 
-                .content-center { text-align: center; }
+                .content-center {
+                    text-align: center;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    flex: 1;
+                }
 
                 .title {
                     font-size: 42px;
@@ -282,10 +304,8 @@ if ($pdf_mode) {
                 }
 
                 .footer-tagline {
-                    position: absolute;
-                    bottom: 6mm;
-                    left: 0;
-                    right: 0;
+                    position: relative;
+                    margin-top: 4mm;
                     text-align: center;
                     font-weight: bold;
                     color: #0a7d98;
@@ -295,8 +315,9 @@ if ($pdf_mode) {
         </head>
         <body>
             <div class="certificate-container">
-                <div class="inner-border">
-                    <div class="corner-legacy"></div>
+                <div class="outer-border">
+                    <div class="inner-border">
+                        <div class="corner-legacy"></div>
 
                     <div class="logo">
                         '.($logoDataUri ? '<img src="'.$logoDataUri.'">' : '').'
@@ -352,6 +373,7 @@ if ($pdf_mode) {
                     </div>
                 </div>
             </div>
+        </div>
         </body>
         </html>';
 
