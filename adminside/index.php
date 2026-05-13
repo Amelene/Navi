@@ -57,32 +57,88 @@ if (!isset($_SESSION['dashboard_tasks']) || !is_array($_SESSION['dashboard_tasks
 	];
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['dashboard_task_action'])) {
-	$action = strtolower(trim((string)$_POST['dashboard_task_action']));
+if (!isset($_SESSION['dashboard_events']) || !is_array($_SESSION['dashboard_events'])) {
+	$_SESSION['dashboard_events'] = [
+		[
+			'id' => 'event_' . uniqid(),
+			'title' => 'New Crew Member Added',
+			'date' => date('Y-m-d', strtotime('+5 days')),
+			'time' => '10:00',
+			'type' => 'contact'
+		],
+		[
+			'id' => 'event_' . uniqid(),
+			'title' => 'Safety Training Session',
+			'date' => date('Y-m-d', strtotime('+8 days')),
+			'time' => '08:00',
+			'type' => 'training'
+		]
+	];
+}
 
-	if ($action === 'add') {
-		$title = trim((string)($_POST['task_title'] ?? ''));
-		$date = trim((string)($_POST['task_date'] ?? ''));
-		$priority = strtolower(trim((string)($_POST['task_priority'] ?? 'medium')));
-		$allowedPriorities = ['high', 'medium', 'low'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+	if (isset($_POST['dashboard_task_action'])) {
+		$action = strtolower(trim((string)$_POST['dashboard_task_action']));
 
-		if ($title !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
-			if (!in_array($priority, $allowedPriorities, true)) {
-				$priority = 'medium';
+		if ($action === 'add') {
+			$title = trim((string)($_POST['task_title'] ?? ''));
+			$date = trim((string)($_POST['task_date'] ?? ''));
+			$priority = strtolower(trim((string)($_POST['task_priority'] ?? 'medium')));
+			$allowedPriorities = ['high', 'medium', 'low'];
+
+			if ($title !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+				if (!in_array($priority, $allowedPriorities, true)) {
+					$priority = 'medium';
+				}
+				$_SESSION['dashboard_tasks'][] = [
+					'id' => 'task_' . uniqid(),
+					'title' => $title,
+					'date' => $date,
+					'priority' => $priority
+				];
 			}
-			$_SESSION['dashboard_tasks'][] = [
-				'id' => 'task_' . uniqid(),
-				'title' => $title,
-				'date' => $date,
-				'priority' => $priority
-			];
+		} elseif ($action === 'delete') {
+			$taskId = trim((string)($_POST['task_id'] ?? ''));
+			if ($taskId !== '') {
+				$_SESSION['dashboard_tasks'] = array_values(array_filter($_SESSION['dashboard_tasks'], function ($task) use ($taskId) {
+					return (string)($task['id'] ?? '') !== $taskId;
+				}));
+			}
 		}
-	} elseif ($action === 'delete') {
-		$taskId = trim((string)($_POST['task_id'] ?? ''));
-		if ($taskId !== '') {
-			$_SESSION['dashboard_tasks'] = array_values(array_filter($_SESSION['dashboard_tasks'], function ($task) use ($taskId) {
-				return (string)($task['id'] ?? '') !== $taskId;
-			}));
+	}
+
+	if (isset($_POST['dashboard_event_action'])) {
+		$eventAction = strtolower(trim((string)$_POST['dashboard_event_action']));
+
+		if ($eventAction === 'add') {
+			$eventTitle = trim((string)($_POST['event_title'] ?? ''));
+			$eventDate = trim((string)($_POST['event_date'] ?? ''));
+			$eventTime = trim((string)($_POST['event_time'] ?? ''));
+			$eventType = strtolower(trim((string)($_POST['event_type'] ?? 'meeting')));
+			$allowedEventTypes = ['contact', 'training', 'cert', 'meeting'];
+
+			if ($eventTitle !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $eventDate)) {
+				if (!preg_match('/^\d{2}:\d{2}$/', $eventTime)) {
+					$eventTime = '';
+				}
+				if (!in_array($eventType, $allowedEventTypes, true)) {
+					$eventType = 'meeting';
+				}
+				$_SESSION['dashboard_events'][] = [
+					'id' => 'event_' . uniqid(),
+					'title' => $eventTitle,
+					'date' => $eventDate,
+					'time' => $eventTime,
+					'type' => $eventType
+				];
+			}
+		} elseif ($eventAction === 'delete') {
+			$eventId = trim((string)($_POST['event_id'] ?? ''));
+			if ($eventId !== '') {
+				$_SESSION['dashboard_events'] = array_values(array_filter($_SESSION['dashboard_events'], function ($event) use ($eventId) {
+					return (string)($event['id'] ?? '') !== $eventId;
+				}));
+			}
 		}
 	}
 
@@ -93,6 +149,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['dashboard_task_action
 $upcomingTasks = $_SESSION['dashboard_tasks'];
 usort($upcomingTasks, function ($a, $b) {
 	return strcmp((string)($a['date'] ?? ''), (string)($b['date'] ?? ''));
+});
+
+$upcomingEvents = $_SESSION['dashboard_events'];
+usort($upcomingEvents, function ($a, $b) {
+	$dateCompare = strcmp((string)($a['date'] ?? ''), (string)($b['date'] ?? ''));
+	if ($dateCompare !== 0) return $dateCompare;
+	return strcmp((string)($a['time'] ?? ''), (string)($b['time'] ?? ''));
 });
 
 try {
