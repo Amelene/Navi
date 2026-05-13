@@ -9,6 +9,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 
 $attempt_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $download_mode = isset($_GET['download']) && $_GET['download'] == '1';
+$download_file_mode = isset($_GET['download_file']) && $_GET['download_file'] == '1';
 
 try {
     $db = Database::getInstance();
@@ -47,6 +48,10 @@ try {
     error_log("Error fetching exam details for certificate: " . $e->getMessage());
     header('Location: ../tests.php');
     exit();
+}
+if ($download_file_mode) {
+    header('Content-Type: text/html; charset=UTF-8');
+    header('Content-Disposition: attachment; filename="certificate_' . $attempt_id . '.html"');
 }
 ?>
 <!DOCTYPE html>
@@ -204,18 +209,11 @@ try {
         if (downloadBtn) {
             downloadBtn.addEventListener('click', function () {
                 const url = new URL(window.location.href);
-                url.searchParams.set('download', '1');
-                window.open(url.toString(), '_blank');
+                url.searchParams.set('download_file', '1');
+                url.searchParams.delete('download');
+                window.location.href = url.toString();
             });
         }
-
-        <?php if ($download_mode): ?>
-        window.addEventListener('load', function () {
-            setTimeout(function () {
-                window.print();
-            }, 300);
-        });
-        <?php endif; ?>
     </script>
 </body>
 </html>
